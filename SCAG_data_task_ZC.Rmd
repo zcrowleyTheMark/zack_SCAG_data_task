@@ -47,14 +47,14 @@ library(srvyr) # Working with survey data
 #    filter(year == 2021, survey == "acs5", level == "housing")
 # 
 # # Write out data dicts for all vars, person and housing vars:
-# write_csv(pums_vars_acs5, "PUMS_docs/pums_vars_acs5.csv")
-# write_csv(pums_vars_acs5_person, "PUMS_docs/pums_vars_acs5_person.csv")
-# write_csv(pums_vars_acs5_housing, "PUMS_docs/pums_vars_acs5_housing.csv")
+# write_csv(pums_vars_acs5, "data_dicts_ACS_PUMS/pums_vars_acs5.csv")
+# write_csv(pums_vars_acs5_person, "data_dicts_ACS_PUMS/pums_vars_acs5_person.csv")
+# write_csv(pums_vars_acs5_housing, "data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv")
 # 
 # Read in data dicts from person and housign level data:
-pums_vars_acs5 <- read_csv("PUMS_docs/pums_vars_acs5.csv")
-pums_vars_acs5_person <- read_csv("PUMS_docs/pums_vars_acs5_person.csv")
-pums_vars_acs5_housing <- read_csv("PUMS_docs/pums_vars_acs5_housing.csv")
+pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5.csv")
+pums_vars_acs5_person <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_person.csv")
+pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv")
 ```
 
 ### Load in raw ACS data from US Census microdata ACS PUMS data repo:
@@ -271,6 +271,58 @@ vars_ca_pums_scag <- names(ca_pums_scag)
 
 ### Recoding variables for use in ACS PUMS Analysis: 
 ```{r recode}
+# Race and Ethnicity: named var "race" for brevity:
+# SAS example-
+# *------- 1. Race_Ethnicity -------------------------------------------------;
+# 
+# racespan=999; 
+# if hisp ge 2 then racespan=1;             	*Hispanic ;
+# if hisp=1 then do;
+#    if RAC1P=1 then racespan=2;              *NH White;
+#    if RAC1P=2 then racespan=3;              *NH Black;
+#    if 6<= RAC1P <= 7 then racespan=4;       *NH Asian & PI;
+#    if 3<= RAC1P <= 5 then racespan=5;       *NH Am Indian;
+#    if RAC1P >= 8 then racespan=6;           *NH Other;
+#    end;
+# Create "race" var based on conditions above: 
+ca_pums_scag <- ca_pums_scag %>% mutate(race = case_when(HISP == 1 & RAC1P == 1 ~ "White", 
+                                                         HISP == 1 & RAC1P == 2 ~ "Black", 
+                                                         HISP == 1 & RAC1P == 6 | HISP == 1 & RAC1P == 7 ~ "Asian/Pacific Islander", 
+                                                         HISP == 1 & RAC1P >= 3 & RAC1P <= 5  ~ "Native American", 
+                                                         HISP == 1 & RAC1P == 8 | HISP == 1 & RAC1P == 9  ~ "Multiracial/Other",
+                                                         HISP >= 2  ~ "Hispanic/Latino"
+                                                         )) 
+
+ 
+  # count(county, race, wt = PWGTP)
+
+
+# Homeownership: own
+# SAS example- 
+# *------- H3.Homeownership: Tenure  -------------;
+# 
+# *TEN Character 1
+# Tenure
+# b .N/A (GQ/vacant)
+# 1 .Owned with mortgage or loan (include home equity loans)
+# 2 .Owned free and clear
+# 3 .Rented
+# 4 .Occupied without payment of rent;
+# 
+# own=.;
+# if TEN in (1 2) then own=1;
+# if TEN in (3 4) then own=0;
+# 
+# Create "own_home" var based on conditions above: 
+ca_pums_scag <- ca_pums_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2 ~ "Homeowner", 
+                                                             TEN == 3 | TEN == 4 ~ "Non-Homeowner"
+                                                            )) 
+
+
+```
+
+### Analysis and Replication of Tables and Figures for SCAG
+```{r analysis}
 # Examples of sex by county with weight by person using var "PWGTP"
 ca_pums_scag %>% 
   count(county, SEX_label, wt = PWGTP)
@@ -285,6 +337,14 @@ ca_pums_scag %>%
     ba_above_pct = ba_above / sum(PWGTP[AGEP >= 25])
   )
 
+### 
+# Figure 22. Homeownership by Race and Ethnicity:
+homeownership_stats <- ca_pums_scag %>% group_by(county, race) %>% 
+                                        summarize(
+                                          total_pop = sum(PWGTP),
+                                          ownership = sum(PWGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                          ownership_pct = sum(PWGTP[own_home == "Homeowner"]) / sum(PWGTP) # divide by total_pop for percent
+                                        )
 ```
 
 

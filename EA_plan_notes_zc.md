@@ -132,3 +132,16 @@ standard error and margin of error for person characteristics.
 - <u>WGTP1-WGTP80</u>: Replicate Housing Unit weighting variables, used for generating the standard error and margin of error for housing unit and household characteristics.
 
  The PUMS Weighting variables (PWGTP and WGTP) may both be used to generate PUMS estimates. They are also used in the generalized variance formulas (GVF) method for calculating standard errors using the design factors. Replicate weights may only be used to calculate standard errors and margins of error using the successive difference replication (SDR) method. The SDR method may also be referred to as direct standard errors.
+
+##### Note on Income Quintile: from Equity Analysis Paper
+Table 5. Income Quintile Distribution for SCAG Growth Forecasting Data (2011 Constant Dollars) 
+
+|  Quintile   |       Range         |
+|:------------|:-------------------:| 
+| Quintile 1  | $0 to $19,585       |
+| Quintile 2  | $19,586 to $43,990  |
+| Quintile 3  | $43,991 to 73,717   |
+| Quintile 4  | $73,718 to $121,205 |
+| Quintile 5  | $121,206 and up     |
+
+* Source: SCAG 2023 processed from U.S. Census Bureau ACS PUMS 2016-2020
