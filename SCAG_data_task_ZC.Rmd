@@ -31,6 +31,8 @@ library(rlang)
 library(rstatix)
 library(janitor)
 library(tidyverse)
+library(readxl) # reading excel files
+library(writexl) # writing excel files
 library(data.table)
 library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
 library(survey)
@@ -266,6 +268,8 @@ ca_pums_scag <- read_csv("clean_data/ca_pums_scag.csv")
 # Set a list of names of the columns from API call:
 vars_ca_pums_scag <- names(ca_pums_scag)
 
+# Read in merged ACS data SCAG:
+merged_acs_data_scag <- read_csv("clean_data/acs_data_raw/merged_acs_data_scag.csv")
 ```
 
 
@@ -285,18 +289,22 @@ vars_ca_pums_scag <- names(ca_pums_scag)
 #    if RAC1P >= 8 then racespan=6;           *NH Other;
 #    end;
 # Create "race" var based on conditions above: 
-ca_pums_scag <- ca_pums_scag %>% mutate(race = case_when(HISP == 1 & RAC1P == 1 ~ "White", 
+ca_pums_scag <- ca_pums_scag %>% mutate(race = case_when(HISP != 1  ~ "Hispanic/Latino",
+                                                         HISP == 1 & RAC1P == 1 ~ "White", 
                                                          HISP == 1 & RAC1P == 2 ~ "Black", 
                                                          HISP == 1 & RAC1P == 6 | HISP == 1 & RAC1P == 7 ~ "Asian/Pacific Islander", 
                                                          HISP == 1 & RAC1P >= 3 & RAC1P <= 5  ~ "Native American", 
-                                                         HISP == 1 & RAC1P == 8 | HISP == 1 & RAC1P == 9  ~ "Multiracial/Other",
-                                                         HISP >= 2  ~ "Hispanic/Latino"
+                                                         HISP == 1 & RAC1P == 8 | HISP == 1 & RAC1P == 9  ~ "Multiracial/Other"
                                                          )) 
-
- 
-  # count(county, race, wt = PWGTP)
-
-
+merged_acs_data_scag <- merged_acs_data_scag %>% mutate(race = case_when(
+                                                         HISP != 1  ~ "Hispanic/Latino",
+                                                         HISP == 1 & RAC1P == 1 ~ "White", 
+                                                         HISP == 1 & RAC1P == 2 ~ "Black", 
+                                                         HISP == 1 & RAC1P == 6 | HISP == 1 & RAC1P == 7 ~ "Asian/Pacific Islander", 
+                                                         HISP == 1 & RAC1P >= 3 & RAC1P <= 5  ~ "Native American", 
+                                                         HISP == 1 & RAC1P == 8 | HISP == 1 & RAC1P == 9  ~ "Multiracial/Other"
+                                                         )) 
+###
 # Homeownership: own
 # SAS example- 
 # *------- H3.Homeownership: Tenure  -------------;
@@ -314,10 +322,15 @@ ca_pums_scag <- ca_pums_scag %>% mutate(race = case_when(HISP == 1 & RAC1P == 1 
 # if TEN in (3 4) then own=0;
 # 
 # Create "own_home" var based on conditions above: 
-ca_pums_scag <- ca_pums_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2 ~ "Homeowner", 
+ca_pums_scag <- ca_pums_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2 ~ "Homeowner",
+                                                             TEN == 3 | TEN == 4 ~ "Non-Homeowner"
+                                                            ))
+
+merged_acs_data_scag <- merged_acs_data_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2 ~ "Homeowner", 
                                                              TEN == 3 | TEN == 4 ~ "Non-Homeowner"
                                                             )) 
 
+###
 
 ```
 
@@ -339,14 +352,128 @@ ca_pums_scag %>%
 
 ### 
 # Figure 22. Homeownership by Race and Ethnicity:
-homeownership_stats <- ca_pums_scag %>% group_by(county, race) %>% 
-                                        summarize(
-                                          total_pop = sum(PWGTP),
-                                          ownership = sum(PWGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                          ownership_pct = sum(PWGTP[own_home == "Homeowner"]) / sum(PWGTP) # divide by total_pop for percent
-                                        )
+# Filter to only housing data () and Use household weights- WGTP:
+# Get homeownership percentages by race for all SCAG:
+scag_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,own_home) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, ownership_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = ownership_perc) # make into wide table to match excel file table.
+
+# Get homeownership percentages by race and by county:
+scag_county_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race,own_home) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
+                                         ) %>% select(county, race, ownership_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = ownership_perc)
+# Get homeownership percentages by county for all SCAG:
+scag_county_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, own_home) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
+                                         ) %>% select(county, ownership_perc) %>% rename(Total = ownership_perc) 
+# Get homeownership percentages for all SCAG:
+scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, own_home) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
+                                         ) %>% mutate(county = "SCAG") %>% select(county, ownership_perc) %>% rename(Total = ownership_perc)
+
+# Full join all scag_total tables:
+scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag_total_homeownership)
+
+# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
+scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table, by = join_by(county))
+scag_homeownership_table
+
 ```
 
+### Write out excel file with all sheets:
+```{r write  excel}
+# Example:
+# library(readxl)
+# library(writexl)
+# 
+# sheets <- list("sheet1Name" = sheet1, "sheet2Name" = sheet2) #assume sheet1 and sheet2 are data frames
+# write_xlsx(sheets, "path/to/location")
+
+# Write out table to new sheet in excel file for tabbed SCAG output:
+sheets <- list("Figure_22" = scag_homeownership_table) # scag_homeownership_table is a tibble
+write_xlsx(sheets, "output/scag_tabbed.xlsx")
+read_xlsx("output/scag_tabbed.xlsx")
+```
+
+--- 
+##### Scratch area
+```{r data tests ACS}
+ca_pums_scag %>% 
+   count(county, SEX_label, wt = PWGTP)
+
+ca_pums_scag %>% 
+   count(SEX_label, wt = PWGTP)
+
+ca_pums %>% 
+   count(SEX_label, wt = PWGTP)
+
+# Get homeownership percentages by race for all SCAG:
+scag_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,own_home) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, ownership_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = ownership_perc) # make into wide table to match excel file table.
+
+# Get homeownership percentages by race and by county:
+scag_county_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race,own_home) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
+                                         ) %>% select(county, race, ownership_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = ownership_perc)
+# Get homeownership percentages by county for all SCAG:
+scag_county_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, own_home) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
+                                         ) %>% select(county, ownership_perc) %>% rename(Total = ownership_perc) 
+# Get homeownership percentages for all SCAG:
+scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, own_home) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
+                                         ) %>% mutate(county = "SCAG") %>% select(county, ownership_perc) %>% rename(Total = ownership_perc)
+
+# Full join all scag_total tables:
+scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag_total_homeownership)
+
+# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
+scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table, by = join_by(county))
+scag_homeownership_table
+```
 
 ### Stop
 
