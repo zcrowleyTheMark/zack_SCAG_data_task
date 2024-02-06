@@ -63,13 +63,13 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 ```{r load in raw ACS data}
 # Total list of vars to get from ACS PUMS
 vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
-                    "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", 
+                    "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", 
                     "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
-                    "ADJINC","VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
+                    "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
        
 ### Housing level data raw:
 # Variables to pull out of raw housing data:
-housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
+housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
 
 # Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
 housing_data <- fread("data/csv_hca-Housing_CA/psam_h06.csv", select = housing_vars_list) %>% as_tibble()
@@ -141,21 +141,19 @@ merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Im
                                                     )) %>% 
                             filter(county %in% scag_county_list) %>% relocate("county", .after = ST) 
 
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_raw": 879241 obs. (same as API call) with 32 variables
+# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_raw": 879241 obs. (same as API call) with 33 variables
 # write_csv(merged_data_scag, "clean_data/acs_data_raw/merged_acs_data_scag.csv")
 
 # # check variables from the merged_data using str() and summary():
 # str(merged_data)
 ```
 
-
 ### CA ACS PUMS Data from 2017-2021- 5 year ACS- Census API Call:
 ```{r tidycensus CA data}
 # List of vars to get from ACS PUMS
 vars_list_pums <- c("PUMA","RELSHIPP","SEX", "AGEP", "HHT", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", 
-                    "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC","VEH",
+                    "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC", "HINCP", "VEH",
                     "RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
-
 
 # Return tibble of var_code and var_label for vars_list_pums, arrange by order of vars_list_pums:
 pums_data_desc <- pums_vars_acs5 %>% 
@@ -187,26 +185,37 @@ pums_data_desc <- pums_vars_acs5 %>%
 # 18 WAGP     Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)                                                         num       person 
 # 19 WKHP     Usual hours worked per week past 12 months                                                                                                    num       person 
 # 20 ADJINC   Adjustment factor for income and earnings dollar amounts (6 implied decimal places)                                                           chr       housing
-# 21 VEH      Vehicles (1 ton or less) available                                                                                                            chr       housing
-# 22 RMSP     Number of rooms                                                                                                                               num       housing
-# 23 NP       Number of persons associated with this housing record                                                                                         num       housing
-# 24 GRPIP    Gross rent as a percentage of household income past 12 months                                                                                 num       housing
-# 25 OCPIP    Selected monthly owner costs as a percentage of household income during the past 12 months                                                    num       housing
-# 26 POVPIP   Income-to-poverty ratio recode                                                                                                                num       person 
+# 21 HINCP    Household income (past 12 months, use ADJINC to adjust HINCP to constant dollars)                                                             num       housing
+# 22 VEH      Vehicles (1 ton or less) available                                                                                                            chr       housing
+# 23 RMSP     Number of rooms                                                                                                                               num       housing
+# 24 NP       Number of persons associated with this housing record                                                                                         num       housing
+# 25 GRPIP    Gross rent as a percentage of household income past 12 months                                                                                 num       housing
+# 26 OCPIP    Selected monthly owner costs as a percentage of household income during the past 12 months                                                    num       housing
+# 27 POVPIP   Income-to-poverty ratio recode                                                                                                                num       person 
 
 # Vector of PUMA codes to get from CA- ACS PUMS API Call below:
-puma_codes_scag <- c(02500, 03701:03799, 05901:05999, 06501:06599, 07101:07199, 11101:11199)
+puma_codes_scag <- c("02500", "03701", "03702", "03703", "03704", "03705", "03706", "03707", "03708", "03709", "03710", "03711", "03712", "03713", 
+                     "03714", "03715", "03716", "03717", "03718", "03719", "03720", "03721", "03722", "03723", "03724", "03725", "03726", "03727", 
+                     "03728", "03729", "03730", "03731", "03732", "03733", "03734", "03735", "03736", "03737", "03738", "03739", "03740", "03741", 
+                     "03742", "03743", "03744", "03745", "03746", "03747", "03748", "03749", "03750", "03751", "03752", "03753", "03754", "03755", 
+                     "03756", "03757", "03758", "03759", "03760", "03761", "03762", "03763", "03764", "03765", "03766", "03767", "03768", "03769", 
+                     "05901", "05902", "05903", "05904", "05905", "05906", "05907", "05908", "05909", "05910", "05911", "05912", "05913", "05914", 
+                     "05915", "05916", "05917", "05918", "06501", "06502", "06503", "06504", "06505", "06506", "06507", "06508", "06509", "06510", 
+                     "06511", "06512","06513", "06514", "06515", "07101", "07102", "07103", "07104", "07105", "07106", "07107", "07108", "07109", 
+                     "07110", "07111", "07112", "07113", "07114", "07115", "11101", "11102", "11103", "11104", "11105", "11106")
+  
 ###
 # Run API call to get all California ACS PUMS data from 2017-2021- 5 year ACS: CA FIPS is 06- took about 8 minutes to download API call.
 ca_pums <- get_pums(
   variables = vars_list_pums,
   state = "CA", # California
-  # puma = c(02500, 03701:03799, 05901:05999, 06501:06599, 07101:07199, 11101:11199),
+  puma = puma_codes_scag,
   survey = "acs5", # acs5 is the 5 year ACS PUMS
   year = 2021, # Gets 2017-2021 ACS PUMS if acs5 set in survey option.
   recode = TRUE, # recode variable values using Census data dictionary and creates a new *_label column for each variable that is recoded.
   show_call  = TRUE # If TRUE, display call made to Census API.
 )
+
 # API CALL: Census API call: https://api.census.gov/data/2021/acs/acs5/pums?get=SERIALNO%2CSPORDER%2CWGTP%2CPWGTP%2CPUMA%2CRELSHIPP%2CSEX%2CAGEP%2CHHT%2CHISP%2CRAC1P%2CENG%2CNATIVITY%2CDIS%2CSCHL%2CESR%2CJWMNP%2CJWTRNS%2CTEN%2CKIT%2CPLM%2CWAGP%2CWKHP%2CADJINC%2CVEH%2CRMSP%2CNP%2CGRPIP%2COCPIP%2CPOVPIP&ucgid=0400000US06
 
 # Write out to .csv for the raw data from API call to folder named "clean_data": 1826332 obs. with 49 variables
@@ -342,10 +351,110 @@ ca_pums_scag <- ca_pums_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2
 # VEH_label 
 # "No vehicles"  "1 vehicle"  "2 vehicles"  "3 vehicles"  "4 vehicles"  "5 vehicles"  "6 or more vehicles" "N/A (GQ/vacant)"
 
+# Means of transportation to work- code- Workers who Commute by Walk, Bike, or Public Transit: named var "walk_bike_public_transport":
+# SAS example-
+# *JWTRNS Character 2
+# Means of transportation to work
+# bb .N/A (not a worker-not in the labor force, including persons .under 16 years, unemployed, employed, with a job but not at .work, Armed Forces, with a job but not at work)
+# 01 .Car, truck, or van
+# 02 .Bus
+# 03 .Subway or elevated rail
+# 04 .Long-distance train or commuter rail
+# 05 .Light rail, streetcar, or trolley
+# 06 .Ferryboat
+# 07 .Taxicab
+# 08 .Motorcycle
+# 09 .Bicycle
+# 10 .Walked
+# 11 .Worked from home
+# 12 .Other method;
+# 
+# Commute=.;
+# if JWTRNS=1 then Commute=1;*Private;
+# if JWTRNS in (2 3 4 5 6 7) then Commute=2;*Public;
+# if JWTRNS in (8 9 10 12) then Commute=3;*Other;
+# 
+# 
+# Commute2=.;
+# if JWTRNS in (1 8) then Commute2=1;*Private(car or motorcycle);
+# if JWTRNS in (2 3 4 5 6 7) then Commute2=2;*Public(bus, rail, taxi or ferry);
+# if JWTRNS in (9 10 12) then Commute2=3;*Other(bike, walk or other);
+# Create "race" var based on conditions above: 
+ca_pums_scag <- ca_pums_scag %>% mutate(walk_bike_public_transport = case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
+                                                         TRUE ~ "Other Transport"
+                                                         )) 
+# Means of transportation to work- code- Workers who Commute by Walk, Bike, or Public Transit: named var "walk_bike_public_transport":
+# SAS example-
+# *------- P3.Average travel time to work (minutes)  -------------;
+# 
+# *JWMNP Numeric 3
+# Travel time to work
+# bbb .N/A (not a worker or worker who worked at home)
+# 1..200 .1 to 200 minutes to get to work (Top-coded);
+ca_pums_scag 
+
 
 ```
 
 ### Analysis and Replication of Tables and Figures for SCAG
+
+#### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
+```{r fig 5}
+### 
+# Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity:
+# Use person level weights- PWGTP:
+# walk_bike_public_transport ==  "Walk/Bike/Public"
+# Get percentages based on non-home workers- drop all if JWTRNS respond == 11 (use filter not equal to 11 like this (filter(JWTRNS != 11)))
+# Get Walk/Bike/Public percentages by race for all SCAG non-home workers:
+scag_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, race, walk_bike_public_transport) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, walk_bike_public_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = walk_bike_public_perc) # make into wide table to match excel file table.
+
+# Get Walk/Bike/Public percentages by race for all by race and by county for non-home workers:
+scag_county_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, county, race, walk_bike_public_transport) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+                                         ) %>% select(county, race, walk_bike_public_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = walk_bike_public_perc)
+
+# Get no_veh percentages by county for all SCAG:
+scag_county_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
+                                         select(PWGTP, county, walk_bike_public_transport)  %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+                                         ) %>% select(county, walk_bike_public_perc) %>% rename(Total = walk_bike_public_perc) 
+# Get no_veh percentages for all SCAG:
+scag_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, walk_bike_public_transport) %>%  
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, walk_bike_public_perc) %>% rename(Total = walk_bike_public_perc)
+
+# Full join all scag_total tables:
+scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_public,scag_total_walk_bike_public)
+
+# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+scag_walk_bike_public_table <- full_join(scag_county_race_walk_bike_public,scag_race_walk_bike_public) %>% left_join(.,scag_total_walk_bike_public_table, by = join_by(county))
+scag_walk_bike_public_table
+
+```
+
 
 #### Figure 6. Figure 6. Householders without a Vehicle by Race and Ethnicity
 ```{r fig 6}
@@ -361,7 +470,7 @@ scag_race_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, rac
                                            total_pop = sum(WGTP),
                                            no_veh = sum(WGTP[VEH_label == "No vehicles"]),  
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
-                                           no_veh_perc = round(no_veh_prop*100, 1)
+                                           no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% mutate(county = "SCAG") %>% select(county, race, no_veh_perc) %>% 
                                          pivot_wider(names_from = race, values_from = no_veh_perc) # make into wide table to match excel file table.
 
@@ -372,7 +481,7 @@ scag_county_race_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WG
                                            total_pop = sum(WGTP),
                                            no_veh = sum(WGTP[VEH_label == "No vehicles"]), 
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
-                                           no_veh_perc = round(no_veh_prop*100, 1)
+                                           no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% select(county, race, no_veh_perc) %>% 
                                          pivot_wider(names_from = race, values_from = no_veh_perc)
 # Get no_veh percentages by county for all SCAG:
@@ -382,7 +491,7 @@ scag_county_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(W
                                            total_pop = sum(WGTP),
                                            no_veh = sum(WGTP[VEH_label == "No vehicles"]),
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
-                                           no_veh_perc = round(no_veh_prop*100, 1)
+                                           no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% select(county, no_veh_perc) %>% rename(Total = no_veh_perc) 
 # Get no_veh percentages for all SCAG:
 scag_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, VEH_label) %>%  
@@ -390,7 +499,7 @@ scag_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, VE
                                            total_pop = sum(WGTP),
                                            no_veh = sum(WGTP[VEH_label == "No vehicles"]), 
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
-                                           no_veh_perc = round(no_veh_prop*100, 1)
+                                           no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% mutate(county = "SCAG") %>% select(county, no_veh_perc) %>% rename(Total = no_veh_perc)
 
 # Full join all scag_total tables:
@@ -399,6 +508,63 @@ scag_total_no_veh_table <- full_join(scag_county_total_no_veh,scag_total_no_veh)
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
 scag_no_veh_table <- full_join(scag_county_race_no_veh,scag_race_no_veh) %>% left_join(.,scag_total_no_veh_table, by = join_by(county))
 scag_no_veh_table
+
+```
+
+#### Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
+```{r fig 7}
+# ### 
+# # Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity:
+# # Use person level weights- PWGTP:
+# # walk_bike_public_transport ==  "Walk/Bike/Public"
+# # Get percentages based on non-home workers- drop all if JWTRNS respond == 11 (use filter not equal to 11 like this (filter(JWTRNS != 11)))
+# # Get Walk/Bike/Public percentages by race for all SCAG non-home workers:
+# scag_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, race, walk_bike_public_transport) %>%  
+#                                          group_by(race) %>% 
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% mutate(county = "SCAG") %>% select(county, race, walk_bike_public_perc) %>% 
+#                                          pivot_wider(names_from = race, values_from = walk_bike_public_perc) # make into wide table to match excel file table.
+# 
+# # Get Walk/Bike/Public percentages by race for all by race and by county for non-home workers:
+# scag_county_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, county, race, walk_bike_public_transport) %>%  
+#                                          group_by(county, race) %>% 
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% select(county, race, walk_bike_public_perc) %>% 
+#                                          pivot_wider(names_from = race, values_from = walk_bike_public_perc)
+# 
+# # Get no_veh percentages by county for all SCAG:
+# scag_county_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
+#                                          select(PWGTP, county, walk_bike_public_transport)  %>%  
+#                                          group_by(county) %>% 
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% select(county, walk_bike_public_perc) %>% rename(Total = walk_bike_public_perc) 
+# # Get no_veh percentages for all SCAG:
+# scag_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, walk_bike_public_transport) %>%  
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% mutate(county = "SCAG") %>% select(county, walk_bike_public_perc) %>% rename(Total = walk_bike_public_perc)
+# 
+# # Full join all scag_total tables:
+# scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_public,scag_total_walk_bike_public)
+# 
+# # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+# scag_walk_bike_public_table <- full_join(scag_county_race_walk_bike_public,scag_race_walk_bike_public) %>% left_join(.,scag_total_walk_bike_public_table, by = join_by(county))
+# scag_walk_bike_public_table
 
 ```
 
@@ -414,7 +580,7 @@ scag_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WG
                                            total_pop = sum(WGTP),
                                            ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
                                            ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0)
+                                           ownership_perc = round(ownership_prop*100, 2)
                                          ) %>% mutate(county = "SCAG") %>% select(county, race, ownership_perc) %>% 
                                          pivot_wider(names_from = race, values_from = ownership_perc) # make into wide table to match excel file table.
 
@@ -425,7 +591,7 @@ scag_county_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% se
                                            total_pop = sum(WGTP),
                                            ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
                                            ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0) 
+                                           ownership_perc = round(ownership_prop*100, 2) 
                                          ) %>% select(county, race, ownership_perc) %>% 
                                          pivot_wider(names_from = race, values_from = ownership_perc)
 # Get homeownership percentages by county for all SCAG:
@@ -435,7 +601,7 @@ scag_county_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% s
                                            total_pop = sum(WGTP),
                                            ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
                                            ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0) 
+                                           ownership_perc = round(ownership_prop*100, 2) 
                                          ) %>% select(county, ownership_perc) %>% rename(Total = ownership_perc) 
 # Get homeownership percentages for all SCAG:
 scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, own_home) %>%  
@@ -443,7 +609,7 @@ scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(W
                                            total_pop = sum(WGTP),
                                            ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
                                            ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0) 
+                                           ownership_perc = round(ownership_prop*100, 2) 
                                          ) %>% mutate(county = "SCAG") %>% select(county, ownership_perc) %>% rename(Total = ownership_perc)
 
 # Full join all scag_total tables:
@@ -454,7 +620,10 @@ scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_h
 scag_homeownership_table
 ```
 
+
+
 ### Write out excel file with all sheets:
+-
 ```{r write  excel}
 # Example:
 # library(readxl)
@@ -468,7 +637,8 @@ scag_homeownership_table
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it-
-sheets <- list("Figure_6" = scag_no_veh_table,
+sheets <- list("Figure_5" = scag_walk_bike_public_table,
+               "Figure_6" = scag_no_veh_table,
                "Figure_22" = scag_homeownership_table) # scag_homeownership_table is a tibble
 # Pass sheet list to write_xlsx() and destination "path/filename.xlsx":
 write_xlsx(sheets, "output/scag_tabbed.xlsx")
@@ -477,7 +647,7 @@ write_xlsx(sheets, "output/scag_tabbed.xlsx")
 
 --- 
 
-```{r scratch code area, include=FALSE}
+```{r scratch code area, eval=FALSE, include=FALSE}
 # Examples of sex by county with weight by person using var "PWGTP"
 ca_pums_scag %>% 
   count(county, SEX_label, wt = PWGTP)
@@ -550,3 +720,56 @@ scag_homeownership_table
 
 
 ---
+
+### Replication of 
+#### Figure 22. Homeownership by Race and Ethnicity
+```{r new_tab, eval=FALSE}
+### 
+# Figure 22. Homeownership by Race and Ethnicity:
+# Filter to only housing data () and Use household weights- WGTP:
+# Get homeownership percentages by race for all SCAG:
+scag_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,own_home) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = round(ownership_prop*100, 0)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, ownership_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = ownership_perc) # make into wide table to match excel file table.
+
+# Get homeownership percentages by race and by county:
+scag_county_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race,own_home) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = round(ownership_prop*100, 0) 
+                                         ) %>% select(county, race, ownership_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = ownership_perc)
+# Get homeownership percentages by county for all SCAG:
+scag_county_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, own_home) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = round(ownership_prop*100, 0) 
+                                         ) %>% select(county, ownership_perc) %>% rename(Total = ownership_perc) 
+# Get homeownership percentages for all SCAG:
+scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, own_home) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
+                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
+                                           ownership_perc = round(ownership_prop*100, 0) 
+                                         ) %>% mutate(county = "SCAG") %>% select(county, ownership_perc) %>% rename(Total = ownership_perc)
+
+# Full join all scag_total tables:
+scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag_total_homeownership)
+
+# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
+scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table)
+scag_homeownership_table
+```

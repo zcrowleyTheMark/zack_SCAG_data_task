@@ -20,7 +20,7 @@ output: html_document
 ### SCAG expectations/deliverables:
   - Develop script (in R) for compiling necessary "raw" data points from baseline conditions report into one document to provide flexibility in what data gets visualized/how the dashboard is structured
   - Develop script (either incorporated in the first, or separate) to create a document (that can be opened in Excel) with one tab for each of the designated topic areas indicated by SCAG
-  - Develop "walk-through" documentation to show how to run the script(s) for future updates (or prior years)
+  - Develop separate "walk-through" documentation to show how to run the script(s) for future updates (or prior years)
   
 ### Deliverables:
   - Script(s)
@@ -63,17 +63,23 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - Figure 39. Median Hourly Wage by Race and Ethnicity
 - Figure 40. Unemployment by Race and Ethnicity
 - Figure 41. Working Poor by Race and Ethnicity
-- *Repeted from above: Demographics charts/tables (from Racial Equity Baseline Conditions Report (REBCR))
-  - Total Population
-  - Race/Ethnicity Distribution
-  - Age Distribution (Youth, Older Adults)
-  - Single Parent Households (REBCR has - female-headed)
-  - Limited English Proficiency
-  - People with Disabilities
-  - National Origin
-  - Educational Attainment (REBCR Economy section)
-  - Median Household Income (REBCR Economy section)
-  - Poverty (REBCR Economy section)
+- **Repeated from above**: Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020)
+  - Total Population- Do you want this for each county and also report the whole SCAG Region like in the REBCR?
+  - Race/Ethnicity Distribution- Do you want this for each county and also report the whole SCAG Region like in the REBCR?
+  - Age Distribution (Youth, Older Adults)- Is this the same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years? Do you want this for each county and also report the whole SCAG Region like 
+  in the REBCR?
+  - Single Parent Households (REBCR has - female-headed) Is this if variable HHT2 is Male or Female household head with children < 18?
+  - Limited English Proficiency- variable named ENG has 4 categories- is this if ENG is "not well" or "not at all"?  Do you want this for each county and also report the whole SCAG Region like in the REBCR?
+  - People with Disabilities- DIS == "with disability" (1) Do you want this for each county and also report the whole SCAG Region like in the REBCR?
+  - National Origin- variable name NATIVITY- Is this percent foreign born? If NATIVITY == "Foreign Born". Do you want this for each county and also report the whole SCAG Region like in the REBCR?
+  - Educational Attainment (REBCR Economy section)- Do you want this only for people over 25? that is how it is coded in the SAS script. Do you want these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
+  COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE"? Do you want this for each county and the SCAG region or like in the REBCR split by race and also report the whole SCAG Region?
+  - Median Household Income (REBCR Economy section) Do you want this for each county and the SCAG region or like in the REBCR split by race and also report the whole SCAG Region?
+  - Poverty (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. Is this if 
+  household was below 200 percent of the poverty line?  Do you want this for each county and the SCAG region or like in the REBCR split by race and also report the whole SCAG Region? Do you want a "People of 
+  Color" category?- How would you like that coded- is it all non-white categories? 
+  
+  - notes also found in this google doc: https://docs.google.com/document/d/1szSsAiYopeeOHjl3hnwSLl8afTc8LS16HEcws6sHdfI/edit
 
 #### Notes on ACS PUMS merge and weights:
 
