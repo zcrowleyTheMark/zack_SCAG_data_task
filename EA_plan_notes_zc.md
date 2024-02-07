@@ -7,7 +7,8 @@ output: html_document
 
 
 ### Main Data Files: 
-- ACS raw PUMS data: download the two files (sas_csv and sas_csv) from [US Census ACS PUMS](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data)  
+- **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2017-2021](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data)  
+- **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2018-2022](https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/)
 
 --- 
 
@@ -49,16 +50,19 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - Median Household Income (REBCR Economy section)
   - Poverty (REBCR Economy section)
   
-### Figures/Tables with Descriptions:
-- Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
-- Figure 6. Householders without a Vehicle by Race and Ethnicity
+### Figures/Tables with Descriptions: 
+
+*Green color indicates figure is completely replicated in output*
+
+- <span style="color: green;">Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity</span>
+- <span style="color: green;">Figure 6. Householders without a Vehicle by Race and Ethnicity</span>
 - Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
 - Table 9. Transportation Mode Usage by Income Quintile in the SCAG Region (Source: 2017 NHTS, income quintiles calculated by SCAG) *NOT SURE IF WE CAN DO WITH ACS PUMS
 - Table 10. Transportation Mode Usage by Race and Ethnicity in the SCAG Region (Source: 2017 NHTS) *NOT SURE IF WE CAN DO WITH ACS PUMS
 - Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity
 - Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 - Figure 21. Households with Severe Overcrowding by Race and Ethnicity
-- Figure 22. Homeownership by Race and Ethnicity
+- <span style="color: green;">Figure 22. Homeownership by Race and Ethnicity</span>
 - Figure 28. People without Health Insurance by Race and Ethnicity
 - Figure 39. Median Hourly Wage by Race and Ethnicity
 - Figure 40. Unemployment by Race and Ethnicity
