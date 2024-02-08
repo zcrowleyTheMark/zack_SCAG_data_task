@@ -722,6 +722,29 @@ ca_pums_scag <- ca_pums_scag %>% mutate(poverty = factor(case_when(POVPIP %in% c
                                                                    POVPIP >= 200 ~ "No",), levels = c("Yes","No"))
                                                          )
 
+# SAS EXAMPLE:
+# *------- H6.Complete kitchen facilities  -------------;
+# 
+# *KIT Character 1
+# Complete kitchen facilities
+# b .N/A (GQ)
+# 1 .Yes, has stove or range, refrigerator, and sink with a faucet
+# 2 .No;
+# 
+# *PLM Character 1
+# Complete plumbing facilities
+# b .N/A (GQ)
+# 1 .Yes, has hot and cold running water and a bathtub or shower .(includes flush toilet for data collected prior to 2016)
+# 2 .No
+# 9 .Case is from Puerto Rico, PLM recode not applicable;
+# 
+# Kit_Plm=1;
+# if KIT=2 and PLM=2 then Kit_Plm=0; *No Kitchen and Plumbing;
+# 
+ca_pums_scag <- ca_pums_scag %>% mutate(no_kitchen_plumbing = factor(case_when(KIT == 2 & PLM == 2 ~ "Yes",
+                                                                   KIT == 1 | PLM == 1 ~ "No",), levels = c("Yes","No"))
+                                                         )
+
 ```
 
 ### Analysis and Replication of Tables and Figures for SCAG
@@ -784,7 +807,7 @@ scag_walk_bike_public_table
 ```
 
 
-#### Figure 6. Figure 6. Householders without a Vehicle by Race and Ethnicity
+#### Figure 6. Householders without a Vehicle by Race and Ethnicity
 ```{r fig 6}
 ### 
 # Figure 6. Householders without a Vehicle by Race and Ethnicity:
@@ -1014,6 +1037,62 @@ scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type
 # Join renters and Homeowners tables:
 full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
 full_housing_burden_table
+```
+
+#### Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
+
+```{r fig 20}
+### 
+# TODO: NOT Matching up with figure 20 from EA report and figure workbook...
+# 
+# Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
+# Filter to only housing data filter(RELSHIPP == 20) and Use household weights- WGTP: sum if no_kitchen_plumbing == "Yes"
+# Get no_kitchen_plumbing percentages by race for all SCAG:
+scag_race_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race, no_kitchen_plumbing) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           no_kitchen_plumbing_sum = sum(WGTP[no_kitchen_plumbing == "Yes"]), # sum up only those that own homes.
+                                           no_kitchen_plumbing_prop = no_kitchen_plumbing_sum / total_pop, # divide by total_pop for proportion
+                                           no_kitchen_plumbing_perc = round(no_kitchen_plumbing_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, no_kitchen_plumbing_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = no_kitchen_plumbing_perc) # make into wide table to match excel file table.
+
+# Get no_kitchen_plumbing percentages by race and by county:
+scag_county_race_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race, no_kitchen_plumbing, county) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           no_kitchen_plumbing_sum = sum(WGTP[no_kitchen_plumbing == "Yes"]), # sum up only those that own homes.
+                                           no_kitchen_plumbing_prop = no_kitchen_plumbing_sum / total_pop, # divide by total_pop for proportion
+                                           no_kitchen_plumbing_perc = round(no_kitchen_plumbing_prop*100, 2)
+                                         ) %>% select(county, race, no_kitchen_plumbing_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = no_kitchen_plumbing_perc)
+# Get no_kitchen_plumbing percentages by county for all SCAG:
+scag_county_total_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, no_kitchen_plumbing) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           no_kitchen_plumbing_sum = sum(WGTP[no_kitchen_plumbing == "Yes"]), # sum up only those that own homes.
+                                           no_kitchen_plumbing_prop = no_kitchen_plumbing_sum / total_pop, # divide by total_pop for proportion
+                                           no_kitchen_plumbing_perc = round(no_kitchen_plumbing_prop*100, 2)
+                                         ) %>% select(county, no_kitchen_plumbing_perc) %>% rename(Total = no_kitchen_plumbing_perc) 
+
+# Get no_kitchen_plumbing percentages for all SCAG:
+scag_total_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, no_kitchen_plumbing) %>%  
+                                        summarize(
+                                           total_pop = sum(WGTP),
+                                           no_kitchen_plumbing_sum = sum(WGTP[no_kitchen_plumbing == "Yes"]), # sum up only those that own homes.
+                                           no_kitchen_plumbing_prop = no_kitchen_plumbing_sum / total_pop, # divide by total_pop for proportion
+                                           no_kitchen_plumbing_perc = round(no_kitchen_plumbing_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, no_kitchen_plumbing_perc) %>% rename(Total = no_kitchen_plumbing_perc)
+
+# Full join all scag_total tables:
+scag_total_no_kitchen_plumbing_table <- full_join(scag_county_total_no_kitchen_plumbing,scag_total_no_kitchen_plumbing)
+
+# Full join all scag_race tables, then left join scag_total_no_kitchen_plumbing_table by county:
+scag_no_kitchen_plumbing_table <- full_join(scag_county_race_no_kitchen_plumbing,scag_race_no_kitchen_plumbing) %>% left_join(.,scag_total_no_kitchen_plumbing_table)
+scag_no_kitchen_plumbing_table
 ```
 
 

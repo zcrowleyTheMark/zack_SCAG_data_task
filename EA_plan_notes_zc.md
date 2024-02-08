@@ -62,7 +62,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: green;">Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity</span> 
 - <span style="color: red;">Table 9. Transportation Mode Usage by Income Quintile in the SCAG Region (Source: 2017 NHTS, income quintiles calculated by SCAG) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
 - <span style="color: red;">Table 10. Transportation Mode Usage by Race and Ethnicity in the SCAG Region (Source: 2017 NHTS) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
-- Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity
+- <span style="color: green;">Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
 - Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 - Figure 21. Households with Severe Overcrowding by Race and Ethnicity
 - <span style="color: green;">Figure 22. Homeownership by Race and Ethnicity</span>
