@@ -24,19 +24,20 @@ options(scipen = 999,
 here::i_am("SCAG_data_task_ZC.Rmd")
 
 # Load libraries:
-library(here)
-library(fs)
-library(rstudioapi) 
-library(rlang)
-library(rstatix)
-library(janitor)
-library(tidyverse)
+library(here) # package to manage file paths
+# library(fs)
+library(rstudioapi) # package accessing Rstudio API 
+# library(rlang) # package for R helpers
+# library(rstatix)
+library(magrittr) # pipe function package
+library(janitor) # package for functions that help clean data
 library(readxl) # reading excel files
 library(writexl) # writing excel files
-library(data.table)
+library(data.table) # package for data manipulation and reads in large files faster using fread()
 library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
-library(survey)
-library(srvyr) # Working with survey data
+library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect, stringR, etc.
+# library(survey) # Working with survey data
+# library(srvyr) # Working with survey data with pipes
 
 # # Get data dictionary as tibble from
 # pums_vars_acs5 <- pums_variables %>%
@@ -53,11 +54,14 @@ library(srvyr) # Working with survey data
 # write_csv(pums_vars_acs5_person, "data_dicts_ACS_PUMS/pums_vars_acs5_person.csv")
 # write_csv(pums_vars_acs5_housing, "data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv")
 # 
-# Read in data dicts from person and housign level data:
+# Read in data dicts from person and housing level data:
 pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5.csv")
 pums_vars_acs5_person <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_person.csv")
 pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv")
+```
 
+
+```{r setup file paths, include=FALSE}
 # Set up all file paths:
 # file path for all raw data:
 data_fp <- here('data')
@@ -92,7 +96,7 @@ clean_data_fp <- here("clean_data")
 
 # Clean 21 data
 # Creates a new folder called "acs_data_21" (if it doesn't already exist in working directory)- this will be where the clean data for the 2021 ACS will be stored:
-if (!dir.exists("acs_data_22")) {dir.create("acs_data_21")}
+if (!dir.exists(here(clean_data_fp, "acs_data_21"))) {dir.create(here(clean_data_fp, "acs_data_21"))}
 # file path for clean_data acs_data_21
 acs_data_21_fp <- here(clean_data_fp, "acs_data_21")
 
@@ -129,44 +133,9 @@ housing_data <- fread("data/csv_hca-Housing_CA/psam_h06.csv", select = housing_v
 ### Person level data raw:
 # Variables to pull out of raw housing data:
 person_vars_list <- c("SERIALNO", "ST", "PUMA", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP")
-# Set up type list for read_csv:
-# person_vars_list_types <- pums_vars_acs5 %>% 
-#             distinct(var_code, data_type) %>% 
-#             filter(var_code %in% person_vars_list) %>%
-#             mutate(var_code =  factor(var_code, levels = person_vars_list)) %>%
-#             arrange(var_code) %>% mutate(data_type = case_when(data_type == "chr" ~ "c",
-#                                                                data_type == "num" ~ "d")) %>% 
-#             tibble::deframe() %>% list()
 
 # Read in the person level data with file path named "person_2021_fp":
 person_data <- fread(here(person_2021_fp), select = person_vars_list) %>% as_tibble()
-# person_data <- fread("data/csv_pca-Person_CA/psam_p06.csv", select = person_vars_list, 
-#                      colClasses = list(numeric = c("ST", "PUMA", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", "NATIVITY", 
-#                                                    "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP"))) %>% as_tibble()
-
-# read_csv
-# person_data <- read_csv("data/csv_pca-Person_CA/psam_p06.csv", col_select = person_vars_list, col_types = (list(SERIALNO = "c",
-#                                                                                                                 ST       = "d",
-#                                                                                                                 PUMA     = "d",
-#                                                                                                                 RELSHIPP = "d",
-#                                                                                                                 PWGTP    = "d",
-#                                                                                                                 SEX      = "d",
-#                                                                                                                 AGEP     = "d",
-#                                                                                                                 HISP     = "d",
-#                                                                                                                 RAC1P    = "d",
-#                                                                                                                 ENG      = "c",
-#                                                                                                                 NATIVITY = "d",
-#                                                                                                                 DIS      = "d",
-#                                                                                                                 SCHL     = "c",
-#                                                                                                                 ESR      = "c",
-#                                                                                                                 JWMNP    = "d",
-#                                                                                                                 JWTRNS   = "c",
-#                                                                                                                 WAGP     = "d",
-#                                                                                                                 WKHP     = "d",
-#                                                                                                                 ADJINC   = "c",
-#                                                                                                                 POVPIP   = "d")), progress = show_progress()) 
-
-
 
 # # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
 merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST", "PUMA", "ADJINC"))
@@ -200,9 +169,103 @@ merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Im
 # str(merged_data)
 ```
 
-### Load in raw 2017-2021 ACS data from US Census microdata ACS PUMS data repo:
+## Load and Clean data from US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) File Transfer Protocol (FTP) site:
 
-```{r load raw ACS 2021 data}
+- Both 5 year estimates from 2017-2021 and 2018-2022 ACS data
+
+### 2017-2021 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
+
+```{r ACS 2021 FTP data}
+# Total list of vars to get from ACS PUMS
+vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
+                    "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", 
+                    "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
+                    "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
+       
+### Housing level data raw:
+# Variables to pull out of raw housing data:
+housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
+
+# Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
+housing_data <- fread("data/csv_hca-Housing_CA/psam_h06.csv", select = housing_vars_list) %>% as_tibble()
+
+### Person level data raw:
+# Variables to pull out of raw housing data:
+person_vars_list <- c("SERIALNO", "ST", "PUMA", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP")
+# Set up type list for read_csv:
+# person_vars_list_types <- pums_vars_acs5 %>% 
+#             distinct(var_code, data_type) %>% 
+#             filter(var_code %in% person_vars_list) %>%
+#             mutate(var_code =  factor(var_code, levels = person_vars_list)) %>%
+#             arrange(var_code) %>% mutate(data_type = case_when(data_type == "chr" ~ "c",
+#                                                                data_type == "num" ~ "d")) %>% 
+#             tibble::deframe() %>% list()
+
+# Read in the person level data:
+person_data <- fread("data/csv_pca-Person_CA/psam_p06.csv", select = person_vars_list) %>% as_tibble()
+# person_data <- fread("data/csv_pca-Person_CA/psam_p06.csv", select = person_vars_list, 
+#                      colClasses = list(numeric = c("ST", "PUMA", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", "NATIVITY", 
+#                                                    "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP"))) %>% as_tibble()
+
+# read_csv
+# person_data <- read_csv("data/csv_pca-Person_CA/psam_p06.csv", col_select = person_vars_list, col_types = (list(SERIALNO = "c",
+#                                                                                                                 ST       = "d",
+#                                                                                                                 PUMA     = "d",
+#                                                                                                                 RELSHIPP = "d",
+#                                                                                                                 PWGTP    = "d",
+#                                                                                                                 SEX      = "d",
+#                                                                                                                 AGEP     = "d",
+#                                                                                                                 HISP     = "d",
+#                                                                                                                 RAC1P    = "d",
+#                                                                                                                 ENG      = "c",
+#                                                                                                                 NATIVITY = "d",
+#                                                                                                                 DIS      = "d",
+#                                                                                                                 SCHL     = "c",
+#                                                                                                                 ESR      = "c",
+#                                                                                                                 JWMNP    = "d",
+#                                                                                                                 JWTRNS   = "c",
+#                                                                                                                 WAGP     = "d",
+#                                                                                                                 WKHP     = "d",
+#                                                                                                                 ADJINC   = "c",
+#                                                                                                                 POVPIP   = "d")), progress = show_progress()) 
+
+
+
+# # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
+merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST", "PUMA", "ADJINC"))
+
+# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 1826332 obs. with 31 variables
+# write_csv(merged_data, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+
+# SCAG County list- need to conver PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
+scag_county_list <- c("Imperial", 
+                      "Los Angeles",
+                      "Orange",
+                      "Riverside",
+                      "San Bernardino", 
+                      "Ventura")
+
+# Mutate/case_when to replicate SAS code above for creating "county" var- 
+# Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
+merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
+                                      PUMA >= 3701 & PUMA <= 3799 ~ "Los Angeles", # 37 prefix
+                                      PUMA >= 5901 & PUMA <= 5999 ~ "Orange", # 59 prefix
+                                      PUMA >= 6501 & PUMA <= 6599 ~ "Riverside", # 65 prefix
+                                      PUMA >= 7101 & PUMA <= 7199 ~ "San Bernardino", # 71 prefix
+                                      PUMA >= 11101 & PUMA <= 11199 ~ "Ventura" # 111 prefix
+                                                    )) %>% 
+                            filter(county %in% scag_county_list) %>% relocate("county", .after = ST) 
+
+# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 879241 obs. (same as API call) with 33 variables
+# write_csv(merged_data_scag, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+
+# # check variables from the merged_data using str() and summary():
+# str(merged_data)
+```
+
+### 2018-2022 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
+
+```{r ACS 2022 FTP data}
 # Total list of vars to get from ACS PUMS
 vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", 
@@ -291,8 +354,12 @@ merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Im
 ```
 
 
+--- 
+
+## API Calls using tidycensus package:
 
 ### CA ACS PUMS Data from 2017-2021- 5 year ACS- Census API Call:
+
 ```{r tidycensus CA data 2021}
 pums_vars_acs5_22 <- pums_variables %>% filter(year == 2022, survey == "acs5")
   
@@ -415,26 +482,30 @@ ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
 # rm(merged_data,merged_data_scag,housing_data,person_data,ca_pums)
 ```
 
+
 ### CA ACS PUMS Data from 2018-2022- 5 year ACS- Census API Call:
+
 ```{r 2022 ACS PUMS Data Dictionary}
-library(rvest)
-# Pull data dictionary from 2018-2022 ACS PUMS from website:
+library(rvest) # package for webscraping
+# Pull data dictionary from 2018-2022 ACS PUMS from website that has the data dict in a html table:
 acs_data_dict_22 <- "https://api.census.gov/data/2022/acs/acs5/pums/variables.html" %>% 
   read_html() %>%
   html_element("table") %>% 
   html_table(convert = TRUE) %>% 
   janitor::clean_names() 
 
-# Drop first row- was incorrectly pulled in from footer of table ("525 variables") and write to csv called :
+# Drop first row- was incorrectly pulled in from footer of table ("525 variables") :
 acs_data_dict_22 <- acs_data_dict_22 %>% filter(name != "525 variables")
 
-# write to csv called :
+# write to csv called "acs_data_dict_22.csv:
 acs_data_dict_22 %>% write_csv(file = "data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 
 ```
 
 
 ```{r tidycensus CA data 2022}
+# TODO : NEED TO UPDATE this section once census API is working again.  
+
 # List of vars to get from ACS PUMS
 vars_list_pums_22 <- c("PUMA10", "PUMA20", "RELSHIPP","SEX", "AGEP", "HHT", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", 
                     "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC", "HINCP", "VEH",
@@ -561,7 +632,12 @@ ca_pums_scag <- ca_pums %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial",
 ```
 
 
+--- 
+
+## Data Recoding and Table Creation: 
+
 ### SCAG Data from ACS PUMS:
+
 ```{r read in SCAG data}
 # Read in SCAG county data from ca_pums_scag.csv:
 ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
@@ -570,7 +646,7 @@ ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
 vars_ca_pums_scag <- names(ca_pums_scag)
 
 # Read in merged ACS data SCAG:
-merged_acs_data_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+# merged_acs_data_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"))
 ```
 
 
