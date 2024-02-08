@@ -673,6 +673,55 @@ ca_pums_scag <- ca_pums_scag %>% mutate(all_transport = factor(case_when(JWTRNS 
 # 1..200 .1 to 200 minutes to get to work (Top-coded);
 
 
+#SAS Example 
+#*------- H8.Housing burden  -------------;
+# *GRPIP Numeric 3
+# Gross rent as a percentage of household income past 12 months
+# bbb .N/A (GQ/vacant/owned or being bought/occupied without .rent payment/no household income)
+# 1..100 .1% to 100%
+# 101 .101% or more
+# 
+# OCPIP Numeric 3
+# Selected monthly owner costs as a percentage of household income during the past 12 months
+# bbb .N/A (GQ/vacant/not owned or being bought/no household .income)
+# 1..100 .1% to 100%
+# 101 .101% or more
+# 
+# POVPIP Numeric 3
+# Income-to-poverty ratio recode
+# bbb .N/A
+# 0..500 .Below 501 percent
+# 501 .501 percent or more;
+# 
+# Gross rent as a percentage of household income (Rent burden) 30% or more and 200 below percent poverty line and rent home:
+# pRENTGT30_POV200=0;	
+# if own=0 then do;
+# 	if GRPIP>=30 and POVPIP<200 then pRENTGT30_POV200=1;
+# end;
+# 
+# owner costs as a percentage of household income (housing cost burden) 30% or more and 200 below percent poverty line and rent home:
+# pSMOCGT30_POV200=0;	
+# if own=1 then do;
+# 	if OCPIP>=30 and POVPIP<200 then pSMOCGT30_POV200=1;
+# end;
+# Housing and Rent burdens: variable for homeowner burden named: "housing_burden"; variable for homeowner burden named: "renter_burden"
+ca_pums_scag <- ca_pums_scag %>% mutate(housing_burden = factor(case_when(POVPIP %in% c(0:199) & own_home == "Homeowner" & OCPIP >= 30 ~ "Yes",
+                                                          TRUE ~ "No",), levels = c("Yes","No")),
+                        renter_burden = factor(case_when(POVPIP %in% c(0:199) & own_home == "Non-Homeowner" & GRPIP >= 30 ~ "Yes",
+                                                          TRUE ~ "No",), levels = c("Yes","No"))
+                                                         ) 
+
+# Poverty-
+# Create a poverty indicator for the Poverty (REBCR Economy section) Table:
+# If households lived below 200 percent of the poverty line or did not:
+# pov=.;
+# if 0<= POVPIP <200 then pov=1;
+# if POVPIP>=200 then pov=2;
+# If poverty == "Yes", the HH is below 200 percent of the poverty line:
+ca_pums_scag <- ca_pums_scag %>% mutate(poverty = factor(case_when(POVPIP %in% c(0:199) ~ "Yes",
+                                                                   POVPIP >= 200 ~ "No",), levels = c("Yes","No"))
+                                                         )
+
 ```
 
 ### Analysis and Replication of Tables and Figures for SCAG
@@ -852,9 +901,121 @@ scag_race_county_transport_mean <- left_join(scag_race_county_transport_mean, sc
 
 
 # Full join scag_race_transport_mean and cag_transport_mean_overall to get full totals table for SCAG and by race:
-scag_transport_mean <- scag_transport_mean %>% full_join(scag_race_county_transport_mean)
-scag_transport_mean
+scag_transport_mean_table <- scag_transport_mean %>% full_join(scag_race_county_transport_mean) %>% ungroup()
+# Round all means to 2 digits:
+scag_transport_mean_table <- scag_transport_mean_table %>% mutate(across(where(is.numeric), round, 2))
+scag_transport_mean_table
 ```
+
+#### Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
+
+```{r fig_19}
+# Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
+# Filter to only housing data and renters (filter(RELSHIPP == 20, own_home == "Non-Homeowner")) and Use household weights- WGTP, sum if renter_burden == "Yes":
+# Get renter burden percentages by race for all SCAG:
+scag_race_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, renter_burden) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, renter_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = renter_perc) # make into wide table to match excel file table.
+
+# Get renter burden percentages by race and by county:
+scag_county_race_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% select(county, race, renter_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = renter_perc)
+
+# Get renter burden percentages  by county for all SCAG:
+scag_county_total_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% select(county, renter_perc) %>% rename(Total = renter_perc) 
+# Get renter burden percentages for all SCAG:
+scag_total_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, renter_perc) %>% rename(Total = renter_perc)
+
+# Full join all scag_total tables:
+scag_total_renter_burden_table <- full_join(scag_county_total_renter_burden,scag_total_renter_burden)
+
+# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
+scag_renter_burden_table <- full_join(scag_county_race_renter_burden,scag_race_renter_burden) %>% left_join(.,scag_total_renter_burden_table)
+# Create new column household_type to denote Renters for type of housing burden for this part of table:
+scag_renter_burden_table <- scag_renter_burden_table %>% mutate(household_type = "Renters") %>% select(household_type, everything())
+
+########
+# Repeat above steps for own_home == "Homeowner" and join with "Renters" table
+# Get housing burden percentages by race for all SCAG:
+scag_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, housing_burden) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, housing_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = housing_perc) # make into wide table to match excel file table.
+
+# Get housing burden percentages by race and by county:
+scag_county_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% select(county, race, housing_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = housing_perc)
+
+# Get housing burden percentages  by county for all SCAG:
+scag_county_total_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% select(county, housing_perc) %>% rename(Total = housing_perc) 
+# Get housing burden percentages for all SCAG:
+scag_total_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, housing_perc) %>% rename(Total = housing_perc)
+
+# Full join all scag_total tables:
+scag_total_housing_burden_table <- full_join(scag_county_total_housing_burden,scag_total_housing_burden)
+
+# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
+scag_housing_burden_table <- full_join(scag_county_race_housing_burden,scag_race_housing_burden) %>% left_join(.,scag_total_housing_burden_table)
+# Create new column household_type to denote Homeowners for type of housing burden for this part of table:
+scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type = "Homeowners") %>% select(household_type, everything())
+
+###
+# Join renters and Homeowners tables:
+full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
+full_housing_burden_table
+```
+
 
 #### Figure 22. Homeownership by Race and Ethnicity
 ```{r fig 22}
@@ -908,7 +1069,7 @@ scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_h
 scag_homeownership_table
 ```
 
-
+--- 
 
 ### Write out excel file with all sheets:
 -
@@ -922,143 +1083,145 @@ scag_homeownership_table
 # # Read in again:
 # read_xlsx("path/to/location")
 
+### Create tabbed excel workbook for SCAG:
+# Table of contents for output "scag_tabbed.xlsx":
+toc <- tribble(~sheet_name, ~ figure_name,
+              "Figure_5",  "Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity",
+              "Figure_6",  "Figure 6. Householders without a Vehicle by Race and Ethnicity",
+              "Figure_7",  "Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity",
+              "Figure_19", "Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity",
+              "Figure_20", "Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity",
+              "Figure_21",  "Figure 21. Households with Severe Overcrowding by Race and Ethniciy",
+              "Figure_22",  "Figure 22. Homeownership by Race and Ethniciy",
+              "Figure_28",  "Figure 28. People without Health Insurance by Race and Ethnicity",
+              "Figure_39", "Figure 39. Median Hourly Wage by Race and Ethnicity",
+              "Figure_40", "Figure 40. Unemployment by Race and Ethnicity",
+              "Figure_41", "Figure 41. Working Poor by Race and Ethnicity")
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it-
-sheets <- list("Figure_5" = scag_walk_bike_public_table,
+sheets <- list("TOC" = toc,
+               "Figure_5" = scag_walk_bike_public_table,
                "Figure_6" = scag_no_veh_table,
-               "Figure 7" = scag_transport_mean,
-               "Figure_22" = scag_homeownership_table) # scag_homeownership_table is a tibble
-# Pass sheet list to write_xlsx() and destination "path/filename.xlsx":
+               "Figure_7" = scag_transport_mean_table,
+               "Figure_19" = full_housing_burden_table,
+               "Figure_22" = scag_homeownership_table) # "scag_homeownership_table" is a tibble that will populate the sheet named "Figure_22".
+
+# Create an output folder if it does NOT exist already:
+if (!dir.exists("output")) {dir.create("output")}
+
+# Pass sheet list to write_xlsx() and destination "path/filename.xlsx", write to "output/scag_tabbed.xlsx":
 write_xlsx(sheets, "output/scag_tabbed.xlsx")
 
 ```
 
 --- 
 
-```{r scratch code area, eval=FALSE, include=FALSE}
-# Examples of sex by county with weight by person using var "PWGTP"
-ca_pums_scag %>% 
-  count(county, SEX_label, wt = PWGTP)
 
-ca_pums_scag %>% 
-  mutate(ba_above = SCHL %in% c("21", "22", "23", "24")) %>% 
-  group_by(county, SEX_label) %>% 
-  summarize(
-    total_pop = sum(PWGTP),
-    mean_age = weighted.mean(AGEP, PWGTP),
-    ba_above = sum(PWGTP[ba_above == TRUE & AGEP >= 25]),
-    ba_above_pct = ba_above / sum(PWGTP[AGEP >= 25])
-  )
-
-ca_pums_scag %>% 
-   count(county, SEX_label, wt = PWGTP)
-
-ca_pums_scag %>% 
-   count(SEX_label, wt = PWGTP)
-
-ca_pums %>% 
-   count(SEX_label, wt = PWGTP)
-
-# Get homeownership percentages by race for all SCAG:
-scag_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,own_home) %>%  
-                                         group_by(race) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, race, ownership_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = ownership_perc) # make into wide table to match excel file table.
-
-# Get homeownership percentages by race and by county:
-scag_county_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race,own_home) %>%  
-                                         group_by(county, race) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
-                                         ) %>% select(county, race, ownership_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = ownership_perc)
-# Get homeownership percentages by county for all SCAG:
-scag_county_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, own_home) %>%  
-                                         group_by(county) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
-                                         ) %>% select(county, ownership_perc) %>% rename(Total = ownership_perc) 
-# Get homeownership percentages for all SCAG:
-scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, own_home) %>%  
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = scales::percent(ownership_prop, accuracy = 1) 
-                                         ) %>% mutate(county = "SCAG") %>% select(county, ownership_perc) %>% rename(Total = ownership_perc)
-
-# Full join all scag_total tables:
-scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag_total_homeownership)
-
-# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
-scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table, by = join_by(county))
-scag_homeownership_table
-```
-
-
----
-
-### Replication of 
-#### Figure 22. Homeownership by Race and Ethnicity
 ```{r new_tab, eval=FALSE}
-### 
-# Figure 22. Homeownership by Race and Ethnicity:
-# Filter to only housing data () and Use household weights- WGTP:
-# Get homeownership percentages by race for all SCAG:
-scag_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,own_home) %>%  
+
+# Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
+# Filter to only housing data and renters (filter(RELSHIPP == 20, own_home == "Non-Homeowner")) and Use household weights- WGTP, sum if renter_burden == "Yes":
+# Get renter burden percentages by race for all SCAG:
+scag_race_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, renter_burden) %>%  
                                          group_by(race) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, race, ownership_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = ownership_perc) # make into wide table to match excel file table.
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, renter_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = renter_perc) # make into wide table to match excel file table.
 
-# Get homeownership percentages by race and by county:
-scag_county_race_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race,own_home) %>%  
+# Get renter burden percentages by race and by county:
+scag_county_race_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
                                          group_by(county, race) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0) 
-                                         ) %>% select(county, race, ownership_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = ownership_perc)
-# Get homeownership percentages by county for all SCAG:
-scag_county_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, own_home) %>%  
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% select(county, race, renter_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = renter_perc)
+
+# Get renter burden percentages  by county for all SCAG:
+scag_county_total_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
                                          group_by(county) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0) 
-                                         ) %>% select(county, ownership_perc) %>% rename(Total = ownership_perc) 
-# Get homeownership percentages for all SCAG:
-scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, own_home) %>%  
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% select(county, renter_perc) %>% rename(Total = renter_perc) 
+# Get renter burden percentages for all SCAG:
+scag_total_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           ownership = sum(WGTP[own_home == "Homeowner"]), # sum up only those that own homes.
-                                           ownership_prop = ownership / total_pop, # divide by total_pop for proportion
-                                           ownership_perc = round(ownership_prop*100, 0) 
-                                         ) %>% mutate(county = "SCAG") %>% select(county, ownership_perc) %>% rename(Total = ownership_perc)
+                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
+                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
+                                           renter_perc = round(renter_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, renter_perc) %>% rename(Total = renter_perc)
 
 # Full join all scag_total tables:
-scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag_total_homeownership)
+scag_total_renter_burden_table <- full_join(scag_county_total_renter_burden,scag_total_renter_burden)
 
 # Full join all scag_race tables, then left join scag_total_homeownership_table by county:
-scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table)
-scag_homeownership_table
+scag_renter_burden_table <- full_join(scag_county_race_renter_burden,scag_race_renter_burden) %>% left_join(.,scag_total_renter_burden_table)
+# Create new column household_type to denote Renters for type of housing burden for this part of table:
+scag_renter_burden_table <- scag_renter_burden_table %>% mutate(household_type = "Renters") %>% select(household_type, everything())
+
+########
+# Repeat above steps for own_home == "Homeowner" and join with "Renters" table
+# Get housing burden percentages by race for all SCAG:
+scag_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, housing_burden) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, housing_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = housing_perc) # make into wide table to match excel file table.
+
+# Get housing burden percentages by race and by county:
+scag_county_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% select(county, race, housing_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = housing_perc)
+
+# Get housing burden percentages  by county for all SCAG:
+scag_county_total_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% select(county, housing_perc) %>% rename(Total = housing_perc) 
+# Get housing burden percentages for all SCAG:
+scag_total_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
+                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
+                                           housing_perc = round(housing_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, housing_perc) %>% rename(Total = housing_perc)
+
+# Full join all scag_total tables:
+scag_total_housing_burden_table <- full_join(scag_county_total_housing_burden,scag_total_housing_burden)
+
+# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
+scag_housing_burden_table <- full_join(scag_county_race_housing_burden,scag_race_housing_burden) %>% left_join(.,scag_total_housing_burden_table)
+# Create new column household_type to denote Homeowners for type of housing burden for this part of table:
+scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type = "Homeowners") %>% select(household_type, everything())
+
+###
+# Join renters and Homeowners tables:
+full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
+full_housing_burden_table
 ```
