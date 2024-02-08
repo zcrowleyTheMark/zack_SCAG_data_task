@@ -551,6 +551,9 @@ vars_ca_pums_scag <- names(ca_pums_scag)
 
 ### Recoding variables for use in ACS PUMS Analysis: 
 ```{r recode}
+# Code county as a factor variable:
+ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")))
+
 # Race and Ethnicity: named var "race" for brevity:
 # SAS example-
 # *------- 1. Race_Ethnicity -------------------------------------------------;
@@ -565,13 +568,14 @@ vars_ca_pums_scag <- names(ca_pums_scag)
 #    if RAC1P >= 8 then racespan=6;           *NH Other;
 #    end;
 # Create "race" var based on conditions above: 
-ca_pums_scag <- ca_pums_scag %>% mutate(race = case_when(HISP != 1  ~ "Hispanic/Latino",
+ca_pums_scag <- ca_pums_scag %>% mutate(race = factor(case_when(HISP != 1  ~ "Hispanic/Latino",
                                                          HISP == 1 & RAC1P == 1 ~ "White", 
                                                          HISP == 1 & RAC1P == 2 ~ "Black", 
                                                          HISP == 1 & RAC1P == 6 | HISP == 1 & RAC1P == 7 ~ "Asian/Pacific Islander", 
                                                          HISP == 1 & RAC1P >= 3 & RAC1P <= 5  ~ "Native American", 
                                                          HISP == 1 & RAC1P == 8 | HISP == 1 & RAC1P == 9  ~ "Multiracial/Other"
-                                                         )) 
+                                                         ), levels = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White"))
+                                        ) 
 
 ###
 # Homeownership: own
@@ -591,9 +595,9 @@ ca_pums_scag <- ca_pums_scag %>% mutate(race = case_when(HISP != 1  ~ "Hispanic/
 # if TEN in (3 4) then own=0;
 # 
 # Create "own_home" var based on conditions above: 
-ca_pums_scag <- ca_pums_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2 ~ "Homeowner",
-                                                             TEN == 3 | TEN == 4 ~ "Non-Homeowner"
-                                                            ))
+ca_pums_scag <- ca_pums_scag %>% mutate(own_home = factor(case_when(TEN == 1 | TEN == 2 ~ "Homeowner",
+                                                             TEN == 3 | TEN == 4 ~ "Non-Homeowner"), levels = c("Homeowner", "Non-Homeowner"))
+                                                          )
 
 ###
 # Households without a vehicle : 
@@ -647,10 +651,19 @@ ca_pums_scag <- ca_pums_scag %>% mutate(own_home = case_when(TEN == 1 | TEN == 2
 # if JWTRNS in (2 3 4 5 6 7) then Commute2=2;*Public(bus, rail, taxi or ferry);
 # if JWTRNS in (9 10 12) then Commute2=3;*Other(bike, walk or other);
 # Create "race" var based on conditions above: 
-ca_pums_scag <- ca_pums_scag %>% mutate(walk_bike_public_transport = case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
-                                                         TRUE ~ "Other Transport"
-                                                         )) 
-# Means of transportation to work- code- Workers who Commute by Walk, Bike, or Public Transit: named var "walk_bike_public_transport":
+ca_pums_scag <- ca_pums_scag %>% mutate(walk_bike_public_transport = factor(case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
+                                                         TRUE ~ "Other Transport"), levels = c("Walk/Bike/Public","Other Transport"))
+                                                         ) 
+# Means of transportation to work- code- named var "all_transport"
+#  Workers who Commute by bus, rail, taxi, or ferry: coded level "Public": JWTRNS %in% c(2:7)
+#  Workers who Commute by Car or Motorcycle: coded level "Private": JWTRNS %in% c(1,8)
+#  Workers who Commute by Walk, Bike, or Other: coded level "Other": JWTRNS %in% c(9,10,12)
+# all_transport will be all forms of transportation if use not na like this: !is.na(all_transport)
+ca_pums_scag <- ca_pums_scag %>% mutate(all_transport = factor(case_when(JWTRNS %in% c(1,8) ~ "Private",
+                                                                  JWTRNS %in% c(2:7) ~  "Public",
+                                                                  JWTRNS %in% c(9,10,12) ~ "Other"
+                                                                 ), levels = c("Other", "Public","Private"))
+                                        ) 
 # SAS example-
 # *------- P3.Average travel time to work (minutes)  -------------;
 # 
@@ -658,7 +671,6 @@ ca_pums_scag <- ca_pums_scag %>% mutate(walk_bike_public_transport = case_when(J
 # Travel time to work
 # bbb .N/A (not a worker or worker who worked at home)
 # 1..200 .1 to 200 minutes to get to work (Top-coded);
-ca_pums_scag 
 
 
 ```
@@ -780,59 +792,68 @@ scag_no_veh_table
 
 #### Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
 ```{r fig 7}
-# ### 
-# # Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity:
-# # Use person level weights- PWGTP:
-# # walk_bike_public_transport ==  "Walk/Bike/Public"
-# # Get percentages based on non-home workers- drop all if JWTRNS respond == 11 (use filter not equal to 11 like this (filter(JWTRNS != 11)))
-# # Get Walk/Bike/Public percentages by race for all SCAG non-home workers:
-# scag_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, race, walk_bike_public_transport) %>%  
-#                                          group_by(race) %>% 
-#                                          summarize(
-#                                            total_pop = sum(PWGTP),
-#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-#                                          ) %>% mutate(county = "SCAG") %>% select(county, race, walk_bike_public_perc) %>% 
-#                                          pivot_wider(names_from = race, values_from = walk_bike_public_perc) # make into wide table to match excel file table.
-# 
-# # Get Walk/Bike/Public percentages by race for all by race and by county for non-home workers:
-# scag_county_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, county, race, walk_bike_public_transport) %>%  
-#                                          group_by(county, race) %>% 
-#                                          summarize(
-#                                            total_pop = sum(PWGTP),
-#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-#                                          ) %>% select(county, race, walk_bike_public_perc) %>% 
-#                                          pivot_wider(names_from = race, values_from = walk_bike_public_perc)
-# 
-# # Get no_veh percentages by county for all SCAG:
-# scag_county_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
-#                                          select(PWGTP, county, walk_bike_public_transport)  %>%  
-#                                          group_by(county) %>% 
-#                                          summarize(
-#                                            total_pop = sum(PWGTP),
-#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-#                                          ) %>% select(county, walk_bike_public_perc) %>% rename(Total = walk_bike_public_perc) 
-# # Get no_veh percentages for all SCAG:
-# scag_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, walk_bike_public_transport) %>%  
-#                                          summarize(
-#                                            total_pop = sum(PWGTP),
-#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-#                                          ) %>% mutate(county = "SCAG") %>% select(county, walk_bike_public_perc) %>% rename(Total = walk_bike_public_perc)
-# 
-# # Full join all scag_total tables:
-# scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_public,scag_total_walk_bike_public)
-# 
-# # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-# scag_walk_bike_public_table <- full_join(scag_county_race_walk_bike_public,scag_race_walk_bike_public) %>% left_join(.,scag_total_walk_bike_public_table, by = join_by(county))
-# scag_walk_bike_public_table
+# Figure 7. Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity:
+# Use person level weights- PWGTP:
+# Grouped by all_transport and race
+# Get weighted means based on non-home workers- drop all if JWTRNS respond == 11 (use filter not equal to 11 like this (filter(JWTRNS != 11)))
+# Get all_transport means by race for all SCAG non-home workers:
+scag_race_transport_mean <- ca_pums_scag %>% select(PWGTP, race, all_transport, JWMNP) %>% drop_na() %>% 
+                                         group_by(race, all_transport) %>%
+                                         summarize(
+                                           mean_transit = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
+                                         ) %>% mutate(county = "SCAG") %>% relocate(county) %>% 
+                                         pivot_wider(names_from = all_transport, values_from = mean_transit) # make into wide table to match excel file table.
+# Get all_transport means for all SCAG non-home workers- Any Transport:
+scag_race_any_transport_mean <- ca_pums_scag %>% filter(JWTRNS != 11) %>%  select(PWGTP, race, all_transport, JWMNP) %>% 
+                                         group_by(race) %>%
+                                         summarize(
+                                           `Any Transportation` = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, `Any Transportation`)
+# Left Join scag_transport_mean and scag_any_transport_mean
+scag_race_transport_mean <- left_join(scag_race_transport_mean, scag_race_any_transport_mean)
 
+# Get all_transport means for all SCAG non-home workers:
+scag_transport_mean <- ca_pums_scag %>% filter(JWTRNS != 11) %>%  select(PWGTP, all_transport, JWMNP) %>% 
+                                         group_by(all_transport) %>%
+                                         summarize(
+                                           mean_transit = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
+                                         ) %>% mutate(county = "SCAG", race = "SCAG Region") %>% relocate(county) %>% 
+                                         pivot_wider(names_from = all_transport, values_from = mean_transit) # make into wide table to match excel file table.
+# Get all_transport means for all SCAG non-home workers- Any Transport:
+scag_any_transport_mean <- ca_pums_scag %>% filter(JWTRNS != 11) %>%  select(PWGTP, all_transport, JWMNP) %>% 
+                                         summarize(
+                                           `Any Transportation` = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
+                                         ) %>% mutate(county = "SCAG", race = "SCAG Region") %>% select(county, race, `Any Transportation`)
+# Left Join scag_transport_mean and scag_any_transport_mean
+scag_transport_mean_totals <- left_join(scag_transport_mean, scag_any_transport_mean)
+# Full join scag_race_transport_mean and cag_transport_mean_overall to get full totals table for SCAG and by race:
+scag_transport_mean <- scag_race_transport_mean %>% full_join(scag_transport_mean_totals)
+
+###########
+# Next, do the same as above by broken down by county and join the full county table to scag_race_transport_mean
+# By county
+# Get all_transport means by race for all SCAG non-home workers:
+scag_race_county_transport_mean <- ca_pums_scag %>% select(PWGTP, race, county, all_transport, JWMNP) %>% drop_na() %>% 
+                                         group_by(race, county, all_transport) %>%
+                                         summarize(
+                                           mean_transit = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
+                                         ) %>% relocate(county)  %>% 
+                                         pivot_wider(names_from = all_transport, values_from = mean_transit) %>% # make into wide table to match excel file table.
+                                         mutate(Public = replace_na(Public,0)) # Replace NA with 0.
+
+# Get all_transport means for all SCAG non-home workers- Any Transport:
+scag_race_county_any_transport_mean <- ca_pums_scag %>% filter(JWTRNS != 11) %>%  select(PWGTP, county, race, all_transport, JWMNP) %>% 
+                                         group_by(race, county) %>%
+                                         summarize(
+                                           `Any Transportation` = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
+                                         ) %>% select(county, race, `Any Transportation`)
+# Left Join scag_transport_mean and scag_any_transport_mean
+scag_race_county_transport_mean <- left_join(scag_race_county_transport_mean, scag_race_county_any_transport_mean)
+
+
+# Full join scag_race_transport_mean and cag_transport_mean_overall to get full totals table for SCAG and by race:
+scag_transport_mean <- scag_transport_mean %>% full_join(scag_race_county_transport_mean)
+scag_transport_mean
 ```
 
 #### Figure 22. Homeownership by Race and Ethnicity
@@ -891,7 +912,7 @@ scag_homeownership_table
 
 ### Write out excel file with all sheets:
 -
-```{r write  excel}
+```{r write excel, eval=FALSE, include=FALSE}
 # Example:
 # library(readxl)
 # library(writexl)
@@ -906,6 +927,7 @@ scag_homeownership_table
 # Make a list that has the name or each sheets and the df/tibble that will populate it-
 sheets <- list("Figure_5" = scag_walk_bike_public_table,
                "Figure_6" = scag_no_veh_table,
+               "Figure 7" = scag_transport_mean,
                "Figure_22" = scag_homeownership_table) # scag_homeownership_table is a tibble
 # Pass sheet list to write_xlsx() and destination "path/filename.xlsx":
 write_xlsx(sheets, "output/scag_tabbed.xlsx")

@@ -4,11 +4,6 @@
 .Ruserdata
 .DS_Store
 clean_data/
-clean_data/ca_pums_scag.csv
-clean_data/acs_data_raw/merged_acs_data.csv
-clean_data/ca_pums_raw.csv
 data/
-data/csv_hca-Housing_CA/psam_h06.csv
-data/csv_pca-Person_CA/psam_p06.csv
 Equity_Analysis/
 PUMS_docs/
