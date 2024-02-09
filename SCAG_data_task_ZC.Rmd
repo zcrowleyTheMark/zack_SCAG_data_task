@@ -31,11 +31,13 @@ library(rstudioapi) # package accessing Rstudio API
 # library(rstatix)
 library(magrittr) # pipe function package
 library(janitor) # package for functions that help clean data
+library(spatstat) # package for weighted.median() function
 library(readxl) # reading excel files
 library(writexl) # writing excel files
 library(data.table) # package for data manipulation and reads in large files faster using fread()
 library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
 library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect, stringR, etc.
+
 # library(survey) # Working with survey data
 # library(srvyr) # Working with survey data with pipes
 
@@ -81,6 +83,7 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 
 # Read in acs_data_dict_22
 pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
+
 ```
 
 
@@ -144,130 +147,130 @@ acs_api_fp <- here(clean_data_fp, "acs_api")
 ### 2017-2021 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
 
 ```{r ACS 2021 FTP data}
-# Total list of vars to get from ACS PUMS
-vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
-                    "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
-                    "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
-       
-### Housing level data raw:
-# Variables to pull out of raw housing data:
-housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
-
-# Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
-housing_data <- fread(here(hh_2021_fp), select = housing_vars_list) %>% as_tibble()
-
-### Person level data raw:
-# Variables to pull out of raw housing data:
-person_vars_list <- c("SERIALNO", "ST", "PUMA", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", "NATIVITY", 
-                      "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP")
-# Set up type list for read_csv:
-
-# Read in the person level data:
-person_data <- fread(here(person_2021_fp), select = person_vars_list) %>% as_tibble()
-
-# # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
-merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST", "PUMA", "ADJINC"))
-
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 1826332 obs. with 31 variables
-# write_csv(merged_data, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
-
-# SCAG County list- need to conver PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
-scag_county_list <- c("Imperial", 
-                      "Los Angeles",
-                      "Orange",
-                      "Riverside",
-                      "San Bernardino", 
-                      "Ventura")
-
-# Mutate/case_when to replicate SAS code above for creating "county" var- 
-# Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
-merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
-                                                              PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
-                                                              PUMA %in% (5901:5999) ~ "Orange", # 59 prefix
-                                                              PUMA %in% (6501:6599) ~ "Riverside", # 65 prefix
-                                                              PUMA %in% (7101:7199) ~ "San Bernardino", # 71 prefix
-                                                              PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
-                                                              )) %>% 
-                                          filter(county %in% scag_county_list) %>% 
-                                          select(SERIALNO, ST,PUMA,county, everything()) 
-
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 879241 obs. (same as API call) with 33 variables
-# write_csv(merged_data_scag, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
-
-# # check variables from the merged_data using str() and summary():
-# str(merged_data)
+# # Total list of vars to get from ACS PUMS
+# vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
+#                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
+#                     "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV")
+#        
+# ### Housing level data raw:
+# # Variables to pull out of raw housing data:
+# housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
 # 
-# Remove all large files if no longer needed:
-# rm(housing_data, person_data, merged_data_scag, merged_data)
+# # Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
+# housing_data <- fread(here(hh_2021_fp), select = housing_vars_list) %>% as_tibble()
+# 
+# ### Person level data raw:
+# # Variables to pull out of raw housing data:
+# person_vars_list <- c("SERIALNO", "ST", "PUMA", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", "NATIVITY", 
+#                       "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP", "HICOV")
+# # Set up type list for read_csv:
+# 
+# # Read in the person level data:
+# person_data <- fread(here(person_2021_fp), select = person_vars_list) %>% as_tibble()
+# 
+# # # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
+# merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST", "PUMA", "ADJINC"))
+# 
+# # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 1826332 obs. with 33 variables
+# # write_csv(merged_data, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+# 
+# # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
+# scag_county_list <- c("Imperial", 
+#                       "Los Angeles",
+#                       "Orange",
+#                       "Riverside",
+#                       "San Bernardino", 
+#                       "Ventura")
+# 
+# # Mutate/case_when to replicate SAS code above for creating "county" var- 
+# # Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
+# merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
+#                                                               PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
+#                                                               PUMA %in% (5901:5999) ~ "Orange", # 59 prefix
+#                                                               PUMA %in% (6501:6599) ~ "Riverside", # 65 prefix
+#                                                               PUMA %in% (7101:7199) ~ "San Bernardino", # 71 prefix
+#                                                               PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
+#                                                               )) %>% 
+#                                           filter(county %in% scag_county_list) %>% 
+#                                           select(SERIALNO, ST,PUMA,county, everything()) 
+# 
+# # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 879241 obs. (same as API call) with 34 variables
+# # write_csv(merged_data_scag, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+# 
+# # # check variables from the merged_data using str() and summary():
+# # str(merged_data)
+# # 
+# # Remove all large files if no longer needed:
+# # rm(housing_data, person_data, merged_data_scag, merged_data)
 
 ```
 
 ### 2018-2022 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
 
 ```{r ACS 2022 FTP data}
-# Total list of vars to get from ACS PUMS 22- change from 21 is PUMA is in 2010 and 2020 census columns: "PUMA10" and "PUMA20"
-vars_list_pums_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
-                    "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
-                    "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
-       
-### Housing level data raw:
-# Variables to pull out of raw housing data:
-housing_vars_list_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
-
-# Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
-housing_data_22 <- fread(here(hh_2022_fp), select = housing_vars_list_22) %>% as_tibble()
-
-### Person level data raw:
-# Variables to pull out of raw housing data:
-person_vars_list_22 <- c("SERIALNO", "ST", "PUMA10", "PUMA20", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", 
-                      "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP")
-# Set up type list for read_csv:
-
-# Read in the person level data:
-person_data_22 <- fread(here(person_2022_fp), select = person_vars_list_22) %>% as_tibble()
-
-# # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
-merged_data_22 <- person_data_22 %>% left_join(., housing_data_22, by = c("SERIALNO", "ST", "PUMA10", "PUMA20", "ADJINC"))
-
-# Create single PUMA code that merges the columns "PUMA10" and "PUMA20", use PUMA10 and if -9 then take in PUMA20 to replace:
-merged_data_22 <- merged_data_22 %>% mutate(PUMA = case_when(PUMA10 == -9 ~ PUMA20,
-                                                                     TRUE ~ PUMA10)) 
-
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22": 1826332 obs. with 31 variables
-# write_csv(merged_data_22, here(acs_data_22_fp, "merged_acs_22.csv")) 
-
-# SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
-scag_county_list <- c("Imperial", 
-                      "Los Angeles",
-                      "Orange",
-                      "Riverside",
-                      "San Bernardino", 
-                      "Ventura")
-
-# Mutate/case_when to replicate SAS code above for creating "county" var- 
-# Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
-merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
-                                                                    PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
-                                                                    PUMA %in% (5901:5999) ~ "Orange", # 59 prefix
-                                                                    PUMA %in% (6501:6599) ~ "Riverside", # 65 prefix
-                                                                    PUMA %in% (7101:7199) ~ "San Bernardino", # 71 prefix
-                                                                    PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
-                                                                    )) %>% 
-                                          filter(county %in% scag_county_list) %>% 
-                                          select(SERIALNO, ST,PUMA,county, everything()) 
-
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs. (same as API call) with 34 variables
-# write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv")) 
-
-# Read in merged_data_22_scag from  here(acs_data_22_fp, "merged_acs_22_scag.csv")
-# merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv")) 
-
-# # check variables from the merged_data_22 using str() and summary():
-# str(merged_data_22)
+# # Total list of vars to get from ACS PUMS 22- change from 21 is PUMA is in 2010 and 2020 census columns: "PUMA10" and "PUMA20"
+# vars_list_pums_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
+#                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
+#                     "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV")
+#        
+# ### Housing level data raw:
+# # Variables to pull out of raw housing data:
+# housing_vars_list_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
 # 
-# Remove all large files if no longer needed:
+# # Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
+# housing_data_22 <- fread(here(hh_2022_fp), select = housing_vars_list_22) %>% as_tibble()
+# 
+# ### Person level data raw:
+# # Variables to pull out of raw housing data:
+# person_vars_list_22 <- c("SERIALNO", "ST", "PUMA10", "PUMA20", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", 
+#                       "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP", "HICOV")
+# # Set up type list for read_csv:
+# 
+# # Read in the person level data:
+# person_data_22 <- fread(here(person_2022_fp), select = person_vars_list_22) %>% as_tibble()
+# 
+# # # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
+# merged_data_22 <- person_data_22 %>% left_join(., housing_data_22, by = c("SERIALNO", "ST", "PUMA10", "PUMA20", "ADJINC"))
+# 
+# # Create single PUMA code that merges the columns "PUMA10" and "PUMA20", use PUMA10 and if -9 then take in PUMA20 to replace:
+# merged_data_22 <- merged_data_22 %>% mutate(PUMA = case_when(PUMA10 == -9 ~ PUMA20,
+#                                                                      TRUE ~ PUMA10)) 
+# 
+# # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22": 1826332 obs. with 31 variables
+# # write_csv(merged_data_22, here(acs_data_22_fp, "merged_acs_22.csv")) 
+# 
+# # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
+# scag_county_list <- c("Imperial", 
+#                       "Los Angeles",
+#                       "Orange",
+#                       "Riverside",
+#                       "San Bernardino", 
+#                       "Ventura")
+# 
+# # Mutate/case_when to replicate SAS code above for creating "county" var- 
+# # Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
+# merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
+#                                                                     PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
+#                                                                     PUMA %in% (5901:5999) ~ "Orange", # 59 prefix
+#                                                                     PUMA %in% (6501:6599) ~ "Riverside", # 65 prefix
+#                                                                     PUMA %in% (7101:7199) ~ "San Bernardino", # 71 prefix
+#                                                                     PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
+#                                                                     )) %>% 
+#                                           filter(county %in% scag_county_list) %>% 
+#                                           select(SERIALNO, ST,PUMA,county, everything()) 
+# 
+# # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
+# # write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv")) 
+# 
+# # Read in merged_data_22_scag from  here(acs_data_22_fp, "merged_acs_22_scag.csv")
+# # merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv")) 
+# 
+# # # check variables from the merged_data_22 using str() and summary():
+# # str(merged_data_22)
+# # 
+# # Remove all large files if no longer needed:
 # rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
-
+# 
 ```
 
 
@@ -275,260 +278,232 @@ merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500
 
 ## API Calls using tidycensus package:
 <!-- TODO: Fix API calls to US Census using tidycensus -->
-### CA ACS PUMS Data from 2017-2021- 5 year ACS- Census API Call:
+### CA ACS PUMS Data from 2017-2021- 5 year ACS- Census API Call: 
 
 ```{r tidycensus CA data 2021}
-pums_vars_acs5_22 <- pums_variables %>% filter(year == 2022, survey == "acs5")
-  
-# List of vars to get from ACS PUMS
-vars_list_pums <- c("PUMA","RELSHIPP","SEX", "AGEP", "HHT", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", 
-                    "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC", "HINCP", "VEH",
-                    "RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
-
-# Return tibble of var_code and var_label for vars_list_pums, arrange by order of vars_list_pums:
-pums_data_desc <- pums_vars_acs5 %>% 
-            distinct(var_code, var_label, data_type, level) %>% 
-            filter(var_code %in% vars_list_pums) %>%
-            mutate(var_code =  factor(var_code, levels = vars_list_pums)) %>%
-            arrange(var_code)
-
-# List of vars and labels:
-#   var_code  var_label                                                                                                                                   data_type   level  
-#    <fct>    <chr>                                                                                                                                         <chr>     <chr>  
-#  1 PUMA     Public use microdata area code (PUMA) based on 2010 Census definition (areas with population of 100,000 or more, use with ST for unique code) chr       NA     
-#  2 RELSHIPP Relationship to reference person                                                                                                              chr       person 
-#  3 SEX      Sex                                                                                                                                           chr       person 
-#  4 AGEP     Age                                                                                                                                           num       person 
-#  5 HHT      Household/family type                                                                                                                         chr       housing
-#  6 HISP     Recoded detailed Hispanic origin                                                                                                              chr       person 
-#  7 RAC1P    Recoded detailed race code                                                                                                                    chr       person 
-#  8 ENG      Ability to speak English                                                                                                                      chr       person 
-#  9 NATIVITY Nativity                                                                                                                                      chr       person 
-# 10 DIS      Disability recode                                                                                                                             chr       person 
-# 11 SCHL     Educational attainment                                                                                                                        chr       person 
-# 12 ESR      Employment status recode                                                                                                                      chr       person 
-# 13 JWMNP    Travel time to work                                                                                                                           num       person 
-# 14 JWTRNS   Means of transportation to work                                                                                                               chr       person 
-# 15 TEN      Tenure                                                                                                                                        chr       housing
-# 16 KIT      Complete kitchen facilities                                                                                                                   chr       housing
-# 17 PLM      Complete plumbing facilities                                                                                                                  chr       housing
-# 18 WAGP     Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)                                                         num       person 
-# 19 WKHP     Usual hours worked per week past 12 months                                                                                                    num       person 
-# 20 ADJINC   Adjustment factor for income and earnings dollar amounts (6 implied decimal places)                                                           chr       housing
-# 21 HINCP    Household income (past 12 months, use ADJINC to adjust HINCP to constant dollars)                                                             num       housing
-# 22 VEH      Vehicles (1 ton or less) available                                                                                                            chr       housing
-# 23 RMSP     Number of rooms                                                                                                                               num       housing
-# 24 NP       Number of persons associated with this housing record                                                                                         num       housing
-# 25 GRPIP    Gross rent as a percentage of household income past 12 months                                                                                 num       housing
-# 26 OCPIP    Selected monthly owner costs as a percentage of household income during the past 12 months                                                    num       housing
-# 27 POVPIP   Income-to-poverty ratio recode                                                                                                                num       person 
-
-# Vector of PUMA codes to get from CA- ACS PUMS API Call below:
-puma_codes_scag <- c("02500", "03701", "03702", "03703", "03704", "03705", "03706", "03707", "03708", "03709", "03710", "03711", "03712", "03713", 
-                     "03714", "03715", "03716", "03717", "03718", "03719", "03720", "03721", "03722", "03723", "03724", "03725", "03726", "03727", 
-                     "03728", "03729", "03730", "03731", "03732", "03733", "03734", "03735", "03736", "03737", "03738", "03739", "03740", "03741", 
-                     "03742", "03743", "03744", "03745", "03746", "03747", "03748", "03749", "03750", "03751", "03752", "03753", "03754", "03755", 
-                     "03756", "03757", "03758", "03759", "03760", "03761", "03762", "03763", "03764", "03765", "03766", "03767", "03768", "03769", 
-                     "05901", "05902", "05903", "05904", "05905", "05906", "05907", "05908", "05909", "05910", "05911", "05912", "05913", "05914", 
-                     "05915", "05916", "05917", "05918", "06501", "06502", "06503", "06504", "06505", "06506", "06507", "06508", "06509", "06510", 
-                     "06511", "06512","06513", "06514", "06515", "07101", "07102", "07103", "07104", "07105", "07106", "07107", "07108", "07109", 
-                     "07110", "07111", "07112", "07113", "07114", "07115", "11101", "11102", "11103", "11104", "11105", "11106")
-  
-###
-# Run API call to get all California ACS PUMS data from 2017-2021- 5 year ACS: CA FIPS is 06- took about 8 minutes to download API call.
-ca_pums <- get_pums(
-  variables = vars_list_pums,
-  state = "CA", # California
-  puma = puma_codes_scag,
-  survey = "acs5", # acs5 is the 5 year ACS PUMS
-  year = 2021, # Gets 2017-2021 ACS PUMS if acs5 set in survey option.
-  recode = TRUE, # recode variable values using Census data dictionary and creates a new *_label column for each variable that is recoded.
-  show_call  = TRUE # If TRUE, display call made to Census API.
-)
-
-# API CALL: Census API call: https://api.census.gov/data/2021/acs/acs5/pums?get=SERIALNO%2CSPORDER%2CWGTP%2CPWGTP%2CPUMA%2CRELSHIPP%2CSEX%2CAGEP%2CHHT%2CHISP%2CRAC1P%2CENG%2CNATIVITY%2CDIS%2CSCHL%2CESR%2CJWMNP%2CJWTRNS%2CTEN%2CKIT%2CPLM%2CWAGP%2CWKHP%2CADJINC%2CVEH%2CRMSP%2CNP%2CGRPIP%2COCPIP%2CPOVPIP&ucgid=0400000US06
-
-# Write out to .csv for the raw data from API call to folder named "clean_data": 1826332 obs. with 49 variables
-# write_csv(ca_pums, here(acs_api_fp, "ca_pums_raw.csv"))
-
-### 
-#Read in saved API call data:
-ca_pums <- read_csv(here(acs_api_fp, "ca_pums_raw.csv"))
-
-# Set cols to numeric that ended up as characters, change order of vars:
-ca_pums <- ca_pums %>% mutate(across(PUMA:RAC1P, ~ as.numeric(.))) %>% 
-    relocate(c("PUMA", "ST", "SPORDER", "SEX", "AGEP","HHT", "HISP","RAC1P", "ENG", "NATIVITY", "DIS", "SCHL","ESR"), .after = SERIALNO)
-
-# Filter data to only PUMAs that we need for SCAG Region: 
-# *------ PUMA 2010 -----------------------------------;
-# if 		  puma  =2500 then county=25; *Imperial;
-# if 3701<= puma <=3799 then county=37; *Los Angeles;
-# if 5901<= puma <=5999 then county=59; *Orange;
-# if 6501<= puma <=6599 then county=65; *Riverside ;
-# if 7101<= puma <=7199 then county=71; *San Bernardino;
-# if 11101<= puma <=11199 then county=111; *Ventura;
-
-# SCAG County list- need to conver PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
-scag_county_list <- c("Imperial", 
-                      "Los Angeles",
-                      "Orange",
-                      "Riverside",
-                      "San Bernardino", 
-                      "Ventura")
-# Mutate/case_when to replicate SAS code above for creating "county" var- 
-# Create county variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
-ca_pums_scag <- ca_pums %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
-                                      PUMA >= 3701 & PUMA <= 3799 ~ "Los Angeles", # 37 prefix
-                                      PUMA >= 5901 & PUMA <= 5999 ~ "Orange", # 59 prefix
-                                      PUMA >= 6501 & PUMA <= 6599 ~ "Riverside", # 65 prefix
-                                      PUMA >= 7101 & PUMA <= 7199 ~ "San Bernardino", # 71 prefix
-                                      PUMA >= 11101 & PUMA <= 11199 ~ "Ventura" # 111 prefix
-                                                    )) %>% 
-                            filter(county %in% scag_county_list) %>% relocate("county", .after = ST) 
-
-# Write out data filtered to only SCAG counties to folder named "clean_data": 879241 obs. with 49 variables
-# write_csv(ca_pums_scag, here(acs_api_fp, "ca_pums_scag.csv"))
-
-# # Read in SCAG county data from ca_pums_scag.csv:
-ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
-# 
-# # Set a list of names of the columns from API call:
-# vars_ca_pums_scag <- names(ca_pums_scag)
-
-# Remove all large datasets, leave ca_pums_scag
-# rm(merged_data,merged_data_scag,housing_data,person_data,ca_pums)
+# pums_vars_acs5_22 <- pums_variables %>% filter(year == 2022, survey == "acs5")
+# # List of vars to get from ACS PUMS 
+# vars_list_pums <- c("PUMA","RELSHIPP","SEX", "AGEP", "HHT", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS",  
+#                     "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC", "HINCP", "VEH", 
+#                     "RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV")
+# # Return tibble of var_code and var_label for vars_list_pums, arrange by order of vars_list_pums: 
+# pums_data_desc <- pums_vars_acs5 %>%  
+#             distinct(var_code, var_label, data_type, level) %>%  
+#             filter(var_code %in% vars_list_pums) %>% 
+#             mutate(var_code =  factor(var_code, levels = vars_list_pums)) %>% 
+#             arrange(var_code)
+# # List of vars and labels: 
+# #   var_code  var_label                                                                                                                                   data_type   level   
+# #    <fct>    <chr>                                                                                                                                         <chr>     <chr>   
+# #  1 PUMA     Public use microdata area code (PUMA) based on 2010 Census definition (areas with population of 100,000 or more, use with ST for unique code) chr       NA      
+# #  2 RELSHIPP Relationship to reference person                                                                                                              chr       person  
+# #  3 SEX      Sex                                                                                                                                           chr       person  
+# #  4 AGEP     Age                                                                                                                                           num       person  
+# #  5 HHT      Household/family type                                                                                                                         chr       housing 
+# #  6 HISP     Recoded detailed Hispanic origin                                                                                                              chr       person  
+# #  7 RAC1P    Recoded detailed race code                                                                                                                    chr       person  
+# #  8 ENG      Ability to speak English                                                                                                                      chr       person  
+# #  9 NATIVITY Nativity                                                                                                                                      chr       person  
+# # 10 DIS      Disability recode                                                                                                                             chr       person  
+# # 11 SCHL     Educational attainment                                                                                                                        chr       person  
+# # 12 ESR      Employment status recode                                                                                                                      chr       person  
+# # 13 JWMNP    Travel time to work                                                                                                                           num       person  
+# # 14 JWTRNS   Means of transportation to work                                                                                                               chr       person  
+# # 15 TEN      Tenure                                                                                                                                        chr       housing 
+# # 16 KIT      Complete kitchen facilities                                                                                                                   chr       housing 
+# # 17 PLM      Complete plumbing facilities                                                                                                                  chr       housing 
+# # 18 WAGP     Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)                                                         num       person  
+# # 19 WKHP     Usual hours worked per week past 12 months                                                                                                    num       person  
+# # 20 ADJINC   Adjustment factor for income and earnings dollar amounts (6 implied decimal places)                                                           chr       housing 
+# # 21 HINCP    Household income (past 12 months, use ADJINC to adjust HINCP to constant dollars)                                                             num       housing 
+# # 22 VEH      Vehicles (1 ton or less) available                                                                                                            chr       housing 
+# # 23 RMSP     Number of rooms                                                                                                                               num       housing 
+# # 24 NP       Number of persons associated with this housing record                                                                                         num       housing 
+# # 25 GRPIP    Gross rent as a percentage of household income past 12 months                                                                                 num       housing 
+# # 26 OCPIP    Selected monthly owner costs as a percentage of household income during the past 12 months                                                    num       housing 
+# # 27 POVPIP   Income-to-poverty ratio recode                                                                                                                num       person 
+# # Vector of PUMA codes to get from CA- ACS PUMS API Call below: 
+# puma_codes_scag <- c("02500", "03701", "03702", "03703", "03704", "03705", "03706", "03707", "03708", "03709", "03710", "03711", "03712", "03713",  
+#                      "03714", "03715", "03716", "03717", "03718", "03719", "03720", "03721", "03722", "03723", "03724", "03725", "03726", "03727",  
+#                      "03728", "03729", "03730", "03731", "03732", "03733", "03734", "03735", "03736", "03737", "03738", "03739", "03740", "03741",  
+#                      "03742", "03743", "03744", "03745", "03746", "03747", "03748", "03749", "03750", "03751", "03752", "03753", "03754", "03755",  
+#                      "03756", "03757", "03758", "03759", "03760", "03761", "03762", "03763", "03764", "03765", "03766", "03767", "03768", "03769",  
+#                      "05901", "05902", "05903", "05904", "05905", "05906", "05907", "05908", "05909", "05910", "05911", "05912", "05913", "05914",  
+#                      "05915", "05916", "05917", "05918", "06501", "06502", "06503", "06504", "06505", "06506", "06507", "06508", "06509", "06510",  
+#                      "06511", "06512","06513", "06514", "06515", "07101", "07102", "07103", "07104", "07105", "07106", "07107", "07108", "07109",  
+#                      "07110", "07111", "07112", "07113", "07114", "07115", "11101", "11102", "11103", "11104", "11105", "11106")
+# ### 
+# # Run API call to get all California ACS PUMS data from 2017-2021- 5 year ACS: CA FIPS is 06- took about 8 minutes to download API call. 
+# ca_pums <- get_pums( 
+#   variables = vars_list_pums, 
+#   state = "CA", # California 
+#   puma = puma_codes_scag, 
+#   survey = "acs5", # acs5 is the 5 year ACS PUMS 
+#   year = 2021, # Gets 2017-2021 ACS PUMS if acs5 set in survey option. 
+#   recode = TRUE, # recode variable values using Census data dictionary and creates a new *_label column for each variable that is recoded. 
+#   show_call  = TRUE # If TRUE, display call made to Census API. 
+# )
+# # API CALL: Census API call: https://api.census.gov/data/2021/acs/acs5/pums?get=SERIALNO%2CSPORDER%2CWGTP%2CPWGTP%2CPUMA%2CRELSHIPP%2CSEX%2CAGEP%2CHHT%2CHISP%2CRAC1P%2CENG%2CNATIVITY%2CDIS%2CSCHL%2CESR%NP%2CJWTRNS%2CTEN%2CKIT%2CPLM%2CWAGP%2CWKHP%2CADJINC%2CVEH%2CRMSP%2CNP%2CGRPIP%2COCPIP%2CPOVPIP&ucgid=0400000US06
+# # Write out to .csv for the raw data from API call to folder named "clean_data": 1826332 obs. with 49 variables 
+# # write_csv(ca_pums, here(acs_api_fp, "ca_pums_raw.csv"))
+# ###  
+# #Read in saved API call data: 
+# ca_pums <- read_csv(here(acs_api_fp, "ca_pums_raw.csv"))
+# # Set cols to numeric that ended up as characters, change order of vars: 
+# ca_pums <- ca_pums %>% mutate(across(PUMA:RAC1P, ~ as.numeric(.))) %>%  
+#     relocate(c("PUMA", "ST", "SPORDER", "SEX", "AGEP","HHT", "HISP","RAC1P", "ENG", "NATIVITY", "DIS", "SCHL","ESR"), .after = SERIALNO)
+# # Filter data to only PUMAs that we need for SCAG Region:  
+# # *------ PUMA 2010 -----------------------------------; 
+# # if 		  puma  =2500 then county=25; *Imperial; 
+# # if 3701<= puma <=3799 then county=37; *Los Angeles; 
+# # if 5901<= puma <=5999 then county=59; *Orange; 
+# # if 6501<= puma <=6599 then county=65; *Riverside ; 
+# # if 7101<= puma <=7199 then county=71; *San Bernardino; 
+# # if 11101<= puma <=11199 then county=111; *Ventura;
+# # SCAG County list- need to conver PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties: 
+# scag_county_list <- c("Imperial",  
+#                       "Los Angeles", 
+#                       "Orange", 
+#                       "Riverside", 
+#                       "San Bernardino",  
+#                       "Ventura") 
+# # Mutate/case_when to replicate SAS code above for creating "county" var-  
+# # Create county variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above: 
+# ca_pums_scag <- ca_pums %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix 
+#                                       PUMA >= 3701 & PUMA <= 3799 ~ "Los Angeles", # 37 prefix 
+#                                       PUMA >= 5901 & PUMA <= 5999 ~ "Orange", # 59 prefix 
+#                                       PUMA >= 6501 & PUMA <= 6599 ~ "Riverside", # 65 prefix 
+#                                       PUMA >= 7101 & PUMA <= 7199 ~ "San Bernardino", # 71 prefix 
+#                                       PUMA >= 11101 & PUMA <= 11199 ~ "Ventura" # 111 prefix 
+#                                                     )) %>%  
+#                             filter(county %in% scag_county_list) %>% relocate("county", .after = ST) 
+# # Write out data filtered to only SCAG counties to folder named "clean_data": 879241 obs. with 49 variables 
+# # write_csv(ca_pums_scag, here(acs_api_fp, "ca_pums_scag.csv"))
+# # # Read in SCAG county data from ca_pums_scag.csv: 
+# ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv")) 
+# #  
+# # # Set a list of names of the columns from API call: 
+# # vars_ca_pums_scag <- names(ca_pums_scag)
+# # Remove all large datasets, leave ca_pums_scag 
+# # rm(merged_data,merged_data_scag,housing_data,person_data,ca_pums) 
 ```
 
 
 ### CA ACS PUMS Data from 2018-2022- 5 year ACS- Census API Call:
 
-```{r tidycensus CA data 2022}
-# TODO: NEED TO UPDATE this section once census API is working again.  
-
-# List of vars to get from ACS PUMS
-vars_list_pums_22 <- c("PUMA10", "PUMA20", "RELSHIPP","SEX", "AGEP", "HHT", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", 
-                    "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC", "HINCP", "VEH",
-                    "RMSP", "NP", "GRPIP", "OCPIP", "POVPIP")
-# Check that all vars from 21 are in 22 data:
-# read in acs_data_dict_22
-acs_data_dict_22 <- read_csv(file = "data_dicts_ACS_PUMS/acs_data_dict_22.csv")
-needed_vars_acs_data_dict_22 <- acs_data_dict_22 %>% filter(name %in% vars_list_pums_22)
-
-# Return tibble of var_code and var_label for vars_list_pums, arrange by order of vars_list_pums:
-# pums_data_desc <- pums_vars_acs5_22 %>% 
-#             distinct(var_code, var_label, data_type, level) %>% 
-#             filter(var_code %in% vars_list_pums) %>%
-#             mutate(var_code =  factor(var_code, levels = vars_list_pums)) %>%
-#             arrange(var_code)
-
-######
-###### List of vars and labels:
-###### 
-#   var_code  var_label                                                                                                                                   data_type   level  
-#    <fct>    <chr>                                                                                                                                         <chr>     <chr>  
-#  1 PUMA     Public use microdata area code (PUMA) based on 2010 Census definition (areas with population of 100,000 or more, use with ST for unique code) chr       NA     
-#  2 RELSHIPP Relationship to reference person                                                                                                              chr       person 
-#  3 SEX      Sex                                                                                                                                           chr       person 
-#  4 AGEP     Age                                                                                                                                           num       person 
-#  5 HHT      Household/family type                                                                                                                         chr       housing
-#  6 HISP     Recoded detailed Hispanic origin                                                                                                              chr       person 
-#  7 RAC1P    Recoded detailed race code                                                                                                                    chr       person 
-#  8 ENG      Ability to speak English                                                                                                                      chr       person 
-#  9 NATIVITY Nativity                                                                                                                                      chr       person 
-# 10 DIS      Disability recode                                                                                                                             chr       person 
-# 11 SCHL     Educational attainment                                                                                                                        chr       person 
-# 12 ESR      Employment status recode                                                                                                                      chr       person 
-# 13 JWMNP    Travel time to work                                                                                                                           num       person 
-# 14 JWTRNS   Means of transportation to work                                                                                                               chr       person 
-# 15 TEN      Tenure                                                                                                                                        chr       housing
-# 16 KIT      Complete kitchen facilities                                                                                                                   chr       housing
-# 17 PLM      Complete plumbing facilities                                                                                                                  chr       housing
-# 18 WAGP     Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)                                                         num       person 
-# 19 WKHP     Usual hours worked per week past 12 months                                                                                                    num       person 
-# 20 ADJINC   Adjustment factor for income and earnings dollar amounts (6 implied decimal places)                                                           chr       housing
-# 21 HINCP    Household income (past 12 months, use ADJINC to adjust HINCP to constant dollars)                                                             num       housing
-# 22 VEH      Vehicles (1 ton or less) available                                                                                                            chr       housing
-# 23 RMSP     Number of rooms                                                                                                                               num       housing
-# 24 NP       Number of persons associated with this housing record                                                                                         num       housing
-# 25 GRPIP    Gross rent as a percentage of household income past 12 months                                                                                 num       housing
-# 26 OCPIP    Selected monthly owner costs as a percentage of household income during the past 12 months                                                    num       housing
-# 27 POVPIP   Income-to-poverty ratio recode                                                                                                                num       person 
-
-# Vector of PUMA codes to get from CA- ACS PUMS API Call below:
-puma_codes_scag <- c("02500", "03701", "03702", "03703", "03704", "03705", "03706", "03707", "03708", "03709", "03710", "03711", "03712", "03713", 
-                     "03714", "03715", "03716", "03717", "03718", "03719", "03720", "03721", "03722", "03723", "03724", "03725", "03726", "03727", 
-                     "03728", "03729", "03730", "03731", "03732", "03733", "03734", "03735", "03736", "03737", "03738", "03739", "03740", "03741", 
-                     "03742", "03743", "03744", "03745", "03746", "03747", "03748", "03749", "03750", "03751", "03752", "03753", "03754", "03755", 
-                     "03756", "03757", "03758", "03759", "03760", "03761", "03762", "03763", "03764", "03765", "03766", "03767", "03768", "03769", 
-                     "05901", "05902", "05903", "05904", "05905", "05906", "05907", "05908", "05909", "05910", "05911", "05912", "05913", "05914", 
-                     "05915", "05916", "05917", "05918", "06501", "06502", "06503", "06504", "06505", "06506", "06507", "06508", "06509", "06510", 
-                     "06511", "06512","06513", "06514", "06515", "07101", "07102", "07103", "07104", "07105", "07106", "07107", "07108", "07109", 
-                     "07110", "07111", "07112", "07113", "07114", "07115", "11101", "11102", "11103", "11104", "11105", "11106")
-  
-###
-# Run API call to get all California ACS PUMS data from 2018-2022- 5 year ACS: CA FIPS is 06- took about 8 minutes to download API call.
-ca_pums_22 <- get_pums(
-  variables = vars_list_pums_22,
-  state = "CA", # California
-  puma = puma_codes_scag,
-  survey = "acs5", # acs5 is the 5 year ACS PUMS
-  year = 2022, # Gets 2018-2022 ACS PUMS if acs5 set in survey option.
-  recode = TRUE, # recode variable values using Census data dictionary and creates a new *_label column for each variable that is recoded.
-  show_call  = TRUE # If TRUE, display call made to Census API.
-)
-
-# API CALL: Census API call: https://api.census.gov/data/2021/acs/acs5/pums?get=SERIALNO%2CSPORDER%2CWGTP%2CPWGTP%2CPUMA%2CRELSHIPP%2CSEX%2CAGEP%2CHHT%2CHISP%2CRAC1P%2CENG%2CNATIVITY%2CDIS%2CSCHL%2CESR%2CJWMNP%2CJWTRNS%2CTEN%2CKIT%2CPLM%2CWAGP%2CWKHP%2CADJINC%2CVEH%2CRMSP%2CNP%2CGRPIP%2COCPIP%2CPOVPIP&ucgid=0400000US06
-
-# Write out to .csv for the raw data from API call to folder named "clean_data": 1826332 obs. with 49 variables
-# write_csv(ca_pums, here(acs_api_fp, "ca_pums_raw.csv"))
-
-### 
-#Read in saved API call data:
-# ca_pums <- read_csv(here(acs_api_fp, "ca_pums_raw.csv"))
-
-# Set cols to numeric that ended up as characters, change order of vars:
-ca_pums <- ca_pums %>% mutate(across(PUMA:RAC1P, ~ as.numeric(.))) %>% 
-    relocate(c("PUMA", "ST", "SPORDER", "SEX", "AGEP","HHT", "HISP","RAC1P", "ENG", "NATIVITY", "DIS", "SCHL","ESR"), .after = SERIALNO)
-
-# Filter data to only PUMAs that we need for SCAG Region: 
-# *------ PUMA 2010 -----------------------------------;
-# if 		  puma  =2500 then county=25; *Imperial;
-# if 3701<= puma <=3799 then county=37; *Los Angeles;
-# if 5901<= puma <=5999 then county=59; *Orange;
-# if 6501<= puma <=6599 then county=65; *Riverside ;
-# if 7101<= puma <=7199 then county=71; *San Bernardino;
-# if 11101<= puma <=11199 then county=111; *Ventura;
-
-# SCAG County list- need to conver PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
-scag_county_list <- c("Imperial", 
-                      "Los Angeles",
-                      "Orange",
-                      "Riverside",
-                      "San Bernardino", 
-                      "Ventura")
-# Mutate/case_when to replicate SAS code above for creating "county" var- 
-# Create county variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
-ca_pums_scag <- ca_pums %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
-                                      PUMA >= 3701 & PUMA <= 3799 ~ "Los Angeles", # 37 prefix
-                                      PUMA >= 5901 & PUMA <= 5999 ~ "Orange", # 59 prefix
-                                      PUMA >= 6501 & PUMA <= 6599 ~ "Riverside", # 65 prefix
-                                      PUMA >= 7101 & PUMA <= 7199 ~ "San Bernardino", # 71 prefix
-                                      PUMA >= 11101 & PUMA <= 11199 ~ "Ventura" # 111 prefix
-                                                    )) %>% 
-                            filter(county %in% scag_county_list) %>% relocate("county", .after = ST) 
-
-# Write out data filtered to only SCAG counties to folder named "clean_data": 879241 obs. with 49 variables
-# write_csv(ca_pums_scag, here(acs_api_fp, "ca_pums_scag.csv"))
-
-# # Read in SCAG county data from ca_pums_scag.csv:
-# ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
-# 
-# # Set a list of names of the columns from API call:
-# vars_ca_pums_scag <- names(ca_pums_scag)
-
-# Remove all large datasets, leave ca_pums_scag
-# rm(merged_data,merged_data_scag,housing_data,person_data,ca_pums)
-```
+```{r tidycensus CA data 2022} 
+# # TODO: NEED TO UPDATE this section once census API is working again.  
+# # List of vars to get from ACS PUMS 
+# vars_list_pums_22 <- c("PUMA10", "PUMA20", "RELSHIPP","SEX", "AGEP", "HHT", "HISP", "RAC1P", "ENG", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS",  
+#                     "TEN", "KIT", "PLM", "WAGP", "WKHP", "ADJINC", "HINCP", "VEH", 
+#                     "RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV") 
+# # Check that all vars from 21 are in 22 data: 
+# # read in acs_data_dict_22 
+# acs_data_dict_22 <- read_csv(file = "data_dicts_ACS_PUMS/acs_data_dict_22.csv") 
+# needed_vars_acs_data_dict_22 <- acs_data_dict_22 %>% filter(name %in% vars_list_pums_22)
+# # Return tibble of var_code and var_label for vars_list_pums, arrange by order of vars_list_pums: 
+# # pums_data_desc <- pums_vars_acs5_22 %>%  
+# #             distinct(var_code, var_label, data_type, level) %>%  
+# #             filter(var_code %in% vars_list_pums) %>% 
+# #             mutate(var_code =  factor(var_code, levels = vars_list_pums)) %>% 
+# #             arrange(var_code)
+# ###### 
+# ###### List of vars and labels: 
+# ######  
+# #   var_code  var_label                                                                                                                                   data_type   level   
+# #    <fct>    <chr>                                                                                                                                         <chr>     <chr>   
+# #  1 PUMA     Public use microdata area code (PUMA) based on 2010 Census definition (areas with population of 100,000 or more, use with ST for unique code) chr       NA      
+# #  2 RELSHIPP Relationship to reference person                                                                                                              chr       person  
+# #  3 SEX      Sex                                                                                                                                           chr       person  
+# #  4 AGEP     Age                                                                                                                                           num       person  
+# #  5 HHT      Household/family type                                                                                                                         chr       housing 
+# #  6 HISP     Recoded detailed Hispanic origin                                                                                                              chr       person  
+# #  7 RAC1P    Recoded detailed race code                                                                                                                    chr       person  
+# #  8 ENG      Ability to speak English                                                                                                                      chr       person  
+# #  9 NATIVITY Nativity                                                                                                                                      chr       person  
+# # 10 DIS      Disability recode                                                                                                                             chr       person  
+# # 11 SCHL     Educational attainment                                                                                                                        chr       person  
+# # 12 ESR      Employment status recode                                                                                                                      chr       person  
+# # 13 JWMNP    Travel time to work                                                                                                                           num       person  
+# # 14 JWTRNS   Means of transportation to work                                                                                                               chr       person  
+# # 15 TEN      Tenure                                                                                                                                        chr       housing 
+# # 16 KIT      Complete kitchen facilities                                                                                                                   chr       housing 
+# # 17 PLM      Complete plumbing facilities                                                                                                                  chr       housing 
+# # 18 WAGP     Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)                                                         num       person  
+# # 19 WKHP     Usual hours worked per week past 12 months                                                                                                    num       person  
+# # 20 ADJINC   Adjustment factor for income and earnings dollar amounts (6 implied decimal places)                                                           chr       housing 
+# # 21 HINCP    Household income (past 12 months, use ADJINC to adjust HINCP to constant dollars)                                                             num       housing 
+# # 22 VEH      Vehicles (1 ton or less) available                                                                                                            chr       housing 
+# # 23 RMSP     Number of rooms                                                                                                                               num       housing 
+# # 24 NP       Number of persons associated with this housing record                                                                                         num       housing 
+# # 25 GRPIP    Gross rent as a percentage of household income past 12 months                                                                                 num       housing 
+# # 26 OCPIP    Selected monthly owner costs as a percentage of household income during the past 12 months                                                    num       housing 
+# # 27 POVPIP   Income-to-poverty ratio recode                                                                                                                num       person 
+# # Vector of PUMA codes to get from CA- ACS PUMS API Call below: 
+# puma_codes_scag <- c("02500", "03701", "03702", "03703", "03704", "03705", "03706", "03707", "03708", "03709", "03710", "03711", "03712", "03713",  
+#                      "03714", "03715", "03716", "03717", "03718", "03719", "03720", "03721", "03722", "03723", "03724", "03725", "03726", "03727",  
+#                      "03728", "03729", "03730", "03731", "03732", "03733", "03734", "03735", "03736", "03737", "03738", "03739", "03740", "03741",  
+#                      "03742", "03743", "03744", "03745", "03746", "03747", "03748", "03749", "03750", "03751", "03752", "03753", "03754", "03755",  
+#                      "03756", "03757", "03758", "03759", "03760", "03761", "03762", "03763", "03764", "03765", "03766", "03767", "03768", "03769",  
+#                      "05901", "05902", "05903", "05904", "05905", "05906", "05907", "05908", "05909", "05910", "05911", "05912", "05913", "05914",  
+#                      "05915", "05916", "05917", "05918", "06501", "06502", "06503", "06504", "06505", "06506", "06507", "06508", "06509", "06510",  
+#                      "06511", "06512","06513", "06514", "06515", "07101", "07102", "07103", "07104", "07105", "07106", "07107", "07108", "07109",  
+#                      "07110", "07111", "07112", "07113", "07114", "07115", "11101", "11102", "11103", "11104", "11105", "11106")
+# ### 
+# # Run API call to get all California ACS PUMS data from 2018-2022- 5 year ACS: CA FIPS is 06- took about 8 minutes to download API call. 
+# ca_pums_22 <- get_pums( 
+#   variables = vars_list_pums_22, 
+#   state = "CA", # California 
+#   puma = puma_codes_scag, 
+#   survey = "acs5", # acs5 is the 5 year ACS PUMS 
+#   year = 2022, # Gets 2018-2022 ACS PUMS if acs5 set in survey option. 
+#   recode = TRUE, # recode variable values using Census data dictionary and creates a new *_label column for each variable that is recoded. 
+#   show_call  = TRUE # If TRUE, display call made to Census API. 
+# )
+# # API CALL: Census API call: https://api.census.gov/data/2021/acs/acs5/pums?get=SERIALNO%2CSPORDER%2CWGTP%2CPWGTP%2CPUMA%2CRELSHIPP%2CSEX%2CAGEP%2CHHT%2CHISP%2CRAC1P%2CENG%2CNATIVITY%2CDIS%2CSCHL%2CESR%NP%2CJWTRNS%2CTEN%2CKIT%2CPLM%2CWAGP%2CWKHP%2CADJINC%2CVEH%2CRMSP%2CNP%2CGRPIP%2COCPIP%2CPOVPIP&ucgid=0400000US06
+# # Write out to .csv for the raw data from API call to folder named "clean_data": 1826332 obs. with 49 variables 
+# # write_csv(ca_pums, here(acs_api_fp, "ca_pums_raw.csv"))
+# ###  
+# #Read in saved API call data: 
+# # ca_pums <- read_csv(here(acs_api_fp, "ca_pums_raw.csv"))
+# # Set cols to numeric that ended up as characters, change order of vars: 
+# ca_pums <- ca_pums %>% mutate(across(PUMA:RAC1P, ~ as.numeric(.))) %>%  
+#     relocate(c("PUMA", "ST", "SPORDER", "SEX", "AGEP","HHT", "HISP","RAC1P", "ENG", "NATIVITY", "DIS", "SCHL","ESR"), .after = SERIALNO)
+# # Filter data to only PUMAs that we need for SCAG Region:  
+# # *------ PUMA 2010 -----------------------------------; 
+# # if 		  puma  =2500 then county=25; *Imperial; 
+# # if 3701<= puma <=3799 then county=37; *Los Angeles; 
+# # if 5901<= puma <=5999 then county=59; *Orange; 
+# # if 6501<= puma <=6599 then county=65; *Riverside ; 
+# # if 7101<= puma <=7199 then county=71; *San Bernardino; 
+# # if 11101<= puma <=11199 then county=111; *Ventura;
+# # SCAG County list- need to conver PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties: 
+# scag_county_list <- c("Imperial",  
+#                       "Los Angeles", 
+#                       "Orange", 
+#                       "Riverside", 
+#                       "San Bernardino",  
+#                       "Ventura") 
+# # Mutate/case_when to replicate SAS code above for creating "county" var-  
+# # Create county variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above: 
+# ca_pums_scag <- ca_pums %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix 
+#                                       PUMA >= 3701 & PUMA <= 3799 ~ "Los Angeles", # 37 prefix 
+#                                       PUMA >= 5901 & PUMA <= 5999 ~ "Orange", # 59 prefix 
+#                                       PUMA >= 6501 & PUMA <= 6599 ~ "Riverside", # 65 prefix 
+#                                       PUMA >= 7101 & PUMA <= 7199 ~ "San Bernardino", # 71 prefix 
+#                                       PUMA >= 11101 & PUMA <= 11199 ~ "Ventura" # 111 prefix 
+#                                                     )) %>%  
+#                             filter(county %in% scag_county_list) %>% relocate("county", .after = ST) 
+# # Write out data filtered to only SCAG counties to folder named "clean_data": 879241 obs. with 49 variables 
+# # write_csv(ca_pums_scag, here(acs_api_fp, "ca_pums_scag.csv"))
+# # # Read in SCAG county data from ca_pums_scag.csv: 
+# # ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv")) 
+# #  
+# # # Set a list of names of the columns from API call: 
+# # vars_ca_pums_scag <- names(ca_pums_scag)
+# # Remove all large datasets, leave ca_pums_scag 
+# # rm(merged_data,merged_data_scag,housing_data,person_data,ca_pums) 
+``` 
 
 
 --- 
@@ -538,14 +513,15 @@ ca_pums_scag <- ca_pums %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial",
 ### SCAG Data from ACS PUMS:
 
 ```{r read in SCAG data}
-# Read in SCAG county data from ca_pums_scag.csv:
-ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
+# Read in SCAG county data from "ca_pums_scag.csv" aka the API CALL DATA:
+# ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
 
 # Set a list of names of the columns from API call:
-vars_ca_pums_scag <- names(ca_pums_scag)
+# vars_ca_pums_scag <- names(ca_pums_scag)
 
-# Read in merged ACS data SCAG:
-# merged_acs_data_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+# Read in merged ACS data SCAG- aka the US Census FTP merged DATA:
+ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+
 ```
 
 
@@ -571,9 +547,9 @@ ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Impe
 ca_pums_scag <- ca_pums_scag %>% mutate(race = factor(case_when(HISP != 1  ~ "Hispanic/Latino",
                                                          HISP == 1 & RAC1P == 1 ~ "White", 
                                                          HISP == 1 & RAC1P == 2 ~ "Black", 
-                                                         HISP == 1 & RAC1P == 6 | HISP == 1 & RAC1P == 7 ~ "Asian/Pacific Islander", 
-                                                         HISP == 1 & RAC1P >= 3 & RAC1P <= 5  ~ "Native American", 
-                                                         HISP == 1 & RAC1P == 8 | HISP == 1 & RAC1P == 9  ~ "Multiracial/Other"
+                                                         HISP == 1 & RAC1P %in% c(6,7) ~ "Asian/Pacific Islander", 
+                                                         HISP == 1 & RAC1P %in% c(3:5) ~ "Native American", 
+                                                         HISP == 1 & RAC1P %in% c(8,9) ~ "Multiracial/Other"
                                                          ), levels = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White"))
                                         ) 
 
@@ -745,11 +721,111 @@ ca_pums_scag <- ca_pums_scag %>% mutate(no_kitchen_plumbing = factor(case_when(K
                                                                    KIT == 1 | PLM == 1 ~ "No",), levels = c("Yes","No"))
                                                          )
 
+
+### 
+# Overcrowding of households: defined as "severe overcrowding is measured as the percentage of householders that have more than 1.5 persons per room"
+# named variable: "overcrowded" if "Yes", more than 1.5 people per room, "No" otherwise. 
+# SAS Example:
+# *RMSP Numeric 2
+# Number of rooms
+# bb .N/A (GQ)
+# 0..99 .Rooms (Top-coded)
+# 
+# NP Numeric 2
+# Number of persons associated with this housing record
+# 0 .Vacant unit
+# 1 .One person record (one person in household or any person .in group quarters)
+# 2..20 .Number of person records (number of persons in household);
+# 
+# Overcrowd=.;
+# *if RMSP>0 then do;
+# 	Overcrowd=NP/RMSP;
+# *end;
+# 
+# Overcrowding=.;
+# if 0<=Overcrowd<=1 then Overcrowding=0;
+# if 1<Overcrowd<1.5 then Overcrowding=1;
+# if Overcrowd>=1.5 then Overcrowding=2;
+# 
+ca_pums_scag <- ca_pums_scag %>% mutate(crowd = case_when(RMSP > 0  ~ NP/RMSP,
+                                                           TRUE ~ NA),
+                                        overcrowded = factor(case_when(crowd >= 1.5  ~ "Yes",
+                                                           crowd < 1.5 ~ "No"), levels = c("Yes","No"))
+                                                         ) 
+# Health insurance coverage
+# *------- P4.Health Insurance  -------------;
+# *HICOV Character 1
+# Health insurance coverage recode
+# 1 .With health insurance coverage
+# 2 .No health insurance coverage;
+# ca_pums_scag %>% select(HICOV) 
+
+## Median Hourly wage: variable named "hourly_wage"
+# if AGEP ge 25 and AGEP le 64;
+# 
+# if ESR in (1 2); *Civilian worker;
+# 
+# *WAGP Numeric 6
+# Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)
+# bbbbbb .N/A (less than 15 years old)
+# 0 .None
+# 4..999999 .$4 to 999999 (Rounded and top-coded)
+# 
+# WKHP Numeric 2
+# Usual hours worked per week past 12 months
+# bb .N/A (less than 16 years old/did not work during the past .12 months)
+# 1..98 .1 to 98 usual hours
+# 99 .99 or more usual hours
+# 
+# ADJINC Character 7
+# Adjustment factor for income and earnings dollar amounts (6 implied decimal places)
+# 1117630 .2017 factor (1.011189 * 1.10526316)
+# 1093093 .2018 factor (1.013097 * 1.07896160)
+# 1070512 .2019 factor (1.010145 * 1.05976096)
+# 1053131 .2020 factor (1.006149 * 1.04669465)
+# 1029928 .2021 factor (1.029928 * 1.00000000)
+# ;
+# 
+# wage=.;
+# if ADJINC=1117630 then wage=WAGP*1.011189 * 1.10526316; 	*2017 Adjust Income ($2021);
+# if ADJINC=1093093 then wage=WAGP*1.013097 * 1.07896160; 	*2018 Adjust Income ($2021);
+# if ADJINC=1070512 then wage=WAGP*1.010145 * 1.05976096; 	*2019 Adjust Income ($2021);
+# if ADJINC=1053131 then wage=WAGP*1.006149 * 1.04669465; 	*2020 Adjust Income ($2021);
+# if ADJINC=1029928 then wage=WAGP*1.029928 * 1.00000000; 	*2021 Adjust Income ($2021);
+# 
+#  
+# 
+# wwage=wage/52; *1 week wage;
+# 
+# Hwage=0;
+# if WKHP>0 then do;
+# 	Hwage=wwage/WKHP; *Hourly Wage;
+# end;
+
+# First, adjust the wages with the Adjust Income for the right year for all civilian workers ages 25-64 who worked more than 0 hours per week;
+# Second, get the weekly wages by dividing by 52, then divide by WKHP (usual hours worked per week)
+# Finally: get hourly wage only in: 
+# ca_pums_scag %>% mutate(hourly_wage = case_when(ESR %in% c(1:2) & AGEP %in% c(25:64) & WKHP > 0 & WAGP > 0 & ADJINC == 1117630 ~ WAGP * ADJINC/52/WKHP, # 2017 Adjust Income
+#                                                 ESR %in% c(1:2) & AGEP %in% c(25:64) & WKHP > 0 & WAGP > 0 & ADJINC == 1093093 ~ WAGP * ADJINC/52/WKHP, # 2018 Adjust Income
+#                                                 ESR %in% c(1:2) & AGEP %in% c(25:64) & WKHP > 0 & WAGP > 0 & ADJINC == 1070512 ~ WAGP * ADJINC/52/WKHP, # 2019 Adjust Income
+#                                                 ESR %in% c(1:2) & AGEP %in% c(25:64) & WKHP > 0 & WAGP > 0 & ADJINC == 1053131 ~ WAGP * ADJINC/52/WKHP, # 2020 Adjust Income
+#                                                 ESR %in% c(1:2) & AGEP %in% c(25:64) & WKHP > 0 & WAGP > 0 & ADJINC == 1029928 ~ WAGP * ADJINC/52/WKHP, # 2021 Adjust Income
+#                                                )) 
+ca_pums_scag <- ca_pums_scag %>% mutate(wage = case_when(ADJINC == 1117630 ~ WAGP * 1.011189 * 1.10526316, # 2017 Adjust Income
+                                         ADJINC == 1093093 ~ WAGP * 1.013097 * 1.07896160, # 2018 Adjust Income
+                                         ADJINC == 1070512 ~ WAGP * 1.010145 * 1.05976096, # 2019 Adjust Income
+                                         ADJINC == 1053131 ~ WAGP * 1.006149 * 1.04669465, # 2020 Adjust Income
+                                         ADJINC == 1029928 ~ WAGP * 1.029928 * 1.00000000, # 2021 Adjust Income
+                                        ),
+                        weekly_wage = wage/52,
+                        hourly_wage = if_else(WKHP > 0,weekly_wage/WKHP, NA_real_)
+                        ) 
 ```
 
 ### Analysis and Replication of Tables and Figures for SCAG
 
-#### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
+### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
+
 ```{r fig 5}
 ### 
 # Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity:
@@ -806,49 +882,49 @@ scag_walk_bike_public_table
 
 ```
 
+### Figure 6. Householders without a Vehicle by Race and Ethnicity
 
-#### Figure 6. Householders without a Vehicle by Race and Ethnicity
 ```{r fig 6}
 ### 
 # Figure 6. Householders without a Vehicle by Race and Ethnicity:
 # Filter to only housing data(RELSHIPP == 20) and Use household weights- WGTP:
-# # VEH_label 
-# "No vehicles"  "1 vehicle"  "2 vehicles"  "3 vehicles"  "4 vehicles"  "5 vehicles"  "6 or more vehicles" "N/A (GQ/vacant)"
+# sum over VEH == 0
+# 
 # Get no_veh percentages by race for all SCAG:
-scag_race_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,VEH_label) %>%  
+scag_race_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race,VEH) %>%  
                                          group_by(race) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           no_veh = sum(WGTP[VEH_label == "No vehicles"]),  
+                                           no_veh = sum(WGTP[VEH == 0]),  
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
                                            no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% mutate(county = "SCAG") %>% select(county, race, no_veh_perc) %>% 
                                          pivot_wider(names_from = race, values_from = no_veh_perc) # make into wide table to match excel file table.
 
 # Get no_veh percentages by race and by county:
-scag_county_race_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race, VEH_label) %>%  
+scag_county_race_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race, VEH) %>%  
                                          group_by(county, race) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           no_veh = sum(WGTP[VEH_label == "No vehicles"]), 
+                                           no_veh = sum(WGTP[VEH == 0]), 
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
                                            no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% select(county, race, no_veh_perc) %>% 
                                          pivot_wider(names_from = race, values_from = no_veh_perc)
 # Get no_veh percentages by county for all SCAG:
-scag_county_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, VEH_label) %>%  
+scag_county_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, VEH) %>%  
                                          group_by(county) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           no_veh = sum(WGTP[VEH_label == "No vehicles"]),
+                                           no_veh = sum(WGTP[VEH == 0]),
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
                                            no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% select(county, no_veh_perc) %>% rename(Total = no_veh_perc) 
 # Get no_veh percentages for all SCAG:
-scag_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, VEH_label) %>%  
+scag_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, VEH) %>%  
                                          summarize(
                                            total_pop = sum(WGTP),
-                                           no_veh = sum(WGTP[VEH_label == "No vehicles"]), 
+                                           no_veh = sum(WGTP[VEH == 0]), 
                                            no_veh_prop = no_veh / total_pop, # divide by total_pop for proportion
                                            no_veh_perc = round(no_veh_prop*100, 2)
                                          ) %>% mutate(county = "SCAG") %>% select(county, no_veh_perc) %>% rename(Total = no_veh_perc)
@@ -862,7 +938,8 @@ scag_no_veh_table
 
 ```
 
-#### Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
+### Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
+
 ```{r fig 7}
 # Figure 7. Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity:
 # Use person level weights- PWGTP:
@@ -930,7 +1007,7 @@ scag_transport_mean_table <- scag_transport_mean_table %>% mutate(across(where(i
 scag_transport_mean_table
 ```
 
-#### Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
+### Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
 
 ```{r fig_19}
 # Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
@@ -1039,16 +1116,16 @@ full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_bu
 full_housing_burden_table
 ```
 
-#### Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
+### Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 
 ```{r fig 20}
 ### 
-# TODO: NOT Matching up with figure 20 from EA report and figure workbook...
+# TODO: NOT Matching up with figure 20 from EA report and figure workbook...Most within 0.01 or matches
 # 
 # Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 # Filter to only housing data filter(RELSHIPP == 20) and Use household weights- WGTP: sum if no_kitchen_plumbing == "Yes"
 # Get no_kitchen_plumbing percentages by race for all SCAG:
-scag_race_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race, no_kitchen_plumbing) %>%  
+scag_race_no_kitchen_plumbing <- ca_pums_scag %>% select(WGTP, race, no_kitchen_plumbing) %>%  drop_na(no_kitchen_plumbing) %>%  
                                          group_by(race) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
@@ -1059,7 +1136,7 @@ scag_race_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% sel
                                          pivot_wider(names_from = race, values_from = no_kitchen_plumbing_perc) # make into wide table to match excel file table.
 
 # Get no_kitchen_plumbing percentages by race and by county:
-scag_county_race_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race, no_kitchen_plumbing, county) %>%  
+scag_county_race_no_kitchen_plumbing <- ca_pums_scag %>% select(WGTP, race, no_kitchen_plumbing, county) %>%  drop_na(no_kitchen_plumbing) %>%
                                          group_by(county, race) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
@@ -1069,7 +1146,7 @@ scag_county_race_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) 
                                          ) %>% select(county, race, no_kitchen_plumbing_perc) %>% 
                                          pivot_wider(names_from = race, values_from = no_kitchen_plumbing_perc)
 # Get no_kitchen_plumbing percentages by county for all SCAG:
-scag_county_total_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, no_kitchen_plumbing) %>%  
+scag_county_total_no_kitchen_plumbing <- ca_pums_scag %>%  select(WGTP, county, no_kitchen_plumbing) %>% drop_na(no_kitchen_plumbing) %>%
                                          group_by(county) %>% 
                                          summarize(
                                            total_pop = sum(WGTP),
@@ -1079,7 +1156,7 @@ scag_county_total_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20)
                                          ) %>% select(county, no_kitchen_plumbing_perc) %>% rename(Total = no_kitchen_plumbing_perc) 
 
 # Get no_kitchen_plumbing percentages for all SCAG:
-scag_total_no_kitchen_plumbing <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, no_kitchen_plumbing) %>%  
+scag_total_no_kitchen_plumbing <- ca_pums_scag %>% select(WGTP, no_kitchen_plumbing) %>% drop_na(no_kitchen_plumbing) %>%
                                         summarize(
                                            total_pop = sum(WGTP),
                                            no_kitchen_plumbing_sum = sum(WGTP[no_kitchen_plumbing == "Yes"]), # sum up only those that own homes.
@@ -1095,8 +1172,61 @@ scag_no_kitchen_plumbing_table <- full_join(scag_county_race_no_kitchen_plumbing
 scag_no_kitchen_plumbing_table
 ```
 
+### Figure 21. Households with Severe Overcrowding by Race and Ethnicity
 
-#### Figure 22. Homeownership by Race and Ethnicity
+```{r fig 21}
+### 
+# Figure 22. Households with Severe Overcrowding by Race and Ethnicity:
+# Filter to only housing data (filter(RELSHIPP == 20)) and Use household weights- WGTP, count if "overcrowded" == "Yes":
+# Get overcrowding percentages by race for all SCAG:
+scag_race_overcrowded <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, race, overcrowded) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           overcrowd = sum(WGTP[overcrowded == "Yes"]), # sum up only those that
+                                           overcrowd_prop = overcrowd / total_pop, # divide by total_pop for proportion
+                                           overcrowd_perc = round(overcrowd_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, overcrowd_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = overcrowd_perc) # make into wide table to match excel file table.
+
+# Get overcrowded percentages by race and by county:
+scag_county_race_overcrowded <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, race, overcrowded) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           overcrowd = sum(WGTP[overcrowded == "Yes"]), # sum up only those that
+                                           overcrowd_prop = overcrowd / total_pop, # divide by total_pop for proportion
+                                           overcrowd_perc = round(overcrowd_prop*100, 2)
+                                         ) %>% select(county, race, overcrowd_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = overcrowd_perc)
+# Get overcrowded percentages by county for all SCAG:
+scag_county_total_overcrowded <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, county, overcrowded) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           overcrowd = sum(WGTP[overcrowded == "Yes"]), # sum up only those that
+                                           overcrowd_prop = overcrowd / total_pop, # divide by total_pop for proportion
+                                           overcrowd_perc = round(overcrowd_prop*100, 2)
+                                         ) %>% select(county, overcrowd_perc) %>% rename(Total = overcrowd_perc) 
+# Get overcrowded percentages for all SCAG:
+scag_total_overcrowded <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, overcrowded) %>%  
+                                         summarize(
+                                           total_pop = sum(WGTP),
+                                           overcrowd = sum(WGTP[overcrowded == "Yes"]), # sum up only those that
+                                           overcrowd_prop = overcrowd / total_pop, # divide by total_pop for proportion
+                                           overcrowd_perc = round(overcrowd_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, overcrowd_perc) %>% rename(Total = overcrowd_perc)
+
+# Full join all scag_total tables:
+scag_total_overcrowded_table <- full_join(scag_county_total_overcrowded,scag_total_overcrowded)
+
+# Full join all scag_race tables, then left join scag_total_overcrowded_table by county:
+scag_overcrowded_table <- full_join(scag_county_race_overcrowded,scag_race_overcrowded) %>% left_join(.,scag_total_overcrowded_table) 
+scag_overcrowded_table
+```
+
+### Figure 22. Homeownership by Race and Ethnicity
+
 ```{r fig 22}
 ### 
 # Figure 22. Homeownership by Race and Ethnicity:
@@ -1148,6 +1278,119 @@ scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_h
 scag_homeownership_table
 ```
 
+### Figure 28. People without Health Insurance by Race and Ethnicity
+
+```{r fig 28}
+### 
+# Figure 28. People without Health Insurance by Race and Ethnicity:
+# # Health insurance coverage
+# *------- P4.Health Insurance  -------------;
+# *HICOV Character 1
+# Health insurance coverage recode
+# 1 .With health insurance coverage
+# 2 .No health insurance coverage;
+# ca_pums_scag %>% select(HICOV) 
+# 
+# Use person level weights- PWGTP:
+# sum over those without health insurance coverage HICOV ==  2
+# 
+# Get People without Health Insurance percentages by race for all SCAG:
+scag_race_no_hicov <- ca_pums_scag %>% select(PWGTP, race, HICOV) %>%  
+                                         group_by(race) %>% 
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           no_hicov = sum(PWGTP[HICOV == 2]),  
+                                           no_hicov_prop = no_hicov / total_pop, # divide by total_pop for proportion
+                                          no_hicov_perc = round(no_hicov_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, race, no_hicov_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = no_hicov_perc) # make into wide table to match excel file table.
+
+# Get People without Health Insurance percentages by race for all by race and county:
+scag_county_race_no_hicov <- ca_pums_scag %>% select(PWGTP, county, race, HICOV) %>%  
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           no_hicov = sum(PWGTP[HICOV == 2]),  
+                                           no_hicov_prop = no_hicov / total_pop, # divide by total_pop for proportion
+                                          no_hicov_perc = round(no_hicov_prop*100, 2)
+                                         ) %>% select(county, race, no_hicov_perc) %>% 
+                                         pivot_wider(names_from = race, values_from = no_hicov_perc)
+
+# Get People without Health Insurance  percentages by county for all SCAG:
+scag_county_total_no_hicov <- ca_pums_scag %>% select(PWGTP, county, HICOV)  %>%  
+                                               group_by(county) %>% 
+                                               summarize(
+                                                 total_pop = sum(PWGTP),
+                                                 no_hicov = sum(PWGTP[HICOV == 2]),  
+                                                 no_hicov_prop = no_hicov / total_pop, # divide by total_pop for proportion
+                                                no_hicov_perc = round(no_hicov_prop*100, 2)
+                                               ) %>% select(county, no_hicov_perc) %>% rename(Total = no_hicov_perc) 
+# Get People without Health Insurance  percentages for all SCAG:
+scag_total_no_hicov <- ca_pums_scag %>% select(PWGTP, HICOV) %>%  
+                                         summarize(
+                                           total_pop = sum(PWGTP),
+                                           no_hicov = sum(PWGTP[HICOV == 2]),  
+                                           no_hicov_prop = no_hicov / total_pop, # divide by total_pop for proportion
+                                          no_hicov_perc = round(no_hicov_prop*100, 2)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, no_hicov_perc) %>% rename(Total = no_hicov_perc)
+
+# Full join all scag_total tables:
+scag_total_no_hicov_table <- full_join(scag_county_total_no_hicov,scag_total_no_hicov)
+
+# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+scag_no_hicov_table <- full_join(scag_county_race_no_hicov,scag_race_no_hicov) %>% left_join(.,scag_total_no_hicov_table, by = join_by(county))
+scag_no_hicov_table
+
+```
+
+### Figure 39. Median Hourly Wage by Race and Ethnicity
+
+```{r fig 39}
+### 
+# Figure 39. Median Hourly Wage by Race and Ethnicity
+# Use person level weights- PWGTP:
+
+# Get Median Hourly Wage by race for all SCAG:
+scag_race_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+                                       select(PWGTP, race, hourly_wage)  %>% 
+                                       group_by(race) %>% 
+                                       summarize(
+                                         med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                       ) %>% mutate(county = "SCAG") %>% select(county, race, med_hr_wage) %>% 
+                                       pivot_wider(names_from = race, values_from = med_hr_wage) # make into wide table to match excel file table.
+
+# Get Median Hourly Wage by race for all by race and county:
+scag_county_race_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+                                       select(PWGTP, county, race, hourly_wage) %>% 
+                                         group_by(county, race) %>% 
+                                         summarize(
+                                         med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                         ) %>% select(county, race, med_hr_wage) %>% 
+                                         pivot_wider(names_from = race, values_from = med_hr_wage)
+
+# Get Median Hourly Wage by county for all SCAG:
+scag_county_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+                                       select(PWGTP, county, race, hourly_wage) %>%  
+                                               group_by(county) %>% 
+                                               summarize(
+                                           med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                         ) %>% select(county, med_hr_wage) %>% rename(Total = med_hr_wage) 
+# Get Median Hourly Wage for all SCAG:
+scag_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+                                       select(PWGTP, race, hourly_wage) %>%  
+                                         summarize(
+                                           med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                           ) %>% mutate(county = "SCAG") %>% select(county, med_hr_wage) %>% rename(Total = med_hr_wage)
+
+# Full join all scag_total tables:
+scag_total_med_hr_wage_table <- full_join(scag_county_total_med_hr_wage,scag_total_med_hr_wage)
+
+# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
+scag_med_hr_wage_table
+
+```
+
 --- 
 
 ### Write out excel file with all sheets:
@@ -1178,13 +1421,18 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "Figure_41", "Figure 41. Working Poor by Race and Ethnicity")
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
-# Make a list that has the name or each sheets and the df/tibble that will populate it-
+# Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "scag_homeownership_table" is a tibble that will populate the sheet named "Figure_22".
 sheets <- list("TOC" = toc,
                "Figure_5" = scag_walk_bike_public_table,
                "Figure_6" = scag_no_veh_table,
                "Figure_7" = scag_transport_mean_table,
                "Figure_19" = full_housing_burden_table,
-               "Figure_22" = scag_homeownership_table) # "scag_homeownership_table" is a tibble that will populate the sheet named "Figure_22".
+               "Figure_20" = scag_no_kitchen_plumbing_table,
+               "Figure_21" = scag_overcrowded_table,
+               "Figure_22" = scag_homeownership_table, 
+               "Figure_28" = scag_no_hicov_table,
+               "Figure_39" = scag_med_hr_wage_table
+               ) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}

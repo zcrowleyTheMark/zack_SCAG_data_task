@@ -9,8 +9,8 @@ output: html_document
 ### Main Data Files: 
 - **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2017-2021](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data)  
 - **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2018-2022](https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/)
-  - NOTES for using 2022 data: - Has PUMA's for 2010 census and 2020 census- which to use?
-  -
+  - NOTES for using 2022 data: - Has PUMA's for 2010 census for years 2018-2021, the observations from 2022 have PUMA's from the 2020 census- some of which may be new but are still within each SCAG county since the prefix of each PUMA remains the same.
+  
 
 --- 
 
@@ -52,7 +52,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - Median Household Income (REBCR Economy section)
   - Poverty (REBCR Economy section)
   
-### Figures/Tables with Descriptions: 
+### Figures/Tables with Descriptions (23 total to replicate): 
 
 *Green color indicates figure is completed in tabbed excel output, red indicates issues or notes with data*
 
@@ -63,10 +63,11 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: red;">Table 9. Transportation Mode Usage by Income Quintile in the SCAG Region (Source: 2017 NHTS, income quintiles calculated by SCAG) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
 - <span style="color: red;">Table 10. Transportation Mode Usage by Race and Ethnicity in the SCAG Region (Source: 2017 NHTS) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
 - <span style="color: green;">Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
-- Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
-- Figure 21. Households with Severe Overcrowding by Race and Ethnicity
+- <span style="color: green;">Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
+  - <span style="color: red;">*NOTE: Some numbers off by 0.01%, Could we get the full SAS html output to review the raw numbers from SCAG.*<span style="color: green;">
+- <span style="color: green;">Figure 21. Households with Severe Overcrowding by Race and Ethnicity</span>
 - <span style="color: green;">Figure 22. Homeownership by Race and Ethnicity</span>
-- Figure 28. People without Health Insurance by Race and Ethnicity
+- <span style="color: green;">Figure 28. People without Health Insurance by Race and Ethnicity</span>
 - Figure 39. Median Hourly Wage by Race and Ethnicity
 - Figure 40. Unemployment by Race and Ethnicity
 - Figure 41. Working Poor by Race and Ethnicity
