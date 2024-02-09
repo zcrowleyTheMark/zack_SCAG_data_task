@@ -820,6 +820,24 @@ ca_pums_scag <- ca_pums_scag %>% mutate(wage = case_when(ADJINC == 1117630 ~ WAG
                         weekly_wage = wage/52,
                         hourly_wage = if_else(WKHP > 0,weekly_wage/WKHP, NA_real_)
                         ) 
+
+# Unemployment -named variable "unemployed"- if "Yes", unemployed, "No" otherwise. 
+# *------- 8. Employment status -------------------------------------;
+# 
+# *ESR Character 1
+# Employment status recode
+# b .N/A (less than 16 years old)
+# 1 .Civilian employed, at work
+# 2 .Civilian employed, with a job but not at work
+# 3 .Unemployed
+# 4 .Armed forces, at work
+# 5 .Armed forces, with a job but not at work
+# 6 .Not in labor force;
+# 
+# Unemployment -named variable "unemployed"- if "Yes", unemployed, "No" otherwise. 
+ca_pums_scag <- ca_pums_scag %>% mutate(unemployed = factor(case_when(ESR == 3  ~ "Yes",
+                                                           ESR != 3 ~ "No"), levels = c("Yes","No"))
+                                                         )
 ```
 
 ### Analysis and Replication of Tables and Figures for SCAG
@@ -1388,6 +1406,56 @@ scag_total_med_hr_wage_table <- full_join(scag_county_total_med_hr_wage,scag_tot
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
 scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
 scag_med_hr_wage_table
+
+```
+
+### Figure 40. Unemployment by Race and Ethnicity
+
+```{r fig 40.}
+### 
+# Figure 40. Unemployment by Race and Ethnicity
+# Use person level weights- PWGTP:
+
+# Get unemployed percentage by race for all SCAG:
+scag_race_unemployed <- ca_pums_scag %>% select(PWGTP, race, unemployed,ESR) %>% drop_na(unemployed) %>% 
+                                       group_by(race) %>% 
+                                       summarize(
+                                           total_labor = sum(PWGTP[ESR != 6]), # excludes not in labor force from ESR variable
+                                           unemployed_sum = sum(PWGTP[unemployed == "Yes"]),  
+                                           unemployed_prop = unemployed_sum / total_labor, # divide by total_labor for proportion
+                                           unemployed_perc = round(unemployed_prop*100, 2)
+                                         )  %>% mutate(county = "SCAG") %>% select(county, race, unemployed_perc) %>% 
+                                       pivot_wider(names_from = race, values_from = unemployed_perc) # make into wide table to match excel file table.
+# TODO: above works need to finish rest of code chuck for figure 40
+# # Get Median Hourly Wage by race for all by race and county:
+# scag_county_race_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+#                                        select(PWGTP, county, race, hourly_wage) %>% 
+#                                          group_by(county, race) %>% 
+#                                          summarize(
+#                                          med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+#                                          ) %>% select(county, race, med_hr_wage) %>% 
+#                                          pivot_wider(names_from = race, values_from = med_hr_wage)
+# 
+# # Get Median Hourly Wage by county for all SCAG:
+# scag_county_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+#                                        select(PWGTP, county, race, hourly_wage) %>%  
+#                                                group_by(county) %>% 
+#                                                summarize(
+#                                            med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+#                                          ) %>% select(county, med_hr_wage) %>% rename(Total = med_hr_wage) 
+# # Get Median Hourly Wage for all SCAG:
+# scag_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
+#                                        select(PWGTP, race, hourly_wage) %>%  
+#                                          summarize(
+#                                            med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+#                                            ) %>% mutate(county = "SCAG") %>% select(county, med_hr_wage) %>% rename(Total = med_hr_wage)
+# 
+# # Full join all scag_total tables:
+# scag_total_med_hr_wage_table <- full_join(scag_county_total_med_hr_wage,scag_total_med_hr_wage)
+# 
+# # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+# scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
+# scag_med_hr_wage_table
 
 ```
 

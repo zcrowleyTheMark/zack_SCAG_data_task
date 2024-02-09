@@ -68,7 +68,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: green;">Figure 21. Households with Severe Overcrowding by Race and Ethnicity</span>
 - <span style="color: green;">Figure 22. Homeownership by Race and Ethnicity</span>
 - <span style="color: green;">Figure 28. People without Health Insurance by Race and Ethnicity</span>
-- Figure 39. Median Hourly Wage by Race and Ethnicity
+- <span style="color: green;">Figure 39. Median Hourly Wage by Race and Ethnicity</span>
 - Figure 40. Unemployment by Race and Ethnicity
 - Figure 41. Working Poor by Race and Ethnicity
 - **Repeated from above**: Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020)
