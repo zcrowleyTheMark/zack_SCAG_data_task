@@ -73,14 +73,14 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: green;">**Figure 39.** Median Hourly Wage by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 40.** Unemployment by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 41.** Working Poor by Race and Ethnicity</span>
-  - NOTE: Figure 41 is working poor using person-level weights- poverty below in REBCR demographics is household poverty (both same measure if 0<= POVPIP <200) using housing level weights.
+  - NOTE: Figure 41 is working poor using person-level weights- civilian workers aged 18 to 64- poverty below in REBCR demographics is household poverty (both same measure if 0<= POVPIP <200) using housing level weights.
 
 ##### Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020 and 10 total to replicate)
 
-  - **Total Population**- By county and whole SCAG Region
-  - **Race/Ethnicity Distribution**- By county and whole SCAG Region- same racial categories as in EA Report.
-  - **Age Distribution (Youth, Older Adults)**- Same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years- break down by county and whole SCAG Region
-  - **Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent HHs broken down by *gender* of head of household. By county and whole SCAG Region
+  - <span style="color: green;">**Total Population**- By county and whole SCAG Region</span>
+  - <span style="color: green;">**Race/Ethnicity Distribution**- By county and whole SCAG Region- same racial categories as in EA Report.</span>
+  - <span style="color: green;">**Age Distribution (Youth, Older Adults)**- Same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years- break down by county and whole SCAG Region.</span>
+  - **Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent households broken down by *gender* of head of household. By county and whole SCAG Region
   - **Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region
   - **People with Disabilities**- DIS == "with disability" (1) By county and whole SCAG Region
   - **National Origin**- variable name NATIVITY- Percent foreign born? If NATIVITY == "Foreign Born". By county and whole SCAG Region

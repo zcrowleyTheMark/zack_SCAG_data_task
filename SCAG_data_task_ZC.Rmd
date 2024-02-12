@@ -564,8 +564,21 @@ ca_pums_scag <- ca_pums_scag %>% mutate(race = factor(case_when(HISP != 1  ~ "Hi
                                                          ), levels = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White"))
                                         ) 
 
+# Age Categories: named var "age_3_cat"
+# SAS example- 
+# ac1=.;
+# if AGEP < 18 then ac1=1;
+# if AGEP ge 18 and AGEP le 64 then ac1=2;
+# if AGEP ge 65 then ac1=3; 
+# Create "age_3_cat" var based on conditions above: 
+ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  ~ "<18 years",
+                                                                     AGEP %in% c(18:64) ~ "18 - 64 years",
+                                                                     AGEP > 64 ~ "65+ years"
+                                                                     ), levels = c("<18 years", "18 - 64 years","65+ years"))
+                                        ) 
+
 ###
-# Homeownership: own
+# Homeownership: own_home
 # SAS example- 
 # *------- H3.Homeownership: Tenure  -------------;
 # 
@@ -851,7 +864,9 @@ ca_pums_scag <- ca_pums_scag %>% mutate(unemployed = factor(case_when(ESR == 3  
                                                          )
 ```
 
-### Analysis and Replication of Tables and Figures for SCAG
+# Analysis and Replication of Tables and Figures for SCAG
+
+## Tables and Figures from Equity Analysis Technical Report- (EA report)
 
 ### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
 
@@ -1599,7 +1614,113 @@ if (file.exists(here(tables_fp, 'scag_working_poor_table.csv'))) {rm(list = ls(p
 
 
 
+
+## Tables and Figures from Racial Equity Baseline Conditions Report (REBCR)
+
+### Total Population by County and SCAG
+
+```{r total_pop}
+### 
+# Total Population by County and SCAG:
+# Use person level weights- PWGTP:
+# sum over everyone
+# 
+# Get Total Population  for all SCAG:
+scag_total_pop <- ca_pums_scag %>% select(PWGTP) %>%  
+                                         summarize(
+                                           total_pop = sum(PWGTP)
+                                         ) %>% mutate(county = "SCAG") %>% select(county, total_pop)
+
+# Get People without Health Insurance percentages by race for all by race and county:
+scag_county_total_pop <- ca_pums_scag %>% select(PWGTP, county) %>%  
+                                         group_by(county) %>% 
+                                         summarize(
+                                           total_pop = sum(PWGTP)
+                                         ) %>% select(county, total_pop)
+
+
+# Full join all scag_total tables:
+scag_total_pop_table <- full_join(scag_county_total_pop, scag_total_pop, by = join_by(county, total_pop))
+scag_total_pop_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_total_pop_table, here(tables_fp, "scag_total_pop_table.csv"))
+if (file.exists(here(tables_fp, 'scag_total_pop_table.csv'))) {rm(list = ls(pattern = "_total_pop"))}
+
+```
+
+### Race/Ethnicity Distribution (%) by County and SCAG Region
+
+```{r race_ethnicity}
+### 
+# Race/Ethnicity Distribution (%) by County and SCAG Region:
+# Use person level weights- PWGTP:
+# Percentages of race by county and SCAG
+# race = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White")
+# 
+# Get race percentages for all SCAG:
+scag_race_perc_total <- ca_pums_scag %>% select(PWGTP, race) %>% count(race, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(race) %>% summarize(SCAG = round( (n / total_pop)*100, 2))
+
+# Get race percentages for by county for each SCAG County:
+scag_race_perc_county <- ca_pums_scag %>% select(PWGTP, race, county) %>% group_by(county) %>% count(race, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
+                                         group_by(race, county) %>% summarize(race_perc = round( (n / total_pop)*100, 2)) %>% 
+                                         pivot_wider(names_from = county, values_from = race_perc)
+
+# Full join all scag_total tables:
+scag_race_perc_table <- left_join(scag_race_perc_county, scag_race_perc_total, by = join_by(race)) %>% ungroup()
+scag_race_perc_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_race_perc_table, here(tables_fp, "scag_race_perc_table.csv"))
+if (file.exists(here(tables_fp, 'scag_race_perc_table.csv'))) {rm(list = ls(pattern = "_race_perc"))}
+
+```
+
+
+### Race/Ethnicity Distribution (%) by County and SCAG Region
+
+```{r race_ethnicity}
+### 
+# Race/Ethnicity Distribution (%) by County and SCAG Region:
+# Use person level weights- PWGTP:
+# Percentages of age categories by county and SCAG
+# Age Categories: named var "age_3_cat"
+# SAS example- 
+# ac1=.;
+# if AGEP < 18 then ac1=1;
+# if AGEP ge 18 and AGEP le 64 then ac1=2;
+# if AGEP ge 65 then ac1=3; 
+# Create "age_3_cat" var based on conditions above: 
+# ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  ~ "<18 years",
+#                                                                      AGEP %in% c(18:64) ~ "18 - 64 years",
+#                                                                      AGEP > 64 ~ "65+ years"
+#                                                                      ), levels = c("<18 years", "18 - 64 years","65+ years"))
+#                                         ) 
+
+# Get age percentages for all SCAG:
+scag_age_perc_total <- ca_pums_scag %>% select(PWGTP, age_3_cat) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(age_3_cat) %>% summarize(SCAG = round( (n / total_pop)*100, 2))  
+                                        
+
+# Get age percentages for by county for each SCAG County:
+scag_age_perc_county <- ca_pums_scag %>% select(PWGTP, age_3_cat, county) %>% group_by(county) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
+                                         group_by(age_3_cat, county) %>% summarize(age_perc = round( (n / total_pop)*100, 2)) %>% 
+                                         pivot_wider(names_from = county, values_from = age_perc)
+
+# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+scag_age_perc_table <- left_join(scag_age_perc_county, scag_age_perc_total, by = join_by(age_3_cat)) %>% ungroup() %>%
+                                pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% rename(age_categories = age_3_cat)
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_age_perc_table, here(tables_fp, "scag_age_perc_table.csv"))
+if (file.exists(here(tables_fp, 'scag_age_perc_table.csv'))) {rm(list = ls(pattern = "_age_perc"))}
+
+```
+
 --- 
+
+
 
 ### Write out excel file with all sheets:
 -
@@ -1629,7 +1750,10 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "Figure_28",  "Figure 28. People without Health Insurance by Race and Ethnicity",
               "Figure_39", "Figure 39. Median Hourly Wage by Race and Ethnicity",
               "Figure_40", "Figure 40. Unemployment by Race and Ethnicity",
-              "Figure_41", "Figure 41. Working Poor by Race and Ethnicity")
+              "Figure_41", "Figure 41. Working Poor by Race and Ethnicity",
+              "Total_Population", "Total Population by County and SCAG Region",
+              "Race_Ethnicity", "Race/Ethnicity Distribution (%) by County and SCAG Region",
+              "Age", "Age Distribution (%) by County and SCAG Region")
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "scag_homeownership_table" is a tibble that will populate the sheet named "Figure_22".
@@ -1644,8 +1768,10 @@ sheets <- list("TOC" = toc,
                "Figure_28" = scag_no_hicov_table,
                "Figure_39" = scag_med_hr_wage_table,
                "Figure_40" = scag_unemployed_table,
-               "Figure_41" = scag_working_poor_table
-               ) 
+               "Figure_41" = scag_working_poor_table,
+               "Total_Population" = scag_total_pop_table,
+               "Race_Ethnicity" = scag_race_perc_table,
+               "Age" = scag_age_perc_table) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}

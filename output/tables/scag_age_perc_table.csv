@@ -1,0 +1,22 @@
+age_categories,county,percentages
+<18 years,Imperial,28.7
+<18 years,Los Angeles,21.64
+<18 years,Orange,21.97
+<18 years,Riverside,25.16
+<18 years,San Bernardino,26.43
+<18 years,Ventura,22.87
+<18 years,SCAG,22.82
+18 - 64 years,Imperial,58.46
+18 - 64 years,Los Angeles,64.66
+18 - 64 years,Orange,63.18
+18 - 64 years,Riverside,60.49
+18 - 64 years,San Bernardino,61.98
+18 - 64 years,Ventura,61.48
+18 - 64 years,SCAG,63.36
+65+ years,Imperial,12.84
+65+ years,Los Angeles,13.71
+65+ years,Orange,14.85
+65+ years,Riverside,14.35
+65+ years,San Bernardino,11.59
+65+ years,Ventura,15.65
+65+ years,SCAG,13.82
