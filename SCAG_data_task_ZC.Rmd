@@ -25,7 +25,8 @@ here::i_am("SCAG_data_task_ZC.Rmd")
 
 # Load libraries:
 library(here) # package to manage file paths
-# library(fs)
+library(fs)  # package to work with system file paths
+library(tools) # another package to work with system file paths
 library(rstudioapi) # package accessing Rstudio API 
 # library(rlang) # package for R helpers
 # library(rstatix)
@@ -66,7 +67,7 @@ pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5.csv")
 pums_vars_acs5_person <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_person.csv")
 pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv")
 
-### 2021 ACS: Needed to scrape from website 
+### 2022 ACS: Needed to scrape from website 
 # library(rvest) # package for webscraping
 # # Pull data dictionary from 2018-2022 ACS PUMS from website that has the data dict in a html table:
 # acs_data_dict_22 <- "https://api.census.gov/data/2022/acs/acs5/pums/variables.html" %>% 
@@ -93,9 +94,10 @@ pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 data_fp <- here('data')
 # list.files(data_fp)
 
+### IMPORTS filepaths ---- 
 # file path for 2021 5-year ACS PUMS Data:
 acs_2021_fp <- here(data_fp, '2017_2021_ACS_PUMS')
-# list.files(acs_2021_fp)
+# list.files(acs_2021_fp) 
 
 # file path for 2021 person level data
 person_2021_fp <- here(acs_2021_fp, "csv_pca", "psam_p06.csv")
@@ -113,6 +115,7 @@ person_2022_fp <- here(acs_2022_fp, "csv_pca", "psam_p06.csv")
 # file path for 2022 household level data
 hh_2022_fp <- here(acs_2022_fp, "csv_hca", "psam_h06.csv")
 
+### CLEAN DATA filepaths ---- 
 # File paths and directories for clean data- 
 # Creates a new folder called "clean_data" if it doesn't already exist in working directory:
 if (!dir.exists("clean_data")) {dir.create("clean_data")}
@@ -127,16 +130,29 @@ if (!dir.exists(here(clean_data_fp, "acs_data_21"))) {dir.create(here(clean_data
 acs_data_21_fp <- here(clean_data_fp, "acs_data_21")
 
 # Clean 22 data
-# Creates a new folder called "acs_data_22" (if it doesn't already exist in working directory)- this will be where the clean data for the 2021 ACS will be stored:
+# Creates a new folder called "acs_data_22" (if it doesn't already exist in working directory)- this will be where the clean data for the 2022 ACS will be stored:
 if (!dir.exists(here(clean_data_fp, 'acs_data_22'))) {dir.create(here(clean_data_fp, 'acs_data_22'))}
 # file path for clean_data acs_data_22
 acs_data_22_fp <- here(clean_data_fp, "acs_data_22")
 
 # Clean ACS API data
-# Creates a new folder called "acs_api" (if it doesn't already exist in working directory)- this will be where the clean data for the 2021 ACS will be stored:
+# Creates a new folder called "acs_api" (if it doesn't already exist in working directory)- this will be where the clean data for API datawill be stored:
 if (!dir.exists(here(clean_data_fp, 'acs_api'))) {dir.create(here(clean_data_fp, 'acs_api'))}
 # file path for clean_data acs_data_22
 acs_api_fp <- here(clean_data_fp, "acs_api")
+
+### OUTPUTS filepaths ---- 
+# output folder
+# Creates a new folder called "output" (if it doesn't already exist in working directory)- this will be where the outputs from the R script will be stored:
+if (!dir.exists(here('output'))) {dir.create(here('output'))}
+# file path for clean_data acs_data_22
+output_fp <- here("output")
+
+# Creates a new folder called "acs_api" (if it doesn't already exist in working directory)- this will be where the individual tables for 
+# the tabbed output from the R script will be stored as separate .csv's:
+if (!dir.exists(here(output_fp, 'tables'))) {dir.create(here(output_fp, 'tables'))}
+# file path for clean_data acs_data_22
+tables_fp <- here(output_fp, 'tables')
 
 ```
 
@@ -172,7 +188,7 @@ acs_api_fp <- here(clean_data_fp, "acs_api")
 # merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST", "PUMA", "ADJINC"))
 # 
 # # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 1826332 obs. with 33 variables
-# # write_csv(merged_data, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+# # write_csv(merged_data, here(acs_data_21_fp, "merged_acs_data_scag.csv")) 
 # 
 # # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
 # scag_county_list <- c("Imperial", 
@@ -511,8 +527,8 @@ acs_api_fp <- here(clean_data_fp, "acs_api")
 ## Data Recoding and Table Creation: 
 
 ### SCAG Data from ACS PUMS:
-
-```{r read in SCAG data}
+### Recoding variables for use in ACS PUMS Analysis: 
+```{r read recode SCAG data}
 # Read in SCAG county data from "ca_pums_scag.csv" aka the API CALL DATA:
 # ca_pums_scag <- read_csv(here(acs_api_fp, "ca_pums_scag.csv"))
 
@@ -522,11 +538,6 @@ acs_api_fp <- here(clean_data_fp, "acs_api")
 # Read in merged ACS data SCAG- aka the US Census FTP merged DATA:
 ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"))
 
-```
-
-
-### Recoding variables for use in ACS PUMS Analysis: 
-```{r recode}
 # Code county as a factor variable:
 ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")))
 
@@ -898,6 +909,10 @@ scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_publi
 scag_walk_bike_public_table <- full_join(scag_county_race_walk_bike_public,scag_race_walk_bike_public) %>% left_join(.,scag_total_walk_bike_public_table, by = join_by(county))
 scag_walk_bike_public_table
 
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_walk_bike_public_table, here(tables_fp, "scag_walk_bike_public_table.csv"))
+if (file.exists(here(tables_fp, 'scag_walk_bike_public_table.csv'))) {rm(list = ls(pattern = "walk_bike_public"))}
+
 ```
 
 ### Figure 6. Householders without a Vehicle by Race and Ethnicity
@@ -953,6 +968,10 @@ scag_total_no_veh_table <- full_join(scag_county_total_no_veh,scag_total_no_veh)
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
 scag_no_veh_table <- full_join(scag_county_race_no_veh,scag_race_no_veh) %>% left_join(.,scag_total_no_veh_table, by = join_by(county))
 scag_no_veh_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_no_veh_table, here(tables_fp, "scag_no_veh_table.csv"))
+if (file.exists(here(tables_fp, 'scag_no_veh_table.csv'))) {rm(list = ls(pattern = "no_veh"))}
 
 ```
 
@@ -1023,6 +1042,11 @@ scag_transport_mean_table <- scag_transport_mean %>% full_join(scag_race_county_
 # Round all means to 2 digits:
 scag_transport_mean_table <- scag_transport_mean_table %>% mutate(across(where(is.numeric), round, 2))
 scag_transport_mean_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_transport_mean_table, here(tables_fp, "scag_transport_mean_table.csv"))
+if (file.exists(here(tables_fp, 'scag_transport_mean_table.csv'))) {rm(list = ls(pattern = "transport_mean"))}
+
 ```
 
 ### Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
@@ -1132,6 +1156,14 @@ scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type
 # Join renters and Homeowners tables:
 full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
 full_housing_burden_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(full_housing_burden_table, here(tables_fp, "full_housing_burden_table.csv"))
+if (file.exists(here(tables_fp, 'full_housing_burden_table.csv'))) {
+    rm(list = ls(pattern = "renter_burden"))
+    rm(list = ls(pattern = "housing_burden"))
+}
+
 ```
 
 ### Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
@@ -1188,6 +1220,11 @@ scag_total_no_kitchen_plumbing_table <- full_join(scag_county_total_no_kitchen_p
 # Full join all scag_race tables, then left join scag_total_no_kitchen_plumbing_table by county:
 scag_no_kitchen_plumbing_table <- full_join(scag_county_race_no_kitchen_plumbing,scag_race_no_kitchen_plumbing) %>% left_join(.,scag_total_no_kitchen_plumbing_table)
 scag_no_kitchen_plumbing_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_no_kitchen_plumbing_table, here(tables_fp, "scag_no_kitchen_plumbing_table.csv"))
+if (file.exists(here(tables_fp, 'scag_no_kitchen_plumbing_table.csv'))) {rm(list = ls(pattern = "no_kitchen_plumbing"))}
+
 ```
 
 ### Figure 21. Households with Severe Overcrowding by Race and Ethnicity
@@ -1241,6 +1278,11 @@ scag_total_overcrowded_table <- full_join(scag_county_total_overcrowded,scag_tot
 # Full join all scag_race tables, then left join scag_total_overcrowded_table by county:
 scag_overcrowded_table <- full_join(scag_county_race_overcrowded,scag_race_overcrowded) %>% left_join(.,scag_total_overcrowded_table) 
 scag_overcrowded_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_overcrowded_table, here(tables_fp, "scag_overcrowded_table.csv"))
+if (file.exists(here(tables_fp, 'scag_overcrowded_table.csv'))) {rm(list = ls(pattern = "_overcrowded"))}
+
 ```
 
 ### Figure 22. Homeownership by Race and Ethnicity
@@ -1294,6 +1336,11 @@ scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag
 # Full join all scag_race tables, then left join scag_total_homeownership_table by county:
 scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table)
 scag_homeownership_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_homeownership_table, here(tables_fp, "scag_homeownership_table.csv"))
+if (file.exists(here(tables_fp, 'scag_homeownership_table.csv'))) {rm(list = ls(pattern = "_homeownership"))}
+
 ```
 
 ### Figure 28. People without Health Insurance by Race and Ethnicity
@@ -1359,6 +1406,10 @@ scag_total_no_hicov_table <- full_join(scag_county_total_no_hicov,scag_total_no_
 scag_no_hicov_table <- full_join(scag_county_race_no_hicov,scag_race_no_hicov) %>% left_join(.,scag_total_no_hicov_table, by = join_by(county))
 scag_no_hicov_table
 
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_no_hicov_table, here(tables_fp, "scag_no_hicov_table.csv"))
+if (file.exists(here(tables_fp, 'scag_no_hicov_table.csv'))) {rm(list = ls(pattern = "_no_hicov"))}
+
 ```
 
 ### Figure 39. Median Hourly Wage by Race and Ethnicity
@@ -1406,6 +1457,10 @@ scag_total_med_hr_wage_table <- full_join(scag_county_total_med_hr_wage,scag_tot
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
 scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
 scag_med_hr_wage_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_med_hr_wage_table, here(tables_fp, "scag_med_hr_wage_table.csv"))
+if (file.exists(here(tables_fp, 'scag_med_hr_wage_table.csv'))) {rm(list = ls(pattern = "_med_hr_wage"))}
 
 ```
 
@@ -1457,6 +1512,10 @@ scag_race_unemployed <- ca_pums_scag %>% select(PWGTP, race, unemployed,ESR) %>%
 # scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
 # scag_med_hr_wage_table
 
+# # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+# write_csv(scag_med_hr_wage_table, here(tables_fp, "scag_med_hr_wage_table.csv"))
+# if (file.exists(here(tables_fp, 'scag_med_hr_wage_table.csv'))) {rm(list = ls(pattern = "_med_hr_wage"))}
+
 ```
 
 --- 
@@ -1464,17 +1523,20 @@ scag_race_unemployed <- ca_pums_scag %>% select(PWGTP, race, unemployed,ESR) %>%
 ### Write out excel file with all sheets:
 -
 ```{r write excel, eval=FALSE, include=FALSE}
-# Example:
-# library(readxl)
-# library(writexl)
-# 
-# sheets <- list("sheet1Name" = sheet1, "sheet2Name" = sheet2) #assume sheet1 and sheet2 are data frames
-# write_xlsx(sheets, "path/to/location")
-# # Read in again:
-# read_xlsx("path/to/location")
+# Read in completed tables and set to tibbles in current global env:
+# Read in all the tables from the folder "output/tables" and keep names from the files:
+table_file_list <- lapply(list.files(here(tables_fp),full.names=TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
+
+# set names of each list element to the actual file name without path and file.extension
+table_file_list <- set_names(table_file_list, file_path_sans_ext(path_file(list.files(here(tables_fp),full.names=TRUE))))
+
+# convert each list item into a tibble and save to the current global env:
+table_file_list %>% 
+  map(as_tibble) %>%
+  list2env(envir = .GlobalEnv)
 
 ### Create tabbed excel workbook for SCAG:
-# Table of contents for output "scag_tabbed.xlsx":
+# Set up up a tibble to use as a table of contents (toc) for output tabbed excel workbook named "scag_tabbed.xlsx":
 toc <- tribble(~sheet_name, ~ figure_name,
               "Figure_5",  "Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity",
               "Figure_6",  "Figure 6. Householders without a Vehicle by Race and Ethnicity",
