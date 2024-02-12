@@ -56,38 +56,42 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 
 *Green color indicates figure is completed in tabbed excel output, red indicates issues or notes with data*
 
-- <span style="color: green;">Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity</span> 
+##### Equity Analysis Technical Report Figures (13 total to replicate- 13 Complete): 
+
+- <span style="color: green;">**Figure 5.** Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity</span> 
   - *NOTE Figure 5: Taken from all non-home workers and did not include taxi or ferry- based on values/calculations from excel figure file*
-- <span style="color: green;">Figure 6. Householders without a Vehicle by Race and Ethnicity</span>
-- <span style="color: green;">Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity</span> 
-- <span style="color: red;">Table 9. Transportation Mode Usage by Income Quintile in the SCAG Region (Source: 2017 NHTS, income quintiles calculated by SCAG) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
-- <span style="color: red;">Table 10. Transportation Mode Usage by Race and Ethnicity in the SCAG Region (Source: 2017 NHTS) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
-- <span style="color: green;">Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
-- <span style="color: green;">Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
+- <span style="color: green;">**Figure 6.** Householders without a Vehicle by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 7.** Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity</span> 
+- <span style="color: red;">**Table 9. Transportation Mode Usage by Income Quintile in the SCAG Region (Source: 2017 NHTS, income quintiles calculated by SCAG) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
+- <span style="color: red;">**Table 10. Transportation Mode Usage by Race and Ethnicity in the SCAG Region (Source: 2017 NHTS) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
+- <span style="color: green;">**Figure 19.** Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 20.** People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
   - <span style="color: red;">*NOTE: Some numbers off by 0.01%, Could we get the full SAS html output to review the raw numbers from SCAG.*<span style="color: green;">
-- <span style="color: green;">Figure 21. Households with Severe Overcrowding by Race and Ethnicity</span>
-- <span style="color: green;">Figure 22. Homeownership by Race and Ethnicity</span>
-- <span style="color: green;">Figure 28. People without Health Insurance by Race and Ethnicity</span>
-- <span style="color: green;">Figure 39. Median Hourly Wage by Race and Ethnicity</span>
-- Figure 40. Unemployment by Race and Ethnicity
-- Figure 41. Working Poor by Race and Ethnicity
-- **Repeated from above**: Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020)
-  - Total Population- Do you want this for each county and also report the whole SCAG Region like in the REBCR?
-  - Race/Ethnicity Distribution- Do you want this for each county and also report the whole SCAG Region like in the REBCR?
-  - Age Distribution (Youth, Older Adults)- Is this the same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years? Do you want this for each county and also report the whole SCAG Region like 
-  in the REBCR?
-  - Single Parent Households (REBCR has - female-headed) Is this if variable HHT2 is Male or Female household head with children < 18?
-  - Limited English Proficiency- variable named ENG has 4 categories- is this if ENG is "not well" or "not at all"?  Do you want this for each county and also report the whole SCAG Region like in the REBCR?
-  - People with Disabilities- DIS == "with disability" (1) Do you want this for each county and also report the whole SCAG Region like in the REBCR?
-  - National Origin- variable name NATIVITY- Is this percent foreign born? If NATIVITY == "Foreign Born". Do you want this for each county and also report the whole SCAG Region like in the REBCR?
-  - Educational Attainment (REBCR Economy section)- Do you want this only for people over 25? that is how it is coded in the SAS script. Do you want these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
-  COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE"? Do you want this for each county and the SCAG region or like in the REBCR split by race and also report the whole SCAG Region?
-  - Median Household Income (REBCR Economy section) Do you want this for each county and the SCAG region or like in the REBCR split by race and also report the whole SCAG Region?
-  - Poverty (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. Is this if 
-  household was below 200 percent of the poverty line?  Do you want this for each county and the SCAG region or like in the REBCR split by race and also report the whole SCAG Region? Do you want a "People of 
-  Color" category?- How would you like that coded- is it all non-white categories? 
+- <span style="color: green;">**Figure 21.** Households with Severe Overcrowding by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 22.** Homeownership by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 28.** People without Health Insurance by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 39.** Median Hourly Wage by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 40.** Unemployment by Race and Ethnicity</span>
+- <span style="color: green;">**Figure 41.** Working Poor by Race and Ethnicity</span>
+  - NOTE: Figure 41 is working poor using person-level weights- poverty below in REBCR demographics is household poverty (both same measure if 0<= POVPIP <200) using housing level weights.
+
+##### Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020 and 10 total to replicate)
+
+  - **Total Population**- By county and whole SCAG Region
+  - **Race/Ethnicity Distribution**- By county and whole SCAG Region- same racial categories as in EA Report.
+  - **Age Distribution (Youth, Older Adults)**- Same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years- break down by county and whole SCAG Region
+  - **Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent HHs broken down by *gender* of head of household. By county and whole SCAG Region
+  - **Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region
+  - **People with Disabilities**- DIS == "with disability" (1) By county and whole SCAG Region
+  - **National Origin**- variable name NATIVITY- Percent foreign born? If NATIVITY == "Foreign Born". By county and whole SCAG Region
+  - **Educational Attainment** (REBCR Economy section)- Filter to people over 25, these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
+  COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region
+  - **Median Household Income** (REBCR Economy section) By race and also report the whole SCAG Region
+  - **Poverty** (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. By race and also report the whole SCAG Region, do not include 'people of color' category.
   
-  - notes also found in this google doc: https://docs.google.com/document/d/1szSsAiYopeeOHjl3hnwSLl8afTc8LS16HEcws6sHdfI/edit
+  - notes also found in this Google doc: https://docs.google.com/document/d/1szSsAiYopeeOHjl3hnwSLl8afTc8LS16HEcws6sHdfI/edit
+
+--- 
 
 #### Notes on ACS PUMS merge and weights:
 

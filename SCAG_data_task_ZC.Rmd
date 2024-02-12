@@ -536,7 +536,7 @@ tables_fp <- here(output_fp, 'tables')
 # vars_ca_pums_scag <- names(ca_pums_scag)
 
 # Read in merged ACS data SCAG- aka the US Census FTP merged DATA:
-ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"))
+ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"), show_col_types = FALSE)
 
 # Code county as a factor variable:
 ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")))
@@ -1466,7 +1466,7 @@ if (file.exists(here(tables_fp, 'scag_med_hr_wage_table.csv'))) {rm(list = ls(pa
 
 ### Figure 40. Unemployment by Race and Ethnicity
 
-```{r fig 40.}
+```{r fig 40}
 ### 
 # Figure 40. Unemployment by Race and Ethnicity
 # Use person level weights- PWGTP:
@@ -1481,42 +1481,123 @@ scag_race_unemployed <- ca_pums_scag %>% select(PWGTP, race, unemployed,ESR) %>%
                                            unemployed_perc = round(unemployed_prop*100, 2)
                                          )  %>% mutate(county = "SCAG") %>% select(county, race, unemployed_perc) %>% 
                                        pivot_wider(names_from = race, values_from = unemployed_perc) # make into wide table to match excel file table.
-# TODO: above works need to finish rest of code chuck for figure 40
-# # Get Median Hourly Wage by race for all by race and county:
-# scag_county_race_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
-#                                        select(PWGTP, county, race, hourly_wage) %>% 
-#                                          group_by(county, race) %>% 
-#                                          summarize(
-#                                          med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
-#                                          ) %>% select(county, race, med_hr_wage) %>% 
-#                                          pivot_wider(names_from = race, values_from = med_hr_wage)
-# 
-# # Get Median Hourly Wage by county for all SCAG:
-# scag_county_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
-#                                        select(PWGTP, county, race, hourly_wage) %>%  
-#                                                group_by(county) %>% 
-#                                                summarize(
-#                                            med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
-#                                          ) %>% select(county, med_hr_wage) %>% rename(Total = med_hr_wage) 
-# # Get Median Hourly Wage for all SCAG:
-# scag_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
-#                                        select(PWGTP, race, hourly_wage) %>%  
-#                                          summarize(
-#                                            med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
-#                                            ) %>% mutate(county = "SCAG") %>% select(county, med_hr_wage) %>% rename(Total = med_hr_wage)
-# 
-# # Full join all scag_total tables:
-# scag_total_med_hr_wage_table <- full_join(scag_county_total_med_hr_wage,scag_total_med_hr_wage)
-# 
-# # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-# scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
-# scag_med_hr_wage_table
 
-# # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-# write_csv(scag_med_hr_wage_table, here(tables_fp, "scag_med_hr_wage_table.csv"))
-# if (file.exists(here(tables_fp, 'scag_med_hr_wage_table.csv'))) {rm(list = ls(pattern = "_med_hr_wage"))}
+
+# Get unemployed percentage by all by race and county:
+scag_county_race_unemployed <- ca_pums_scag %>%  select(PWGTP, county, race, unemployed,ESR) %>% drop_na(unemployed) %>%
+                                         group_by(county, race) %>%
+                                         summarize(
+                                           total_labor = sum(PWGTP[ESR != 6]), # excludes not in labor force from ESR variable
+                                           unemployed_sum = sum(PWGTP[unemployed == "Yes"]),
+                                           unemployed_prop = unemployed_sum / total_labor, # divide by total_labor for proportion
+                                           unemployed_perc = round(unemployed_prop*100, 2)
+                                         ) %>% select(county, race, unemployed_perc) %>%
+                                         pivot_wider(names_from = race, values_from = unemployed_perc)
+
+# TODO: above works need to finish rest of code chuck for figure 40
+
+# Get unemployed percentage by county for all SCAG:
+scag_county_total_unemployed <- ca_pums_scag %>% select(PWGTP, county, unemployed,ESR) %>% drop_na(unemployed) %>%
+                                               group_by(county) %>%
+                                               summarize(
+                                                       total_labor = sum(PWGTP[ESR != 6]), # excludes not in labor force from ESR variable
+                                                       unemployed_sum = sum(PWGTP[unemployed == "Yes"]),
+                                                       unemployed_prop = unemployed_sum / total_labor, # divide by total_labor for proportion
+                                                       unemployed_perc = round(unemployed_prop*100, 2)
+                                                     ) %>% select(county, unemployed_perc) %>% rename(Total = unemployed_perc)
+
+# # Get Median Hourly Wage for all SCAG:
+scag_total_unemployed <- ca_pums_scag %>%  select(PWGTP, county, unemployed,ESR) %>% drop_na(unemployed) %>%
+                                               summarize(
+                                                       total_labor = sum(PWGTP[ESR != 6]), # excludes not in labor force from ESR variable
+                                                       unemployed_sum = sum(PWGTP[unemployed == "Yes"]),
+                                                       unemployed_prop = unemployed_sum / total_labor, # divide by total_labor for proportion
+                                                       unemployed_perc = round(unemployed_prop*100, 2)
+                                                     ) %>% mutate(county = "SCAG") %>% select(county, unemployed_perc) %>% rename(Total = unemployed_perc)
+
+# Full join all scag_total tables:
+scag_total_unemployed_table <- full_join(scag_county_total_unemployed,scag_total_unemployed)
+
+# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+scag_unemployed_table <- full_join(scag_county_race_unemployed,scag_race_unemployed) %>% left_join(.,scag_total_unemployed_table, by = join_by(county))
+scag_unemployed_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_unemployed_table, here(tables_fp, "scag_unemployed_table.csv"))
+if (file.exists(here(tables_fp, 'scag_unemployed_table.csv'))) {rm(list = ls(pattern = "_unemployed"))}
 
 ```
+
+
+### Figure 41. Working Poor by Race and Ethnicity
+
+```{r fig 41}
+### 
+# Figure 41. Working Poor by Race and Ethnicity
+# Use person level weights- PWGTP:
+# Filter to age 25-64 and a civilian worker:
+# SAS Example: 
+# if AGEP ge 25 and AGEP le 64;
+# if ESR in (1 2); *Civilian worker;
+# if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line
+
+# Get working poor percentage by race for all SCAG:
+scag_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, race, poverty)%>% drop_na(poverty) %>% 
+                                       group_by(race) %>% 
+                                       summarize(
+                                           total_pop = sum(PWGTP),
+                                           poverty_sum = sum(PWGTP[poverty == "Yes"]),  
+                                           poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+                                           poverty_perc = round(poverty_prop*100, 2)
+                                         )  %>% mutate(county = "SCAG") %>% select(county, race, poverty_perc) %>% 
+                                       pivot_wider(names_from = race, values_from = poverty_perc) # make into wide table to match excel file table.
+
+
+# Get working poor percentage by all by race and county:
+scag_county_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, county, race, poverty) %>% drop_na(poverty) %>%
+                                         group_by(county, race) %>%
+                                         summarize(
+                                           total_pop = sum(PWGTP), 
+                                           poverty_sum = sum(PWGTP[poverty == "Yes"]),
+                                           poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+                                           poverty_perc = round(poverty_prop*100, 2)
+                                         ) %>% select(county, race, poverty_perc) %>%
+                                         pivot_wider(names_from = race, values_from = poverty_perc)
+
+
+# Get working poor percentage by county for all SCAG:
+scag_county_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% select(PWGTP, county, poverty,ESR) %>% drop_na(poverty) %>%
+                                               group_by(county) %>%
+                                               summarize(
+                                                       total_pop = sum(PWGTP), 
+                                                       poverty_sum = sum(PWGTP[poverty == "Yes"]),
+                                                       poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+                                                       poverty_perc = round(poverty_prop*100, 2)
+                                                     ) %>% select(county, poverty_perc) %>% rename(Total = poverty_perc)
+
+# Get working poor for all SCAG:
+scag_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% select(PWGTP, county, poverty,ESR) %>% drop_na(poverty) %>%
+                                               summarize(
+                                                       total_pop = sum(PWGTP), 
+                                                       poverty_sum = sum(PWGTP[poverty == "Yes"]),
+                                                       poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+                                                       poverty_perc = round(poverty_prop*100, 2)
+                                                     ) %>% mutate(county = "SCAG") %>% select(county, poverty_perc) %>% rename(Total = poverty_perc)
+
+# Full join all scag_total tables:
+scag_total_working_poor_table <- full_join(scag_county_total_working_poor,scag_total_working_poor)
+
+# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+scag_working_poor_table <- full_join(scag_county_race_working_poor,scag_race_working_poor) %>% left_join(.,scag_total_working_poor_table, by = join_by(county))
+scag_working_poor_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_working_poor_table, here(tables_fp, "scag_working_poor_table.csv"))
+if (file.exists(here(tables_fp, 'scag_working_poor_table.csv'))) {rm(list = ls(pattern = "_working_poor"))}
+
+```
+
+
 
 --- 
 
@@ -1561,7 +1642,9 @@ sheets <- list("TOC" = toc,
                "Figure_21" = scag_overcrowded_table,
                "Figure_22" = scag_homeownership_table, 
                "Figure_28" = scag_no_hicov_table,
-               "Figure_39" = scag_med_hr_wage_table
+               "Figure_39" = scag_med_hr_wage_table,
+               "Figure_40" = scag_unemployed_table,
+               "Figure_41" = scag_working_poor_table
                ) 
 
 # Create an output folder if it does NOT exist already:
