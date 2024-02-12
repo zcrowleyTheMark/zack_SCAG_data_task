@@ -83,7 +83,7 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 # acs_data_dict_22 %>% write_csv(file = "data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 
 # Read in acs_data_dict_22
-pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
+pums_vars_acs5_22 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 
 ```
 
@@ -163,14 +163,14 @@ tables_fp <- here(output_fp, 'tables')
 ### 2017-2021 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
 
 ```{r ACS 2021 FTP data}
-# # Total list of vars to get from ACS PUMS
-# vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
+# # Total list of vars to get from ACS PUMS HHT
+# vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HHT2", "HISP", 
 #                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
 #                     "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV")
 #        
 # ### Housing level data raw:
 # # Variables to pull out of raw housing data:
-# housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
+# housing_vars_list <- c("SERIALNO", "PUMA", "ST","WGTP", "HHT", "HHT2", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
 # 
 # # Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
 # housing_data <- fread(here(hh_2021_fp), select = housing_vars_list) %>% as_tibble()
@@ -221,24 +221,25 @@ tables_fp <- here(output_fp, 'tables')
 
 ```
 
+
 ### 2018-2022 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
 
 ```{r ACS 2022 FTP data}
 # # Total list of vars to get from ACS PUMS 22- change from 21 is PUMA is in 2010 and 2020 census columns: "PUMA10" and "PUMA20"
-# vars_list_pums_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HISP", 
-#                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP", 
+# vars_list_pums_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HHT2", "HISP",
+#                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "TEN","KIT", "PLM", "WAGP", "WKHP",
 #                     "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV")
-#        
+# 
 # ### Housing level data raw:
 # # Variables to pull out of raw housing data:
-# housing_vars_list_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST","WGTP", "HHT", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
+# housing_vars_list_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST","WGTP", "HHT", "HHT2", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
 # 
 # # Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
 # housing_data_22 <- fread(here(hh_2022_fp), select = housing_vars_list_22) %>% as_tibble()
 # 
 # ### Person level data raw:
 # # Variables to pull out of raw housing data:
-# person_vars_list_22 <- c("SERIALNO", "ST", "PUMA10", "PUMA20", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG", 
+# person_vars_list_22 <- c("SERIALNO", "ST", "PUMA10", "PUMA20", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG",
 #                       "NATIVITY", "DIS", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP", "HICOV")
 # # Set up type list for read_csv:
 # 
@@ -250,20 +251,20 @@ tables_fp <- here(output_fp, 'tables')
 # 
 # # Create single PUMA code that merges the columns "PUMA10" and "PUMA20", use PUMA10 and if -9 then take in PUMA20 to replace:
 # merged_data_22 <- merged_data_22 %>% mutate(PUMA = case_when(PUMA10 == -9 ~ PUMA20,
-#                                                                      TRUE ~ PUMA10)) 
+#                                                                      TRUE ~ PUMA10))
 # 
 # # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22": 1826332 obs. with 31 variables
-# # write_csv(merged_data_22, here(acs_data_22_fp, "merged_acs_22.csv")) 
+# write_csv(merged_data_22, here(acs_data_22_fp, "merged_acs_22.csv"))
 # 
 # # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
-# scag_county_list <- c("Imperial", 
+# scag_county_list <- c("Imperial",
 #                       "Los Angeles",
 #                       "Orange",
 #                       "Riverside",
-#                       "San Bernardino", 
+#                       "San Bernardino",
 #                       "Ventura")
 # 
-# # Mutate/case_when to replicate SAS code above for creating "county" var- 
+# # Mutate/case_when to replicate SAS code above for creating "county" var-
 # # Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
 # merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
 #                                                                     PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
@@ -271,26 +272,27 @@ tables_fp <- here(output_fp, 'tables')
 #                                                                     PUMA %in% (6501:6599) ~ "Riverside", # 65 prefix
 #                                                                     PUMA %in% (7101:7199) ~ "San Bernardino", # 71 prefix
 #                                                                     PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
-#                                                                     )) %>% 
-#                                           filter(county %in% scag_county_list) %>% 
-#                                           select(SERIALNO, ST,PUMA,county, everything()) 
+#                                                                     )) %>%
+#                                           filter(county %in% scag_county_list) %>%
+#                                           select(SERIALNO, ST,PUMA,county, everything())
 # 
 # # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
-# # write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv")) 
+# write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 # 
 # # Read in merged_data_22_scag from  here(acs_data_22_fp, "merged_acs_22_scag.csv")
-# # merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv")) 
+# # merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 # 
 # # # check variables from the merged_data_22 using str() and summary():
 # # str(merged_data_22)
-# # 
+# #
 # # Remove all large files if no longer needed:
 # rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
-# 
+
 ```
 
 
 --- 
+
 
 ## API Calls using tidycensus package:
 <!-- TODO: Fix API calls to US Census using tidycensus -->
@@ -862,6 +864,37 @@ ca_pums_scag <- ca_pums_scag %>% mutate(wage = case_when(ADJINC == 1117630 ~ WAG
 ca_pums_scag <- ca_pums_scag %>% mutate(unemployed = factor(case_when(ESR == 3  ~ "Yes",
                                                            ESR != 3 ~ "No"), levels = c("Yes","No"))
                                                          )
+###
+# Single Parent Households by gender:
+# Use HHT2 to create new variable named "single_hh"
+# Household/family type (includes cohabiting) == HHT2
+# Value       Label		
+#  bb	   N/A (GQ/vacant)
+#  01	   Married couple household with children of the householder less than 18
+#  02	   Married couple household, no children of the householder less than 18
+#  03	   Cohabiting couple household with children of the householder less than 18
+#  04	   Cohabiting couple household, no children of the householder less than 18
+#  05	   Female householder, no spouse/partner present, living alone
+#  06	   Female householder, no spouse/partner present, with children of the householder less than 18
+#  07	   Female householder, no spouse/partner present, with relatives, no children of the householder less than 18
+#  08	   Female householder, no spouse/partner present, only nonrelatives present
+#  09	   Male householder, no spouse/partner present, living alone
+#  10	   Male householder, no spouse/partner present, with children of the householder less than 18
+#  11	   Male householder, no spouse/partner present, with relatives, no children of the householder less than 18
+#  12	   Male householder, no spouse/partner present, only nonrelatives present
+#  
+# Create new var named single_hh
+# If HHT2 == 06	   Female householder, no spouse/partner present, with children of the householder less than 18
+# # Then single_hh == "female_hh"
+# If HHT2 == 10	   Male householder, no spouse/partner present, with children of the householder less than 18
+# Then single_hh == "male_hh"
+# Otherwise, single_hh == "cohabit_or_nokids"
+ca_pums_scag <- ca_pums_scag %>% mutate(single_hh = factor(case_when(HHT2 == 6  ~ "female_hh",
+                                                                     HHT2 == 10  ~ "male_hh",
+                                                                     HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"
+                                                                     ), levels = c("female_hh", "male_hh","cohabit_or_nokids"))
+                                        ) 
+
 ```
 
 # Analysis and Replication of Tables and Figures for SCAG
@@ -1678,11 +1711,11 @@ if (file.exists(here(tables_fp, 'scag_race_perc_table.csv'))) {rm(list = ls(patt
 ```
 
 
-### Race/Ethnicity Distribution (%) by County and SCAG Region
+### Age Distribution (%) by County and SCAG Region
 
-```{r race_ethnicity}
+```{r age_dist}
 ### 
-# Race/Ethnicity Distribution (%) by County and SCAG Region:
+# Age Distribution (%) by County and SCAG Region:
 # Use person level weights- PWGTP:
 # Percentages of age categories by county and SCAG
 # Age Categories: named var "age_3_cat"
@@ -1691,12 +1724,7 @@ if (file.exists(here(tables_fp, 'scag_race_perc_table.csv'))) {rm(list = ls(patt
 # if AGEP < 18 then ac1=1;
 # if AGEP ge 18 and AGEP le 64 then ac1=2;
 # if AGEP ge 65 then ac1=3; 
-# Create "age_3_cat" var based on conditions above: 
-# ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  ~ "<18 years",
-#                                                                      AGEP %in% c(18:64) ~ "18 - 64 years",
-#                                                                      AGEP > 64 ~ "65+ years"
-#                                                                      ), levels = c("<18 years", "18 - 64 years","65+ years"))
-#                                         ) 
+# Use "age_3_cat" to get percentages of each category for each SCAG County and the whole SCAG Region: 
 
 # Get age percentages for all SCAG:
 scag_age_perc_total <- ca_pums_scag %>% select(PWGTP, age_3_cat) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
@@ -1718,8 +1746,68 @@ if (file.exists(here(tables_fp, 'scag_age_perc_table.csv'))) {rm(list = ls(patte
 
 ```
 
---- 
 
+### Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region
+
+```{r singe_parent}
+### 
+# Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region:
+# Use household level weights- WGTP:
+# Percentages of Single Parent Household categories by gender of Head of Household by county and SCAG
+#                                         
+# Household/family type (includes cohabiting) == HHT2
+# Value       Label		
+#  bb	   N/A (GQ/vacant)
+#  01	   Married couple household with children of the householder less than 18
+#  02	   Married couple household, no children of the householder less than 18
+#  03	   Cohabiting couple household with children of the householder less than 18
+#  04	   Cohabiting couple household, no children of the householder less than 18
+#  05	   Female householder, no spouse/partner present, living alone
+#  06	   Female householder, no spouse/partner present, with children of the householder less than 18
+#  07	   Female householder, no spouse/partner present, with relatives, no children of the householder less than 18
+#  08	   Female householder, no spouse/partner present, only nonrelatives present
+#  09	   Male householder, no spouse/partner present, living alone
+#  10	   Male householder, no spouse/partner present, with children of the householder less than 18
+#  11	   Male householder, no spouse/partner present, with relatives, no children of the householder less than 18
+#  12	   Male householder, no spouse/partner present, only nonrelatives present
+#  
+# Create new var named single_hh
+# If HHT2 == 06	   Female householder, no spouse/partner present, with children of the householder less than 18
+# # Then single_hh == "female_hh"
+# If HHT2 == 10	   Male householder, no spouse/partner present, with children of the householder less than 18
+# Then single_hh == "male_hh"
+# Otherwise, single_hh == "cohabit_or_nokids"
+# ca_pums_scag <- ca_pums_scag %>% mutate(single_hh = factor(case_when(HHT2 == 6  ~ "female_hh",
+#                                                                      HHT2 == 10  ~ "male_hh",
+#                                                                      HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"
+#                                                                      ), levels = c("female_hh", "male_hh","cohabit_or_nokids"))
+#                                         ) 
+
+
+# Get Single Parent Households percentages for all SCAG:
+scag_single_hh_total <- ca_pums_scag %>% select(WGTP, single_hh)  %>% count(single_hh, wt = WGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(single_hh) %>% summarize(SCAG = round( (n / total_pop)*100, 2)) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
+                                        
+
+# Get Single Parent Households percentages for by county for each SCAG County:
+scag_single_hh_county <- ca_pums_scag %>% select(WGTP, single_hh, county) %>% group_by(county) %>% count(single_hh, wt = WGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
+                                         group_by(single_hh, county) %>% summarize(single_hh_perc = round( (n / total_pop)*100, 2)) %>% 
+                                         pivot_wider(names_from = county, values_from = single_hh_perc) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
+
+# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+scag_single_hh_table <- left_join(scag_single_hh_county, scag_single_hh_total, by = join_by(single_hh)) %>% ungroup() %>%
+                                pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% 
+                                rename(single_parent_households = single_hh)
+scag_single_hh_table
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(scag_single_hh_table, here(tables_fp, "scag_single_hh_table.csv"))
+if (file.exists(here(tables_fp, 'scag_single_hh_table.csv'))) {rm(list = ls(pattern = "_single_hh"))}
+
+```
+
+
+
+--- 
 
 
 ### Write out excel file with all sheets:
@@ -1753,7 +1841,8 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "Figure_41", "Figure 41. Working Poor by Race and Ethnicity",
               "Total_Population", "Total Population by County and SCAG Region",
               "Race_Ethnicity", "Race/Ethnicity Distribution (%) by County and SCAG Region",
-              "Age", "Age Distribution (%) by County and SCAG Region")
+              "Age", "Age Distribution (%) by County and SCAG Region",
+              "Singe_Parent_HHs", "Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region")
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "scag_homeownership_table" is a tibble that will populate the sheet named "Figure_22".
@@ -1771,7 +1860,8 @@ sheets <- list("TOC" = toc,
                "Figure_41" = scag_working_poor_table,
                "Total_Population" = scag_total_pop_table,
                "Race_Ethnicity" = scag_race_perc_table,
-               "Age" = scag_age_perc_table) 
+               "Age" = scag_age_perc_table,
+               "Singe_Parent_HHs" = scag_single_hh_table) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}

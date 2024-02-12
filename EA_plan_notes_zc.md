@@ -80,7 +80,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - <span style="color: green;">**Total Population**- By county and whole SCAG Region</span>
   - <span style="color: green;">**Race/Ethnicity Distribution**- By county and whole SCAG Region- same racial categories as in EA Report.</span>
   - <span style="color: green;">**Age Distribution (Youth, Older Adults)**- Same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years- break down by county and whole SCAG Region.</span>
-  - **Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent households broken down by *gender* of head of household. By county and whole SCAG Region
+  - <span style="color: green;">**Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent households broken down by *gender* of head of household. By county and whole SCAG Region</span>
   - **Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region
   - **People with Disabilities**- DIS == "with disability" (1) By county and whole SCAG Region
   - **National Origin**- variable name NATIVITY- Percent foreign born? If NATIVITY == "Foreign Born". By county and whole SCAG Region
