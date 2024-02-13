@@ -81,13 +81,13 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - <span style="color: green;">**Race/Ethnicity Distribution**- By county and whole SCAG Region- same racial categories as in EA Report.</span>
   - <span style="color: green;">**Age Distribution (Youth, Older Adults)**- Same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years- break down by county and whole SCAG Region.</span>
   - <span style="color: green;">**Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent households broken down by *gender* of head of household. By county and whole SCAG Region</span>
+  - **National Origin**- variable name NATIVITY- Percent foreign born? If NATIVITY == "Foreign Born". By county and whole SCAG Region
   - **Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region
   - **People with Disabilities**- DIS == "with disability" (1) By county and whole SCAG Region
-  - **National Origin**- variable name NATIVITY- Percent foreign born? If NATIVITY == "Foreign Born". By county and whole SCAG Region
   - **Educational Attainment** (REBCR Economy section)- Filter to people over 25, these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
   COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region
   - **Median Household Income** (REBCR Economy section) By race and also report the whole SCAG Region
-  - **Poverty** (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. By race and also report the whole SCAG Region, do not include 'people of color' category.
+  - **Poverty (Household)** (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. By race and also report the whole SCAG Region, do not include 'people of color' category.
   
   - notes also found in this Google doc: https://docs.google.com/document/d/1szSsAiYopeeOHjl3hnwSLl8afTc8LS16HEcws6sHdfI/edit
 

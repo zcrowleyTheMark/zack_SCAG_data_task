@@ -954,12 +954,12 @@ scag_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(
 scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_public,scag_total_walk_bike_public)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-scag_walk_bike_public_table <- full_join(scag_county_race_walk_bike_public,scag_race_walk_bike_public) %>% left_join(.,scag_total_walk_bike_public_table, by = join_by(county))
-scag_walk_bike_public_table
+walk_bike_public_scag_table <- full_join(scag_county_race_walk_bike_public,scag_race_walk_bike_public) %>% left_join(.,scag_total_walk_bike_public_table, by = join_by(county))
+walk_bike_public_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_walk_bike_public_table, here(tables_fp, "scag_walk_bike_public_table.csv"))
-if (file.exists(here(tables_fp, 'scag_walk_bike_public_table.csv'))) {rm(list = ls(pattern = "walk_bike_public"))}
+write_csv(walk_bike_public_scag_table, here(tables_fp, "walk_bike_public_scag_table.csv"))
+if (file.exists(here(tables_fp, 'walk_bike_public_scag_table.csv'))) {rm(list = ls(pattern = "walk_bike_public"))}
 
 ```
 
@@ -1014,12 +1014,12 @@ scag_total_no_veh <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGTP, VE
 scag_total_no_veh_table <- full_join(scag_county_total_no_veh,scag_total_no_veh)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-scag_no_veh_table <- full_join(scag_county_race_no_veh,scag_race_no_veh) %>% left_join(.,scag_total_no_veh_table, by = join_by(county))
-scag_no_veh_table
+no_veh_scag_table <- full_join(scag_county_race_no_veh,scag_race_no_veh) %>% left_join(.,scag_total_no_veh_table, by = join_by(county))
+no_veh_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_no_veh_table, here(tables_fp, "scag_no_veh_table.csv"))
-if (file.exists(here(tables_fp, 'scag_no_veh_table.csv'))) {rm(list = ls(pattern = "no_veh"))}
+write_csv(no_veh_scag_table, here(tables_fp, "no_veh_scag_table.csv"))
+if (file.exists(here(tables_fp, 'no_veh_scag_table.csv'))) {rm(list = ls(pattern = "no_veh"))}
 
 ```
 
@@ -1086,14 +1086,14 @@ scag_race_county_transport_mean <- left_join(scag_race_county_transport_mean, sc
 
 
 # Full join scag_race_transport_mean and cag_transport_mean_overall to get full totals table for SCAG and by race:
-scag_transport_mean_table <- scag_transport_mean %>% full_join(scag_race_county_transport_mean) %>% ungroup()
+transport_mean_scag_table <- scag_transport_mean %>% full_join(scag_race_county_transport_mean) %>% ungroup()
 # Round all means to 2 digits:
-scag_transport_mean_table <- scag_transport_mean_table %>% mutate(across(where(is.numeric), round, 2))
-scag_transport_mean_table
+transport_mean_scag_table <- transport_mean_scag_table %>% mutate(across(where(is.numeric), round, 2))
+transport_mean_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_transport_mean_table, here(tables_fp, "scag_transport_mean_table.csv"))
-if (file.exists(here(tables_fp, 'scag_transport_mean_table.csv'))) {rm(list = ls(pattern = "transport_mean"))}
+write_csv(transport_mean_scag_table, here(tables_fp, "transport_mean_scag_table.csv"))
+if (file.exists(here(tables_fp, 'transport_mean_scag_table.csv'))) {rm(list = ls(pattern = "transport_mean"))}
 
 ```
 
@@ -1202,12 +1202,12 @@ scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type
 
 ###
 # Join renters and Homeowners tables:
-full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
-full_housing_burden_table
+housing_burden_scag_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
+housing_burden_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(full_housing_burden_table, here(tables_fp, "full_housing_burden_table.csv"))
-if (file.exists(here(tables_fp, 'full_housing_burden_table.csv'))) {
+write_csv(housing_burden_scag_table, here(tables_fp, "housing_burden_scag_table.csv"))
+if (file.exists(here(tables_fp, 'housing_burden_scag_table.csv'))) {
     rm(list = ls(pattern = "renter_burden"))
     rm(list = ls(pattern = "housing_burden"))
 }
@@ -1266,12 +1266,12 @@ scag_total_no_kitchen_plumbing <- ca_pums_scag %>% select(WGTP, no_kitchen_plumb
 scag_total_no_kitchen_plumbing_table <- full_join(scag_county_total_no_kitchen_plumbing,scag_total_no_kitchen_plumbing)
 
 # Full join all scag_race tables, then left join scag_total_no_kitchen_plumbing_table by county:
-scag_no_kitchen_plumbing_table <- full_join(scag_county_race_no_kitchen_plumbing,scag_race_no_kitchen_plumbing) %>% left_join(.,scag_total_no_kitchen_plumbing_table)
-scag_no_kitchen_plumbing_table
+no_kitchen_plumbing_scag_table <- full_join(scag_county_race_no_kitchen_plumbing,scag_race_no_kitchen_plumbing) %>% left_join(.,scag_total_no_kitchen_plumbing_table)
+no_kitchen_plumbing_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_no_kitchen_plumbing_table, here(tables_fp, "scag_no_kitchen_plumbing_table.csv"))
-if (file.exists(here(tables_fp, 'scag_no_kitchen_plumbing_table.csv'))) {rm(list = ls(pattern = "no_kitchen_plumbing"))}
+write_csv(no_kitchen_plumbing_scag_table, here(tables_fp, "no_kitchen_plumbing_scag_table.csv"))
+if (file.exists(here(tables_fp, 'no_kitchen_plumbing_scag_table.csv'))) {rm(list = ls(pattern = "no_kitchen_plumbing"))}
 
 ```
 
@@ -1324,12 +1324,12 @@ scag_total_overcrowded <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(WGT
 scag_total_overcrowded_table <- full_join(scag_county_total_overcrowded,scag_total_overcrowded)
 
 # Full join all scag_race tables, then left join scag_total_overcrowded_table by county:
-scag_overcrowded_table <- full_join(scag_county_race_overcrowded,scag_race_overcrowded) %>% left_join(.,scag_total_overcrowded_table) 
-scag_overcrowded_table
+overcrowded_scag_table <- full_join(scag_county_race_overcrowded,scag_race_overcrowded) %>% left_join(.,scag_total_overcrowded_table) 
+overcrowded_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_overcrowded_table, here(tables_fp, "scag_overcrowded_table.csv"))
-if (file.exists(here(tables_fp, 'scag_overcrowded_table.csv'))) {rm(list = ls(pattern = "_overcrowded"))}
+write_csv(overcrowded_scag_table, here(tables_fp, "overcrowded_scag_table.csv"))
+if (file.exists(here(tables_fp, 'overcrowded_scag_table.csv'))) {rm(list = ls(pattern = "overcrowded"))}
 
 ```
 
@@ -1382,12 +1382,12 @@ scag_total_homeownership <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% select(W
 scag_total_homeownership_table <- full_join(scag_county_total_homeownership,scag_total_homeownership)
 
 # Full join all scag_race tables, then left join scag_total_homeownership_table by county:
-scag_homeownership_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table)
-scag_homeownership_table
+homeownership_scag_table <- full_join(scag_county_race_homeownership,scag_race_homeownership) %>% left_join(.,scag_total_homeownership_table)
+homeownership_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_homeownership_table, here(tables_fp, "scag_homeownership_table.csv"))
-if (file.exists(here(tables_fp, 'scag_homeownership_table.csv'))) {rm(list = ls(pattern = "_homeownership"))}
+write_csv(homeownership_scag_table, here(tables_fp, "homeownership_scag_table.csv"))
+if (file.exists(here(tables_fp, 'homeownership_scag_table.csv'))) {rm(list = ls(pattern = "homeownership"))}
 
 ```
 
@@ -1451,12 +1451,12 @@ scag_total_no_hicov <- ca_pums_scag %>% select(PWGTP, HICOV) %>%
 scag_total_no_hicov_table <- full_join(scag_county_total_no_hicov,scag_total_no_hicov)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-scag_no_hicov_table <- full_join(scag_county_race_no_hicov,scag_race_no_hicov) %>% left_join(.,scag_total_no_hicov_table, by = join_by(county))
-scag_no_hicov_table
+no_hicov_scag_table <- full_join(scag_county_race_no_hicov,scag_race_no_hicov) %>% left_join(.,scag_total_no_hicov_table, by = join_by(county))
+no_hicov_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_no_hicov_table, here(tables_fp, "scag_no_hicov_table.csv"))
-if (file.exists(here(tables_fp, 'scag_no_hicov_table.csv'))) {rm(list = ls(pattern = "_no_hicov"))}
+write_csv(no_hicov_scag_table, here(tables_fp, "no_hicov_scag_table.csv"))
+if (file.exists(here(tables_fp, 'no_hicov_scag_table.csv'))) {rm(list = ls(pattern = "no_hicov"))}
 
 ```
 
@@ -1503,12 +1503,12 @@ scag_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(
 scag_total_med_hr_wage_table <- full_join(scag_county_total_med_hr_wage,scag_total_med_hr_wage)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-scag_med_hr_wage_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
-scag_med_hr_wage_table
+med_hr_wage_scag_table <- full_join(scag_county_race_med_hr_wage,scag_race_med_hr_wage) %>% left_join(.,scag_total_med_hr_wage_table, by = join_by(county))
+med_hr_wage_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_med_hr_wage_table, here(tables_fp, "scag_med_hr_wage_table.csv"))
-if (file.exists(here(tables_fp, 'scag_med_hr_wage_table.csv'))) {rm(list = ls(pattern = "_med_hr_wage"))}
+write_csv(med_hr_wage_scag_table, here(tables_fp, "med_hr_wage_scag_table.csv"))
+if (file.exists(here(tables_fp, 'med_hr_wage_scag_table.csv'))) {rm(list = ls(pattern = "med_hr_wage"))}
 
 ```
 
@@ -1567,12 +1567,12 @@ scag_total_unemployed <- ca_pums_scag %>%  select(PWGTP, county, unemployed,ESR)
 scag_total_unemployed_table <- full_join(scag_county_total_unemployed,scag_total_unemployed)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-scag_unemployed_table <- full_join(scag_county_race_unemployed,scag_race_unemployed) %>% left_join(.,scag_total_unemployed_table, by = join_by(county))
-scag_unemployed_table
+unemployed_scag_table <- full_join(scag_county_race_unemployed,scag_race_unemployed) %>% left_join(.,scag_total_unemployed_table, by = join_by(county))
+unemployed_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_unemployed_table, here(tables_fp, "scag_unemployed_table.csv"))
-if (file.exists(here(tables_fp, 'scag_unemployed_table.csv'))) {rm(list = ls(pattern = "_unemployed"))}
+write_csv(unemployed_scag_table, here(tables_fp, "unemployed_scag_table.csv"))
+if (file.exists(here(tables_fp, 'unemployed_scag_table.csv'))) {rm(list = ls(pattern = "unemployed"))}
 
 ```
 
@@ -1636,12 +1636,12 @@ scag_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c
 scag_total_working_poor_table <- full_join(scag_county_total_working_poor,scag_total_working_poor)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-scag_working_poor_table <- full_join(scag_county_race_working_poor,scag_race_working_poor) %>% left_join(.,scag_total_working_poor_table, by = join_by(county))
-scag_working_poor_table
+working_poor_scag_table <- full_join(scag_county_race_working_poor,scag_race_working_poor) %>% left_join(.,scag_total_working_poor_table, by = join_by(county))
+working_poor_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_working_poor_table, here(tables_fp, "scag_working_poor_table.csv"))
-if (file.exists(here(tables_fp, 'scag_working_poor_table.csv'))) {rm(list = ls(pattern = "_working_poor"))}
+write_csv(working_poor_scag_table, here(tables_fp, "working_poor_scag_table.csv"))
+if (file.exists(here(tables_fp, 'working_poor_scag_table.csv'))) {rm(list = ls(pattern = "working_poor"))}
 
 ```
 
@@ -1673,12 +1673,12 @@ scag_county_total_pop <- ca_pums_scag %>% select(PWGTP, county) %>%
 
 
 # Full join all scag_total tables:
-scag_total_pop_table <- full_join(scag_county_total_pop, scag_total_pop, by = join_by(county, total_pop))
-scag_total_pop_table
+total_pop_scag_table <- full_join(scag_county_total_pop, scag_total_pop, by = join_by(county, total_pop))
+total_pop_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_total_pop_table, here(tables_fp, "scag_total_pop_table.csv"))
-if (file.exists(here(tables_fp, 'scag_total_pop_table.csv'))) {rm(list = ls(pattern = "_total_pop"))}
+write_csv(total_pop_scag_table, here(tables_fp, "total_pop_scag_table.csv"))
+if (file.exists(here(tables_fp, 'total_pop_scag_table.csv'))) {rm(list = ls(pattern = "total_pop"))}
 
 ```
 
@@ -1701,12 +1701,12 @@ scag_race_perc_county <- ca_pums_scag %>% select(PWGTP, race, county) %>% group_
                                          pivot_wider(names_from = county, values_from = race_perc)
 
 # Full join all scag_total tables:
-scag_race_perc_table <- left_join(scag_race_perc_county, scag_race_perc_total, by = join_by(race)) %>% ungroup()
-scag_race_perc_table
+race_perc_scag_table <- left_join(scag_race_perc_county, scag_race_perc_total, by = join_by(race)) %>% ungroup()
+race_perc_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_race_perc_table, here(tables_fp, "scag_race_perc_table.csv"))
-if (file.exists(here(tables_fp, 'scag_race_perc_table.csv'))) {rm(list = ls(pattern = "_race_perc"))}
+write_csv(race_perc_scag_table, here(tables_fp, "race_perc_scag_table.csv"))
+if (file.exists(here(tables_fp, 'race_perc_scag_table.csv'))) {rm(list = ls(pattern = "race_perc"))}
 
 ```
 
@@ -1737,12 +1737,12 @@ scag_age_perc_county <- ca_pums_scag %>% select(PWGTP, age_3_cat, county) %>% gr
                                          pivot_wider(names_from = county, values_from = age_perc)
 
 # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-scag_age_perc_table <- left_join(scag_age_perc_county, scag_age_perc_total, by = join_by(age_3_cat)) %>% ungroup() %>%
+age_perc_scag_table <- left_join(scag_age_perc_county, scag_age_perc_total, by = join_by(age_3_cat)) %>% ungroup() %>%
                                 pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% rename(age_categories = age_3_cat)
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_age_perc_table, here(tables_fp, "scag_age_perc_table.csv"))
-if (file.exists(here(tables_fp, 'scag_age_perc_table.csv'))) {rm(list = ls(pattern = "_age_perc"))}
+write_csv(age_perc_scag_table, here(tables_fp, "age_perc_scag_table.csv"))
+if (file.exists(here(tables_fp, 'age_perc_scag_table.csv'))) {rm(list = ls(pattern = "age_perc"))}
 
 ```
 
@@ -1795,13 +1795,49 @@ scag_single_hh_county <- ca_pums_scag %>% select(WGTP, single_hh, county) %>% gr
                                          pivot_wider(names_from = county, values_from = single_hh_perc) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
 
 # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-scag_single_hh_table <- left_join(scag_single_hh_county, scag_single_hh_total, by = join_by(single_hh)) %>% ungroup() %>%
+single_hh_scag_table <- left_join(scag_single_hh_county, scag_single_hh_total, by = join_by(single_hh)) %>% ungroup() %>%
                                 pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% 
                                 rename(single_parent_households = single_hh)
-scag_single_hh_table
+single_hh_scag_table
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-write_csv(scag_single_hh_table, here(tables_fp, "scag_single_hh_table.csv"))
-if (file.exists(here(tables_fp, 'scag_single_hh_table.csv'))) {rm(list = ls(pattern = "_single_hh"))}
+write_csv(single_hh_scag_table, here(tables_fp, "single_hh_scag_table.csv"))
+if (file.exists(here(tables_fp, 'single_hh_scag_table.csv'))) {rm(list = ls(pattern = "single_hh"))}
+
+```
+
+### National Origin (% Foreign born) by County and SCAG Region
+
+```{r singe_parent}
+### 
+# National Origin (% Foreign born) by County and SCAG Region
+# Use person level weights- PWGTP:
+# Percentages of Foreign born by county and SCAG
+#                             
+# National Origin == NATIVITY
+# Value    Label		
+#  1        Native
+#  2	    Foreign born
+#  
+# sum over if NATIVITY == 2 
+
+# Get Foreign born percentages for all SCAG:
+scag_natl_origin_total <- ca_pums_scag %>% select(PWGTP, NATIVITY)  %>% count(NATIVITY, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(NATIVITY) %>% summarize(natl_origin_perc = round( (n / total_pop)*100, 2)) %>% filter(NATIVITY == 2) %>% ungroup() %>% 
+                                        mutate(county = "SCAG") %>% select(county, natl_origin_perc)
+                                        
+
+# Get Foreign born percentages for by county for each SCAG County:
+scag_natl_origin_county <- ca_pums_scag %>% select(PWGTP, NATIVITY, county) %>% group_by(county) %>% count(NATIVITY, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(NATIVITY, county) %>% summarize(natl_origin_perc = round( (n / total_pop)*100, 2)) %>% filter(NATIVITY == 2) %>% ungroup() %>% 
+                                         select(county, natl_origin_perc)
+
+# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+natl_origin_scag_table <- full_join(scag_natl_origin_total, scag_natl_origin_county, by = join_by(county, natl_origin_perc)) 
+
+natl_origin_scag_table
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(natl_origin_scag_table, here(tables_fp, "natl_origin_scag_table.csv"))
+if (file.exists(here(tables_fp, 'natl_origin_scag_table.csv'))) {rm(list = ls(pattern = "single_hh"))}
 
 ```
 
@@ -1812,7 +1848,7 @@ if (file.exists(here(tables_fp, 'scag_single_hh_table.csv'))) {rm(list = ls(patt
 
 ### Write out excel file with all sheets:
 -
-```{r write excel, eval=FALSE, include=FALSE}
+```{r write excel}
 # Read in completed tables and set to tibbles in current global env:
 # Read in all the tables from the folder "output/tables" and keep names from the files:
 table_file_list <- lapply(list.files(here(tables_fp),full.names=TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
@@ -1842,26 +1878,28 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "Total_Population", "Total Population by County and SCAG Region",
               "Race_Ethnicity", "Race/Ethnicity Distribution (%) by County and SCAG Region",
               "Age", "Age Distribution (%) by County and SCAG Region",
-              "Singe_Parent_HHs", "Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region")
+              "Singe_Parent_HHs", "Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region",
+              "Natl_Origin", "National Origin (% Foreign born) by County and SCAG Region") 
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
-# Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "scag_homeownership_table" is a tibble that will populate the sheet named "Figure_22".
+# Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "homeownership_scag_table" is a tibble that will populate the sheet named "Figure_22".
 sheets <- list("TOC" = toc,
-               "Figure_5" = scag_walk_bike_public_table,
-               "Figure_6" = scag_no_veh_table,
-               "Figure_7" = scag_transport_mean_table,
-               "Figure_19" = full_housing_burden_table,
-               "Figure_20" = scag_no_kitchen_plumbing_table,
-               "Figure_21" = scag_overcrowded_table,
-               "Figure_22" = scag_homeownership_table, 
-               "Figure_28" = scag_no_hicov_table,
-               "Figure_39" = scag_med_hr_wage_table,
-               "Figure_40" = scag_unemployed_table,
-               "Figure_41" = scag_working_poor_table,
-               "Total_Population" = scag_total_pop_table,
-               "Race_Ethnicity" = scag_race_perc_table,
-               "Age" = scag_age_perc_table,
-               "Singe_Parent_HHs" = scag_single_hh_table) 
+               "Figure_5" = walk_bike_public_scag_table,
+               "Figure_6" = no_veh_scag_table,
+               "Figure_7" = transport_mean_scag_table,
+               "Figure_19" = housing_burden_scag_table,
+               "Figure_20" = no_kitchen_plumbing_scag_table,
+               "Figure_21" = overcrowded_scag_table,
+               "Figure_22" = homeownership_scag_table, 
+               "Figure_28" = no_hicov_scag_table,
+               "Figure_39" = med_hr_wage_scag_table,
+               "Figure_40" = unemployed_scag_table,
+               "Figure_41" = working_poor_scag_table,
+               "Total_Population" = total_pop_scag_table,
+               "Race_Ethnicity" = race_perc_scag_table,
+               "Age" = age_perc_scag_table,
+               "Singe_Parent_HHs" = single_hh_scag_table,
+               "Natl_Origin" = natl_origin_scag_table) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}
@@ -1873,111 +1911,3 @@ write_xlsx(sheets, "output/scag_tabbed.xlsx")
 
 --- 
 
-
-```{r new_tab, eval=FALSE}
-
-# Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
-# Filter to only housing data and renters (filter(RELSHIPP == 20, own_home == "Non-Homeowner")) and Use household weights- WGTP, sum if renter_burden == "Yes":
-# Get renter burden percentages by race for all SCAG:
-scag_race_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, renter_burden) %>%  
-                                         group_by(race) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
-                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
-                                           renter_perc = round(renter_prop*100, 2)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, race, renter_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = renter_perc) # make into wide table to match excel file table.
-
-# Get renter burden percentages by race and by county:
-scag_county_race_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
-                                         group_by(county, race) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
-                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
-                                           renter_perc = round(renter_prop*100, 2)
-                                         ) %>% select(county, race, renter_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = renter_perc)
-
-# Get renter burden percentages  by county for all SCAG:
-scag_county_total_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
-                                         group_by(county) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
-                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
-                                           renter_perc = round(renter_prop*100, 2)
-                                         ) %>% select(county, renter_perc) %>% rename(Total = renter_perc) 
-# Get renter burden percentages for all SCAG:
-scag_total_renter_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% select(WGTP, race, county, renter_burden) %>%  
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           renter = sum(WGTP[renter_burden == "Yes"]), # sum up only those that own homes.
-                                           renter_prop = renter / total_pop, # divide by total_pop for proportion
-                                           renter_perc = round(renter_prop*100, 2)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, renter_perc) %>% rename(Total = renter_perc)
-
-# Full join all scag_total tables:
-scag_total_renter_burden_table <- full_join(scag_county_total_renter_burden,scag_total_renter_burden)
-
-# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
-scag_renter_burden_table <- full_join(scag_county_race_renter_burden,scag_race_renter_burden) %>% left_join(.,scag_total_renter_burden_table)
-# Create new column household_type to denote Renters for type of housing burden for this part of table:
-scag_renter_burden_table <- scag_renter_burden_table %>% mutate(household_type = "Renters") %>% select(household_type, everything())
-
-########
-# Repeat above steps for own_home == "Homeowner" and join with "Renters" table
-# Get housing burden percentages by race for all SCAG:
-scag_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, housing_burden) %>%  
-                                         group_by(race) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
-                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
-                                           housing_perc = round(housing_prop*100, 2)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, race, housing_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = housing_perc) # make into wide table to match excel file table.
-
-# Get housing burden percentages by race and by county:
-scag_county_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
-                                         group_by(county, race) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
-                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
-                                           housing_perc = round(housing_prop*100, 2)
-                                         ) %>% select(county, race, housing_perc) %>% 
-                                         pivot_wider(names_from = race, values_from = housing_perc)
-
-# Get housing burden percentages  by county for all SCAG:
-scag_county_total_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
-                                         group_by(county) %>% 
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
-                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
-                                           housing_perc = round(housing_prop*100, 2)
-                                         ) %>% select(county, housing_perc) %>% rename(Total = housing_perc) 
-# Get housing burden percentages for all SCAG:
-scag_total_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, county, housing_burden) %>%  
-                                         summarize(
-                                           total_pop = sum(WGTP),
-                                           housing = sum(WGTP[housing_burden == "Yes"]), # sum up only those that own homes.
-                                           housing_prop = housing / total_pop, # divide by total_pop for proportion
-                                           housing_perc = round(housing_prop*100, 2)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, housing_perc) %>% rename(Total = housing_perc)
-
-# Full join all scag_total tables:
-scag_total_housing_burden_table <- full_join(scag_county_total_housing_burden,scag_total_housing_burden)
-
-# Full join all scag_race tables, then left join scag_total_homeownership_table by county:
-scag_housing_burden_table <- full_join(scag_county_race_housing_burden,scag_race_housing_burden) %>% left_join(.,scag_total_housing_burden_table)
-# Create new column household_type to denote Homeowners for type of housing burden for this part of table:
-scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type = "Homeowners") %>% select(household_type, everything())
-
-###
-# Join renters and Homeowners tables:
-full_housing_burden_table <- full_join(scag_renter_burden_table, scag_housing_burden_table)
-full_housing_burden_table
-```
