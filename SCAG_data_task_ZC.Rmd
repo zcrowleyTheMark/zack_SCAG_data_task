@@ -893,7 +893,30 @@ ca_pums_scag <- ca_pums_scag %>% mutate(single_hh = factor(case_when(HHT2 == 6  
                                                                      HHT2 == 10  ~ "male_hh",
                                                                      HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"
                                                                      ), levels = c("female_hh", "male_hh","cohabit_or_nokids"))
-                                        ) 
+                                        )
+
+# 
+# Limited English Proficiency:     
+# SAS Example:                       
+# *------- 4. English Proficiency -------------------------------------;
+# *ENG Character 1
+# Ability to speak English
+# b .N/A (less than 5 years old/speaks only English)
+# 1 .Very well
+# 2 .Well
+# 3 .Not well
+# 4 .Not at all;
+#   
+# New variable named "lep"
+# lep == "limited_english_proficiency" if ENG == 3 | if ENG == 4
+# lep == "english_proficient" if ENG == 3 | if ENG == 4
+# lep == "<5yos_or_no_eng" if is.na(ENG) or TRUE
+ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
+                                                               ENG %in% c(1:2) ~ "english_proficient",
+                                                               TRUE ~ "<5yos_or_no_eng"),
+                                                    levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
+                                                    )
+                                        )
 
 ```
 
@@ -1807,7 +1830,7 @@ if (file.exists(here(tables_fp, 'single_hh_scag_table.csv'))) {rm(list = ls(patt
 
 ### National Origin (% Foreign born) by County and SCAG Region
 
-```{r singe_parent}
+```{r natl_origin}
 ### 
 # National Origin (% Foreign born) by County and SCAG Region
 # Use person level weights- PWGTP:
@@ -1832,7 +1855,7 @@ scag_natl_origin_county <- ca_pums_scag %>% select(PWGTP, NATIVITY, county) %>% 
                                          select(county, natl_origin_perc)
 
 # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-natl_origin_scag_table <- full_join(scag_natl_origin_total, scag_natl_origin_county, by = join_by(county, natl_origin_perc)) 
+natl_origin_scag_table <- full_join(scag_natl_origin_county, scag_natl_origin_total, by = join_by(county, natl_origin_perc)) 
 
 natl_origin_scag_table
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -1842,12 +1865,62 @@ if (file.exists(here(tables_fp, 'natl_origin_scag_table.csv'))) {rm(list = ls(pa
 ```
 
 
+### Limited English Proficiency (%) by County and SCAG Region
+
+```{r LEP}
+### 
+# Limited English Proficiency (LEP %) by County and SCAG Region
+# Use person level weights- PWGTP:
+# Percentages of LEP by county and SCAG
+#      
+# SAS Example:                       
+# *------- 4. English Proficiency -------------------------------------;
+# *ENG Character 1
+# Ability to speak English
+# b .N/A (less than 5 years old/speaks only English)
+# 1 .Very well
+# 2 .Well
+# 3 .Not well
+# 4 .Not at all;
+#   
+# New variable named "lep"
+# lep == "limited_english_proficiency" if ENG == 3 | if ENG == 4
+# lep == "english_proficient" if ENG == 3 | if ENG == 4
+# lep == "<5yos_or_no_eng" if is.na(ENG) or TRUE
+# ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
+#                                                                ENG %in% c(1:2) ~ "english_proficient",
+#                                                                TRUE ~ "<5yos_or_no_eng"),
+#                                                     levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
+#                                                     )
+#                                         )
+
+# Get LEP percentages for all SCAG:
+scag_lep_total <- ca_pums_scag %>% select(PWGTP, lep)  %>% count(lep, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(lep) %>% summarize(lep_perc = round( (n / total_pop)*100, 2)) %>% filter(lep == "limited_english_proficiency") %>% ungroup() %>% 
+                                        mutate(county = "SCAG") %>% select(county, lep_perc)
+                                        
+
+# Get LEP percentages for by county for each SCAG County:
+scag_lep_county <- ca_pums_scag %>% select(PWGTP, lep, county) %>% group_by(county) %>% count(lep, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+                                        group_by(lep, county) %>% summarize(lep_perc = round( (n / total_pop)*100, 2)) %>% filter(lep == "limited_english_proficiency") %>% ungroup() %>% 
+                                         select(county, lep_perc)
+
+# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+lep_scag_table <- full_join(scag_lep_county, scag_lep_total, by = join_by(county, lep_perc)) 
+lep_scag_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(lep_scag_table, here(tables_fp, "lep_scag_table.csv"))
+if (file.exists(here(tables_fp, 'lep_scag_table.csv'))) {rm(list = ls(pattern = "single_hh"))}
+
+```
+
 
 --- 
 
 
 ### Write out excel file with all sheets:
--
+
 ```{r write excel}
 # Read in completed tables and set to tibbles in current global env:
 # Read in all the tables from the folder "output/tables" and keep names from the files:
@@ -1879,7 +1952,8 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "Race_Ethnicity", "Race/Ethnicity Distribution (%) by County and SCAG Region",
               "Age", "Age Distribution (%) by County and SCAG Region",
               "Singe_Parent_HHs", "Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region",
-              "Natl_Origin", "National Origin (% Foreign born) by County and SCAG Region") 
+              "Natl_Origin", "National Origin (% Foreign born) by County and SCAG Region",
+              "LEP", "Limited English Proficiency (%) by County and SCAG Region") 
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "homeownership_scag_table" is a tibble that will populate the sheet named "Figure_22".
@@ -1899,7 +1973,8 @@ sheets <- list("TOC" = toc,
                "Race_Ethnicity" = race_perc_scag_table,
                "Age" = age_perc_scag_table,
                "Singe_Parent_HHs" = single_hh_scag_table,
-               "Natl_Origin" = natl_origin_scag_table) 
+               "Natl_Origin" = natl_origin_scag_table,
+               "LEP" = lep_scag_table) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}
