@@ -640,10 +640,10 @@ ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  
 # 
 ca_pums_scag <- ca_pums_scag %>% mutate(edu = factor(case_when(SCHL %in% c(1:15)  ~ "Less than HS Diploma",
                                                                SCHL %in% c(16:17) ~ "HS Diploma",
-                                                               SCHL %in% c(18:19) ~ "Some College", 
-                                                               SCHL == 20 ~ "AA Degree", 
-                                                               SCHL == 21 ~ "BA degree", 
-                                                               SCHL %in% c(23:24) ~ "MA degree or higher" 
+                                                               SCHL %in% c(18:19) ~ "Some College",
+                                                               SCHL == 20 ~ "AA Degree",
+                                                               SCHL == 21 ~ "BA degree",
+                                                               SCHL %in% c(22:24) ~ "MA degree or higher"
                                                                ), levels = c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher"))
                                         )
 
@@ -2076,7 +2076,7 @@ if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls
 
 ```
 
-### Educational Attainment (%) by County and Race/ethnicity SCAG Region
+### Educational Attainment (%) by Race/ethincity and whole SCAG Region
 
 - 6 categories of disabilities: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive
 
@@ -2107,7 +2107,7 @@ if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls
 #                                                                SCHL %in% c(18:19) ~ "Some College", 
 #                                                                SCHL == 20 ~ "AA Degree", 
 #                                                                SCHL == 21 ~ "BA degree", 
-#                                                                SCHL %in% c(23:24) ~ "MA degree or higher" 
+#                                                                SCHL %in% c(22:24) ~ "MA degree or higher" 
 #                                                                ), levels = c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher"))
 #                                         )
 #                                         
@@ -2149,12 +2149,9 @@ scag_edu_perc_county <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% 
 edu_perc_scag_table <- full_join(scag_edu_perc_county, scag_edu_perc_total, by = join_by(edu, race, percentage)) %>% arrange(edu) %>% ungroup()
 edu_perc_scag_table
 
-# TODO: MA or higher not right- NEED TO DOUBLE CHECK and write_csv() below
-
-
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-# write_csv(edu_perc_scag_table, here(tables_fp, "edu_perc_scag_table.csv"))
-# if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(pattern = "edu_perc"))}
+write_csv(edu_perc_scag_table, here(tables_fp, "edu_perc_scag_table.csv"))
+if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(pattern = "edu_perc"))}
 
 ```
 
@@ -2199,7 +2196,8 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "Natl_Origin", "National Origin (% Foreign born) by County and SCAG Region",
               "LEP", "Limited English Proficiency (%) by County and SCAG Region",
               "Disablity", "People with Disabilities (%) by County and SCAG Region",
-              "Categories_Disablity", "Disabilites by 6 categories (%) and then by County and SCAG Region: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive") 
+              "Categories_Disablity", "Disabilites by 6 categories (%) and then by County and SCAG Region: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive",
+              "Education", "Educational Attainment (%) by Race/ethincity and whole SCAG Region") 
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "homeownership_scag_table" is a tibble that will populate the sheet named "Figure_22".
@@ -2222,7 +2220,8 @@ sheets <- list("TOC" = toc,
                "Natl_Origin" = natl_origin_scag_table,
                "LEP" = lep_scag_table,
                "Disablity" = dis_scag_table,
-               "Categories_Disablity" = categories_dis_scag_table) 
+               "Categories_Disablity" = categories_dis_scag_table,
+               "Education" = edu_perc_scag_table) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}
