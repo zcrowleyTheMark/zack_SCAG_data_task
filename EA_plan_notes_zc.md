@@ -39,7 +39,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 
 ### New list is:
 - Figures 5-7, 19-22, 28, and 39-41
-- Tables 9-10
+- Tables 9-10- DO NOT NEED- data from NHTS
 - Demographics charts/tables (from Racial Equity Baseline Conditions Report (REBCR))
   - Total Population
   - Race/Ethnicity Distribution
@@ -52,18 +52,16 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - Median Household Income (REBCR Economy section)
   - Poverty (REBCR Economy section)
   
-### Figures/Tables with Descriptions (23 total to replicate): 
+### Figures/Tables with Descriptions (21 total to replicate): 
 
 *Green color indicates figure is completed in tabbed excel output, red indicates issues or notes with data*
 
-##### Equity Analysis Technical Report Figures (13 total to replicate- 13 Complete): 
+##### Equity Analysis Technical Report Figures (11 total to replicate- 11 Complete): 
 
 - <span style="color: green;">**Figure 5.** Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity</span> 
   - *NOTE Figure 5: Taken from all non-home workers and did not include taxi or ferry- based on values/calculations from excel figure file*
 - <span style="color: green;">**Figure 6.** Householders without a Vehicle by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 7.** Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity</span> 
-- <span style="color: red;">**Table 9. Transportation Mode Usage by Income Quintile in the SCAG Region (Source: 2017 NHTS, income quintiles calculated by SCAG) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
-- <span style="color: red;">**Table 10. Transportation Mode Usage by Race and Ethnicity in the SCAG Region (Source: 2017 NHTS) *NOT SURE IF WE CAN DO WITH ACS PUMS</span>
 - <span style="color: green;">**Figure 19.** Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 20.** People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
   - <span style="color: red;">*NOTE: Some numbers off by 0.01%, Could we get the full SAS html output to review the raw numbers from SCAG.*<span style="color: green;">
@@ -82,8 +80,9 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - <span style="color: green;">**Age Distribution (Youth, Older Adults)**- Same as in REBCR with three groups being: <18 years, 18 - 64 years, 65+ years- break down by county and whole SCAG Region.</span>
   - <span style="color: green;">**Single Parent Households** (REBCR has - female-headed) If variable HHT2 is Male or Female head of household head with children < 18, include single-parent households broken down by *gender* of head of household. By county and whole SCAG Region</span>
   - <span style="color: green;">**National Origin**- variable name NATIVITY- Percent foreign born? If NATIVITY == "Foreign Born". By county and whole SCAG Region</span>
-  - <span style="color: green;">- **Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region</span>
-  - **People with Disabilities**- DIS == "with disability" (1) By county and whole SCAG Region
+  - <span style="color: green;">**Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region</span>
+  - <span style="color: green;">**People with Disabilities**- DIS == "with disability" (1) - with DIS overall. By county and whole SCAG Region- with DIS overall</span>
+  - <span style="color: green;">**Disabilites by category**-  disaggregated by 6 categories: Self-care, hearing, vision, IL, Ambulatory, Cognitive. By county and whole SCAG Region.</span>
   - **Educational Attainment** (REBCR Economy section)- Filter to people over 25, these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
   COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region
   - **Median Household Income** (REBCR Economy section) By race and also report the whole SCAG Region
