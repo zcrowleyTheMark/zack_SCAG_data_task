@@ -1,8 +1,49 @@
-county,Asian/Pacific Islander,Black,Hispanic/Latino,Multiracial/Other,Native American,White,Total
-Imperial,5.1,15.74,6.79,3.09,11.3,4.49,6.64
-Los Angeles,8.22,16.2,8.16,8.87,14.95,7.26,8.62
-Orange,5.63,9.44,4.24,3.76,4.8,4.24,4.6
-Riverside,3.93,5.86,3.42,6.25,10.46,3.9,3.93
-San Bernardino,4.46,8.66,3.54,6.09,6.44,4.78,4.57
-Ventura,3.26,8.85,4.2,3.2,0,4.07,4.1
-SCAG,6.97,13.7,6.31,7.13,11.05,5.68,6.71
+county,race,no_vehicle_percentage
+Imperial,Asian/Pacific Islander,5.1
+Imperial,Black,15.74
+Imperial,Hispanic/Latino,6.79
+Imperial,Multiracial/Other,3.09
+Imperial,Native American,11.3
+Imperial,White,4.49
+Imperial,SCAG Region,6.64
+Los Angeles,Asian/Pacific Islander,8.22
+Los Angeles,Black,16.2
+Los Angeles,Hispanic/Latino,8.16
+Los Angeles,Multiracial/Other,8.87
+Los Angeles,Native American,14.95
+Los Angeles,White,7.26
+Los Angeles,SCAG Region,8.62
+Orange,Asian/Pacific Islander,5.63
+Orange,Black,9.44
+Orange,Hispanic/Latino,4.24
+Orange,Multiracial/Other,3.76
+Orange,Native American,4.8
+Orange,White,4.24
+Orange,SCAG Region,4.6
+Riverside,Asian/Pacific Islander,3.93
+Riverside,Black,5.86
+Riverside,Hispanic/Latino,3.42
+Riverside,Multiracial/Other,6.25
+Riverside,Native American,10.46
+Riverside,White,3.9
+Riverside,SCAG Region,3.93
+San Bernardino,Asian/Pacific Islander,4.46
+San Bernardino,Black,8.66
+San Bernardino,Hispanic/Latino,3.54
+San Bernardino,Multiracial/Other,6.09
+San Bernardino,Native American,6.44
+San Bernardino,White,4.78
+San Bernardino,SCAG Region,4.57
+Ventura,Asian/Pacific Islander,3.26
+Ventura,Black,8.85
+Ventura,Hispanic/Latino,4.2
+Ventura,Multiracial/Other,3.2
+Ventura,White,4.07
+Ventura,SCAG Region,4.1
+SCAG,Asian/Pacific Islander,6.97
+SCAG,Black,13.7
+SCAG,Hispanic/Latino,6.31
+SCAG,Multiracial/Other,7.13
+SCAG,Native American,11.05
+SCAG,White,5.68
+SCAG,SCAG Region,6.71

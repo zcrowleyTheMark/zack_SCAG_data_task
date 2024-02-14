@@ -43,8 +43,9 @@ library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect
 # library(srvyr) # Working with survey data with pipes
 
 ### Functions ######### ----
-### 
-# Function to return full table of weighted percentages by group and filtered to one value of a variable:
+### weight_perc_table_filter()
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# For use when you want to return weighted percentages of one value of a variable and by one group- e.g. people with disability (%) by county
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
 # has and if statement to drop filter_value if NULL, which it is by default
 weight_perc_table_filter <- function(df, var, weight, group, filter_value = NULL) {
@@ -86,6 +87,90 @@ weight_perc_table_filter <- function(df, var, weight, group, filter_value = NULL
     }
 }
 
+### ----
+### weight_perc_2groups()
+# Function to return full table of weighted percentages by two groups and also able to be filtered to one value of a variable if specified: weight_perc_2groups()
+# # For use when you want to return weighted percentages by two groups- e.g. HH without a vehicle (%) by county and race.
+# df = dataframe of all data, var = variable to sum over,  weight = weights, group1 = grouping variable 1 (county), group2 = grouping variable 2 (race),
+#  filter_value = value of a variable to filter output to, group1_levels = levels (vector) to change group1 to a factor, group2_levels = levels to change group2 to a factor
+# has and if statement to drop filter_value if NULL, which it is by default group_by(across(variables_2))
+weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = NULL, group1_levels = NULL, group2_levels = NULL) {
+    # If filter_value is not NULL:
+    if (!is.null(filter_value)) {
+    # Get percent for group1 (usually county):
+    group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
+                                              count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% 
+                                                 select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                              group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>%  mutate({{group1}} := "SCAG") %>% 
+                                                 select({{group1}}, percentage)
+
+    # Full join all scag_total tables:
+    group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
+
+    # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) 
+    
+    } else { # else filter_value is NULL:
+        
+    # Get percent for group1 (usually county):
+    group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
+                                                mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
+                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
+                                              count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% 
+                                                summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
+                                                 select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                              group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>%  
+                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, percentage)
+
+    # Full join all scag_total tables:
+    group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
+
+    # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total)
+    
+    } # End of main if/else.
+    
+    if (!is.null(group1_levels) & !is.null(group2_levels)) {
+        
+    # If levels are provided for both group1_levels and group2_levels- set each as a factor with levels and then arrange by group1,group2:
+    full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels = group1_levels),
+                                        {{group2}} := factor(!!sym((group2)), levels = group2_levels)) %>% 
+                                 arrange(!!sym((group1)),!!sym((group2)))
+    } 
+    
+    return(full_table)
+} # end of weight_perc_2groups()
+
+###
+###
 ```
 
 
@@ -1037,180 +1122,53 @@ race_levels <-  c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multira
 # walk_bike_public_transport ==  "Walk/Bike/Public"
 # Get percentages based on non-home workers- drop all if JWTRNS respond == 11 (use filter not equal to 11 like this (filter(JWTRNS != 11)))
 # Get Walk/Bike/Public percentages by race for all SCAG non-home workers:
-scag_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, race, walk_bike_public_transport) %>%  
-                                         group_by(race) %>% 
-                                         summarize(
-                                           total_pop = sum(PWGTP),
-                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, race, walk_bike_public_perc)
-
-# Get Walk/Bike/Public percentages by race for all by race and by county for non-home workers:
-scag_county_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, county, race, walk_bike_public_transport) %>%  
-                                         group_by(county, race) %>% 
-                                         summarize(
-                                           total_pop = sum(PWGTP),
-                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-                                         ) %>% select(county, race, walk_bike_public_perc)
-
-# Get no_veh percentages by county for all SCAG:
-scag_county_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
-                                         select(PWGTP, county, walk_bike_public_transport)  %>%  
-                                         group_by(county) %>% 
-                                         summarize(
-                                           total_pop = sum(PWGTP),
-                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-                                         ) %>% select(county, walk_bike_public_perc) 
-# Get no_veh percentages for all SCAG:
-scag_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, walk_bike_public_transport) %>%  
-                                         summarize(
-                                           total_pop = sum(PWGTP),
-                                           walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
-                                           walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
-                                           walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, walk_bike_public_perc) 
-
-# Full join all scag_total tables:
-scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_public,scag_total_walk_bike_public) %>% mutate(race = "SCAG Region")
-
-# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-walk_bike_public_scag_table <- full_join(scag_county_race_walk_bike_public,scag_total_walk_bike_public_table) %>% full_join(.,scag_race_walk_bike_public) %>% 
-                                mutate(county = factor(county, levels = county_levels),
-                                       race = factor(race, levels = race_levels)) %>% 
-                                arrange(county, race)
-walk_bike_public_scag_table
-
-# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
-# write_csv(walk_bike_public_scag_table, here(tables_fp, "walk_bike_public_scag_table.csv"))
-# if (file.exists(here(tables_fp, 'walk_bike_public_scag_table.csv'))) {rm(list = ls(pattern = "walk_bike_public"))}
-
-```
-
-```{r scratch_func_grouped}
-# df = ca_pums_scag %>% filter(JWTRNS != 11) 
-# var = "walk_bike_public_transport"
-# weight = "PWGTP"
-# group1 = "county"
-# group2 = "race"
-# filter_value = "Walk/Bike/Public"
+# scag_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, race, walk_bike_public_transport) %>%  
+#                                          group_by(race) %>% 
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% mutate(county = "SCAG") %>% select(county, race, walk_bike_public_perc)
 # 
-# # Get percent for group1 (usually county):
-# group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-#                                             group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-#                                             filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
+# # Get Walk/Bike/Public percentages by race for all by race and by county for non-home workers:
+# scag_county_race_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, county, race, walk_bike_public_transport) %>%  
+#                                          group_by(county, race) %>% 
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% select(county, race, walk_bike_public_perc)
 # 
-# # Get percent for group2 (usually county):
-# group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-#                                             group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-#                                             filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
-# 
-# # Get percent for group2 (usually county):
-# group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
-#                                           count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-#                                             group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-#                                             filter(!!sym((var)) == filter_value) %>% ungroup() %>% 
-#                                              select({{group1}}, {{group2}},  percentage)
-# 
-# # Get percent for group2 (usually county):
-# total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-#                                           group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-#                                             filter(!!sym((var)) == filter_value) %>% ungroup() %>%  mutate({{group1}} := "SCAG") %>% 
-#                                              select({{group1}}, percentage)
+# # Get no_veh percentages by county for all SCAG:
+# scag_county_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
+#                                          select(PWGTP, county, walk_bike_public_transport)  %>%  
+#                                          group_by(county) %>% 
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% select(county, walk_bike_public_perc) 
+# # Get no_veh percentages for all SCAG:
+# scag_total_walk_bike_public <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWGTP, walk_bike_public_transport) %>%  
+#                                          summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            walk_bike_public = sum(PWGTP[walk_bike_public_transport == "Walk/Bike/Public"]),  
+#                                            walk_bike_public_prop = walk_bike_public / total_pop, # divide by total_pop for proportion
+#                                            walk_bike_public_perc = round(walk_bike_public_prop*100, 2)
+#                                          ) %>% mutate(county = "SCAG") %>% select(county, walk_bike_public_perc) 
 # 
 # # Full join all scag_total tables:
-# group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
+# scag_total_walk_bike_public_table <- full_join(scag_county_total_walk_bike_public,scag_total_walk_bike_public) %>% mutate(race = "SCAG Region")
 # 
 # # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-# full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) %>% 
+# walk_bike_public_scag_table <- full_join(scag_county_race_walk_bike_public,scag_total_walk_bike_public_table) %>% full_join(.,scag_race_walk_bike_public) %>% 
 #                                 mutate(county = factor(county, levels = county_levels),
 #                                        race = factor(race, levels = race_levels)) %>% 
-#                                 arrange(county, race)
-# return(full_table)
-
-
-### Functions ######### ----
-### 
-# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_2groups
-# df = dataframe of all data, var = variable to sum over,  weight = weights, group1 = grouping variable 1 (county), group2 = grouping variable 2 (race),
-#  filter_value = value of a variable to filter output to.
-# has and if statement to drop filter_value if NULL, which it is by default group_by(across(variables_2))
-weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = NULL) {
-    # If filter_value is not NULL:
-    if (!is.null(filter_value)) {
-    # Get percent for group1 (usually county):
-    group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                                group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
-
-    # Get percent for group2 (usually county):
-    group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                                group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
-
-    # Get percent for group2 (usually county):
-    group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
-                                              count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                                group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% 
-                                                 select({{group1}}, {{group2}},  percentage)
-
-    # Get percent for group2 (usually county):
-    total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                              group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>%  mutate({{group1}} := "SCAG") %>% 
-                                                 select({{group1}}, percentage)
-
-    # Full join all scag_total tables:
-    group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
-
-    # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) %>% 
-                                    mutate(county = factor(county, levels = county_levels),
-                                           race = factor(race, levels = race_levels)) %>% 
-                                    arrange(county, race)
-    
-    } else { # else filter_value is NULL:
-        
-    # Get percent for group1 (usually county):
-    group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                                group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                                mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
-
-    # Get percent for group2 (usually county):
-    group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                                group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
-
-    # Get percent for group2 (usually county):
-    group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
-                                              count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                                group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% 
-                                                summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                                 select({{group1}}, {{group2}},  percentage)
-
-    # Get percent for group2 (usually county):
-    total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                              group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>%  ungroup() %>%  
-                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, percentage)
-
-    # Full join all scag_total tables:
-    group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
-
-    # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) %>% 
-                                    mutate(county = factor(county, levels = county_levels),
-                                           race = factor(race, levels = race_levels)) %>% 
-                                    arrange(county, race)
-    
-    }
-    
-    return(full_table)
-}
+#                                 arrange(county, race) %>% ungroup()
+# walk_bike_public_scag_table
 
 # Use weight_perc_table_filter():
 # Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
@@ -1218,55 +1176,17 @@ weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = 
 # has and if statement to drop filter_value if NULL, which it is by default
 # 
 # Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "poverty" and filter to "poverty" == "Yes": 
-ALT_walk_bike_public_scag_table <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
-    weight_perc_2groups(var = "walk_bike_public_transport", weight = "PWGTP", group1 = "county", group2 = "race", filter_value = "Walk/Bike/Public")
-ALT_walk_bike_public_scag_table
+walk_bike_public_scag_table <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
+    weight_perc_2groups(var = "walk_bike_public_transport", weight = "PWGTP", group1 = "county", group2 = "race", filter_value = "Walk/Bike/Public",
+                        group1_levels = county_levels, group2_levels = race_levels) %>% rename(walk_bike_public_perc = percentage)
+walk_bike_public_scag_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(walk_bike_public_scag_table, here(tables_fp, "walk_bike_public_scag_table.csv"))
+if (file.exists(here(tables_fp, 'walk_bike_public_scag_table.csv'))) {rm(list = ls(pattern = "walk_bike_public"))}
 
 ```
 
-
-```{r}
-df = ca_pums_scag %>% filter(JWTRNS != 11) 
-var = "walk_bike_public_transport"
-weight = "PWGTP"
-group1 = "county"
-group2 = "race"
-filter_value = "Walk/Bike/Public"
-
-# Get percent for group1 (usually county):
-group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                            group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                            filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
-
-# Get percent for group2 (usually county):
-group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                            group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                            filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
-
-# Get percent for group2 (usually county):
-group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
-                                          count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                            group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                            filter(!!sym((var)) == filter_value) %>% ungroup() %>% 
-                                             select({{group1}}, {{group2}},  percentage)
-
-# Get percent for group2 (usually county):
-total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
-                                          group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
-                                            filter(!!sym((var)) == filter_value) %>% ungroup() %>%  mutate({{group1}} := "SCAG") %>% 
-                                             select({{group1}}, percentage)
-
-# Full join all scag_total tables:
-group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
-
-# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) %>% 
-                                mutate(county = factor(county, levels = county_levels),
-                                       race = factor(race, levels = race_levels)) %>% 
-                                arrange(county, race)
-return(full_table)
-
-```
 
 ### Figure 6. Householders without a Vehicle by Race and Ethnicity
 
@@ -2542,4 +2462,146 @@ write_xlsx(sheets, "output/scag_tabbed.xlsx")
 ```
 
 --- 
+
+```{r scratch_func_grouped, eval=FALSE, include=FALSE}
+df = ca_pums_scag %>% filter(JWTRNS != 11) 
+var = "walk_bike_public_transport"
+weight = "PWGTP"
+group1 = "county"
+group2 = "race"
+filter_value = "Walk/Bike/Public"
+group1_levels = county_levels
+group2_levels = race_levels
+    
+# Get percent for group1 (usually county):
+group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                            group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                            filter(!!sym((var)) == filter_value) %>% mutate({{group2}} := "SCAG Region") %>% ungroup() %>%
+                                            select({{group1}}, {{group2}},  percentage)
+# Get percent for group2 (usually county):
+group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                            group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                            filter(!!sym((var)) == filter_value) %>% mutate({{group1}} := "SCAG") %>% ungroup() %>% 
+                                            select({{group1}}, {{group2}},  percentage)
+# Get percent for group2 (usually county):
+group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
+                                          count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                            group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                            filter(!!sym((var)) == filter_value) %>% ungroup() %>% 
+                                             select({{group1}}, {{group2}},  percentage)
+# Get percent for group2 (usually county):
+total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                          group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                            filter(!!sym((var)) == filter_value) %>% mutate({{group1}} := "SCAG") %>% ungroup() %>% 
+                                             select({{group1}}, percentage) 
+# Full join all scag_total tables:
+group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
+# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) 
+
+if (!is.null(group1_levels) & !is.null(group2_levels)) {
+    
+# If levels are provided for both group1_levels and group2_levels- set each as a factor with levels and then arrange by group1,group2:
+full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels = group1_levels),
+                                    {{group2}} := factor(!!sym((group2)), levels = group2_levels)) %>% 
+                             arrange(desc({{group2}}),{{group1}}) 
+} 
+
+full_table
+
+# 
+### Functions ######### ----
+### weight_perc_2groups()
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_2groups
+# df = dataframe of all data, var = variable to sum over,  weight = weights, group1 = grouping variable 1 (county), group2 = grouping variable 2 (race),
+#  filter_value = value of a variable to filter output to.
+# has and if statement to drop filter_value if NULL, which it is by default group_by(across(variables_2))
+weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = NULL, group1_levels = NULL, group2_levels = NULL) {
+    # If filter_value is not NULL:
+    if (!is.null(filter_value)) {
+    # Get percent for group1 (usually county):
+    group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
+                                              count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>% 
+                                                 select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                              group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% 
+                                                filter(!!sym((var)) == filter_value) %>% ungroup() %>%  mutate({{group1}} := "SCAG") %>% 
+                                                 select({{group1}}, percentage)
+
+    # Full join all scag_total tables:
+    group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
+
+    # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) 
+    
+    } else { # else filter_value is NULL:
+        
+    # Get percent for group1 (usually county):
+    group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
+                                                mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
+                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
+                                              count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                                group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% 
+                                                summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
+                                                 select({{group1}}, {{group2}},  percentage)
+
+    # Get percent for group2 (usually county):
+    total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
+                                              group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>%  
+                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, percentage)
+
+    # Full join all scag_total tables:
+    group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
+
+    # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total)
+    
+    } # End of main if/else.
+    
+    if (!is.null(group1_levels) & !is.null(group2_levels)) {
+        
+    # If levels are provided for both group1_levels and group2_levels- set each as a factor with levels and then arrange by group1,group2:
+    full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels = group1_levels),
+                                        {{group2}} := factor(!!sym((group2)), levels = group2_levels)) %>% 
+                                 arrange(!!sym((group1)),!!sym((group2)))
+    } 
+    
+    return(full_table)
+}
+
+# Use weight_perc_table_filter():
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
+# has and if statement to drop filter_value if NULL, which it is by default
+# 
+# Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "poverty" and filter to "poverty" == "Yes": 
+walk_bike_public_scag_table <- ca_pums_scag %>% filter(JWTRNS != 11) %>% 
+    weight_perc_2groups(var = "walk_bike_public_transport", weight = "PWGTP", group1 = "county", group2 = "race", filter_value = "Walk/Bike/Public",
+                        group1_levels = county_levels, group2_levels = race_levels) %>% rename(walk_bike_public_perc = percentage)
+walk_bike_public_scag_table
+
+
+```
 
