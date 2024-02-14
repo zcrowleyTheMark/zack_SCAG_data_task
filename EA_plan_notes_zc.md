@@ -1,10 +1,23 @@
 ---
 title: "EA Tech Support Plan and Docs"
 author: "Zack Crowley"
-date: "1/23/24"
+date: "2/14/24"
 output: html_document
 ---
 
+### To Do:
+
+- Change all tables in tabbed excel output "scag_tabbed.xlsx" to long form
+
+- Clean up R code in .Rmd, double-check all code works and confirm folder structure/ imports and outputs work.
+
+- Set up how to create tabbed excel output "scag_tabbed.xlsx" using data from 2018-22 ACS PUMS. 
+
+- Figure out how to share all files/folder structure: either zip or use .git repo from Github.
+
+- Complete separate Documentation: high-level walk through/broad explanation of R code and inputs/outputs.
+
+---
 
 ### Main Data Files: 
 - **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2017-2021](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data)  
@@ -85,8 +98,8 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - <span style="color: green;">**Disabilites by category**-  disaggregated by 6 categories: Self-care, hearing, vision, IL, Ambulatory, Cognitive. By county and whole SCAG Region.</span>
   - <span style="color: green;">**Educational Attainment** (REBCR Economy section)- Filter to people over 25, these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
   COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region</span>
-  - **Median Household Income** (REBCR Economy section) By race and also report the whole SCAG Region
-  - **Poverty (Household)** (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. By race and also report the whole SCAG Region, do not include 'people of color' category.
+  - <span style="color: green;">**Median Household Income** (REBCR Economy section) By race and also report the whole SCAG Region</span>
+  - <span style="color: green;">**Poverty (Household)** (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. By race and also report the whole SCAG Region, do not include 'people of color' category.</span>
   
   - notes also found in this Google doc: https://docs.google.com/document/d/1szSsAiYopeeOHjl3hnwSLl8afTc8LS16HEcws6sHdfI/edit
 

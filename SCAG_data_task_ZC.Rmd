@@ -1,7 +1,7 @@
 ---
 title: "SCAG Data Task"
 author: "Zack Crowley"
-date: "`r Sys.Date()`"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: html_document
 ---
 
@@ -986,6 +986,37 @@ ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~
                                                     )
                                         )
 
+# Household Income:
+# # Create new variable "housing_income" by multiplying HINCP by ADJINC for each given year:
+# SAS Example
+# *------- H2.Median Household Income  -------------;
+# 
+# *
+# ADJINC Character 7
+# Adjustment factor for income and earnings dollar amounts (6 implied decimal places)
+# 1117630 .2017 factor (1.011189 * 1.10526316)
+# 1093093 .2018 factor (1.013097 * 1.07896160)
+# 1070512 .2019 factor (1.010145 * 1.05976096)
+# 1053131 .2020 factor (1.006149 * 1.04669465)
+# 1029928 .2021 factor (1.029928 * 1.00000000);
+# 
+# HHINC=.;
+# if ADJINC=1117630 then HHINC=HINCP*1.011189 * 1.10526316; 	*2017 Adjust Income ($2021);
+# if ADJINC=1093093 then HHINC=HINCP*1.013097 * 1.07896160; 	*2018 Adjust Income ($2021);
+# if ADJINC=1070512 then HHINC=HINCP*1.010145 * 1.05976096; 	*2019 Adjust Income ($2021);
+# if ADJINC=1053131 then HHINC=HINCP*1.006149 * 1.04669465; 	*2020 Adjust Income ($2021);
+# if ADJINC=1029928 then HHINC=HINCP*1.029928 * 1.00000000; 	*2021 Adjust Income ($2021);
+
+# Create new variable "housing_income" by multiplying HINCP by ADJINC for each given year:
+ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * 1.011189 * 1.10526316, # 2017 Adjust Income
+                                                                   ADJINC == 1093093 ~ HINCP * 1.013097 * 1.07896160, # 2018 Adjust Income
+                                                                   ADJINC == 1070512 ~ HINCP * 1.010145 * 1.05976096, # 2019 Adjust Income
+                                                                   ADJINC == 1053131 ~ HINCP * 1.006149 * 1.04669465, # 2020 Adjust Income
+                                                                   ADJINC == 1029928 ~ HINCP * 1.029928 * 1.00000000, # 2021 Adjust Income
+                                        )
+                        ) 
+
+
 ```
 
 # Analysis and Replication of Tables and Figures for SCAG
@@ -1681,7 +1712,7 @@ if (file.exists(here(tables_fp, 'unemployed_scag_table.csv'))) {rm(list = ls(pat
 # if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line
 
 # Get working poor percentage by race for all SCAG:
-scag_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, race, poverty)%>% drop_na(poverty) %>% 
+scag_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, race, poverty) %>% drop_na(poverty) %>% 
                                        group_by(race) %>% 
                                        summarize(
                                            total_pop = sum(PWGTP),
@@ -2146,7 +2177,7 @@ scag_edu_perc_county <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% 
                                          mutate(total_pop = sum(n)) %>% ungroup() %>% 
                                          group_by(edu, race) %>% summarize(percentage = round( (n / total_pop)*100, 2)) 
 # Full join all scag_total tables:
-edu_perc_scag_table <- full_join(scag_edu_perc_county, scag_edu_perc_total, by = join_by(edu, race, percentage)) %>% arrange(edu) %>% ungroup()
+edu_perc_scag_table <- full_join(scag_edu_perc_county, scag_edu_perc_total, by = join_by(edu, race, percentage)) %>% arrange(edu) %>% ungroup() %>% rename(education_level = edu)
 edu_perc_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -2155,6 +2186,98 @@ if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(patte
 
 ```
 
+### Median Household Income by Race/ethincity and whole SCAG Region
+
+```{r med_hh_incom}
+### 
+### Median Household Income by Race/ethincity and whole SCAG Region
+# Use person level weights- WGTP:
+# filter(RELSHIPP == 20) Only household level
+# use weighted median for only households
+# 
+### 
+# Household Income:
+# # Create new variable "housing_income" by multiplying HINCP by ADJINC for each given year:
+# SAS Example
+# *------- H2.Median Household Income  -------------;
+# 
+# *
+# ADJINC Character 7
+# Adjustment factor for income and earnings dollar amounts (6 implied decimal places)
+# 1117630 .2017 factor (1.011189 * 1.10526316)
+# 1093093 .2018 factor (1.013097 * 1.07896160)
+# 1070512 .2019 factor (1.010145 * 1.05976096)
+# 1053131 .2020 factor (1.006149 * 1.04669465)
+# 1029928 .2021 factor (1.029928 * 1.00000000);
+# 
+# HHINC=.;
+# if ADJINC=1117630 then HHINC=HINCP*1.011189 * 1.10526316; 	*2017 Adjust Income ($2021);
+# if ADJINC=1093093 then HHINC=HINCP*1.013097 * 1.07896160; 	*2018 Adjust Income ($2021);
+# if ADJINC=1070512 then HHINC=HINCP*1.010145 * 1.05976096; 	*2019 Adjust Income ($2021);
+# if ADJINC=1053131 then HHINC=HINCP*1.006149 * 1.04669465; 	*2020 Adjust Income ($2021);
+# if ADJINC=1029928 then HHINC=HINCP*1.029928 * 1.00000000; 	*2021 Adjust Income ($2021);
+
+# Create new variable "housing_income" by multiplying HINCP by ADJINC for each given year:
+# ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * 1.011189 * 1.10526316, # 2017 Adjust Income
+#                                                                    ADJINC == 1093093 ~ HINCP * 1.013097 * 1.07896160, # 2018 Adjust Income
+#                                                                    ADJINC == 1070512 ~ HINCP * 1.010145 * 1.05976096, # 2019 Adjust Income
+#                                                                    ADJINC == 1053131 ~ HINCP * 1.006149 * 1.04669465, # 2020 Adjust Income
+#                                                                    ADJINC == 1029928 ~ HINCP * 1.029928 * 1.00000000, # 2021 Adjust Income
+#                                         )
+#                         ) 
+                        
+
+# Get median hh income for all SCAG:
+scag_med_hh_income_total <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income)  %>% 
+                                             summarize(
+                                               med_hh_income = round(weighted.median(housing_income, WGTP, na.rm = TRUE),2)
+                                             ) %>% mutate(race = "SCAG region") %>% select(race,  med_hh_income)
+
+# Get median hh income for by race for each SCAG County:
+scag_med_hh_income_county <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income, race)  %>% 
+                                              group_by(race) %>% 
+                                              summarize(
+                                                med_hh_income = round(weighted.median(housing_income, WGTP, na.rm = TRUE),2)
+                                              ) %>%  select(race, med_hh_income)
+
+# Full join all scag_total tables:
+med_hh_income_scag_table <- full_join(scag_med_hh_income_county, scag_med_hh_income_total, by = join_by(med_hh_income, race)) %>% 
+                                        arrange(housing_income) %>% ungroup() %>% rename(housing_incomecation_level = housing_income)
+med_hh_income_scag_table
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(med_hh_income_scag_table, here(tables_fp, "med_hh_income_scag_table.csv"))
+if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(pattern = "med_hh_income"))}
+
+```
+
+
+--- 
+
+
+
+### Household Poverty (%) by Race/ethincity and whole SCAG Region
+
+```{r poverty_hh}
+### 
+# Use household level weights- WGTP:
+# Filter only households: filter(RELSHIPP == 20)
+# if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line
+
+# Use weight_perc_table_filter():
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
+# has and if statement to drop filter_value if NULL, which it is by default
+# 
+# Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "poverty" and filter to "poverty" == "Yes": 
+poverty_hh_scag_table <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% weight_perc_table_filter(var = "poverty", weight = "WGTP", group = "race", filter_value = "Yes")
+
+
+# Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
+write_csv(poverty_hh_scag_table, here(tables_fp, "poverty_hh_scag_table.csv"))
+if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pattern = "poverty_hh"))}
+
+```
 
 
 --- 
@@ -2197,7 +2320,9 @@ toc <- tribble(~sheet_name, ~ figure_name,
               "LEP", "Limited English Proficiency (%) by County and SCAG Region",
               "Disablity", "People with Disabilities (%) by County and SCAG Region",
               "Categories_Disablity", "Disabilites by 6 categories (%) and then by County and SCAG Region: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive",
-              "Education", "Educational Attainment (%) by Race/ethincity and whole SCAG Region") 
+              "Education", "Educational Attainment (%) by Race/ethincity and whole SCAG Region",
+              "Median_HH_Income", "Median Household Income by Race/ethincity and whole SCAG Region",
+              "Poverty_HH","Household Poverty (%) by Race/ethincity and whole SCAG Region") 
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name or each sheets and the df/tibble that will populate it- e.g below "homeownership_scag_table" is a tibble that will populate the sheet named "Figure_22".
@@ -2221,7 +2346,9 @@ sheets <- list("TOC" = toc,
                "LEP" = lep_scag_table,
                "Disablity" = dis_scag_table,
                "Categories_Disablity" = categories_dis_scag_table,
-               "Education" = edu_perc_scag_table) 
+               "Education" = edu_perc_scag_table,
+               "Median_HH_Income" = med_hh_income_scag_table,
+               "Poverty_HH" = poverty_hh_scag_table) 
 
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}
