@@ -64,7 +64,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: green;">**Figure 7.** Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity</span> 
 - <span style="color: green;">**Figure 19.** Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 20.** People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
-  - <span style="color: red;">*NOTE: Some numbers off by 0.01%, Could we get the full SAS html output to review the raw numbers from SCAG.*<span style="color: green;">
+  - <span style="color: red;">*NOTE: After reviewing the full SAS html output my output matches teh SAS output but not the figure from figure 20 in "Equity_Report_Figures_20231102.xlsx"*<span style="color: green;">
 - <span style="color: green;">**Figure 21.** Households with Severe Overcrowding by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 22.** Homeownership by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 28.** People without Health Insurance by Race and Ethnicity</span>
@@ -83,8 +83,8 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - <span style="color: green;">**Limited English Proficiency**- variable named ENG has 4 categories- If ENG is "not well" or "not at all", so the groups are: Not at all/not well vs well/very well. By county and whole SCAG Region</span>
   - <span style="color: green;">**People with Disabilities**- DIS == "with disability" (1) - with DIS overall. By county and whole SCAG Region- with DIS overall</span>
   - <span style="color: green;">**Disabilites by category**-  disaggregated by 6 categories: Self-care, hearing, vision, IL, Ambulatory, Cognitive. By county and whole SCAG Region.</span>
-  - **Educational Attainment** (REBCR Economy section)- Filter to people over 25, these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
-  COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region
+  - <span style="color: green;">**Educational Attainment** (REBCR Economy section)- Filter to people over 25, these 6 categories: "LESS THAN HS DIPLOMA", "HS DIPLOMA", "SOME 
+  COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region</span>
   - **Median Household Income** (REBCR Economy section) By race and also report the whole SCAG Region
   - **Poverty (Household)** (REBCR Economy section) variable name POVPIP- income to poverty ratio, if 0<= POVPIP <200 then pov=1; if POVPIP>=200 then pov=2. If households lived below 200 percent of the poverty line. By race and also report the whole SCAG Region, do not include 'people of color' category.
   
