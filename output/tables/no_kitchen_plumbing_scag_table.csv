@@ -1,8 +1,50 @@
-county,Asian/Pacific Islander,Black,Hispanic/Latino,Multiracial/Other,Native American,White,Total
-Imperial,0,0,0.1,0,2.26,0,0.1
-Los Angeles,0.22,0.53,0.29,0.37,0.13,0.21,0.28
-Orange,0.11,0,0.14,0.41,0,0.08,0.11
-Riverside,0.12,0.14,0.2,0.3,1.79,0.18,0.19
-San Bernardino,0.31,0.26,0.18,0.14,0.53,0.27,0.23
-Ventura,0.18,0,0.18,0.33,0,0.26,0.22
-SCAG,0.19,0.42,0.24,0.34,0.54,0.19,0.23
+county,race,no_kitchen_plumbing_percentage
+Imperial,Asian/Pacific Islander,0
+Imperial,Black,0
+Imperial,Hispanic/Latino,0.1
+Imperial,Multiracial/Other,0
+Imperial,Native American,2.26
+Imperial,White,0
+Imperial,SCAG Region,0.1
+Los Angeles,Asian/Pacific Islander,0.22
+Los Angeles,Black,0.53
+Los Angeles,Hispanic/Latino,0.29
+Los Angeles,Multiracial/Other,0.37
+Los Angeles,Native American,0.13
+Los Angeles,White,0.21
+Los Angeles,SCAG Region,0.28
+Orange,Asian/Pacific Islander,0.11
+Orange,Black,0
+Orange,Hispanic/Latino,0.14
+Orange,Multiracial/Other,0.41
+Orange,Native American,0
+Orange,White,0.08
+Orange,SCAG Region,0.11
+Riverside,Asian/Pacific Islander,0.12
+Riverside,Black,0.14
+Riverside,Hispanic/Latino,0.2
+Riverside,Multiracial/Other,0.3
+Riverside,Native American,1.79
+Riverside,White,0.18
+Riverside,SCAG Region,0.19
+San Bernardino,Asian/Pacific Islander,0.31
+San Bernardino,Black,0.26
+San Bernardino,Hispanic/Latino,0.18
+San Bernardino,Multiracial/Other,0.14
+San Bernardino,Native American,0.53
+San Bernardino,White,0.27
+San Bernardino,SCAG Region,0.23
+Ventura,Asian/Pacific Islander,0.18
+Ventura,Black,0
+Ventura,Hispanic/Latino,0.18
+Ventura,Multiracial/Other,0.33
+Ventura,Native American,0
+Ventura,White,0.26
+Ventura,SCAG Region,0.22
+SCAG,Asian/Pacific Islander,0.19
+SCAG,Black,0.42
+SCAG,Hispanic/Latino,0.24
+SCAG,Multiracial/Other,0.34
+SCAG,Native American,0.54
+SCAG,White,0.19
+SCAG,SCAG Region,0.23

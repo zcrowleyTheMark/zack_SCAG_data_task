@@ -77,12 +77,13 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: green;">**Figure 7.** Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity</span> 
 - <span style="color: green;">**Figure 19.** Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 20.** People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
-  - <span style="color: red;">*NOTE: After reviewing the full SAS html output my output matches teh SAS output but not the figure from figure 20 in "Equity_Report_Figures_20231102.xlsx"*<span style="color: green;">
+  - <span style="color: red;">*NOTE: After reviewing the full SAS html output my output matches the SAS output but not the figure from figure 20 in "Equity_Report_Figures_20231102.xlsx"*<span style="color: green;">
 - <span style="color: green;">**Figure 21.** Households with Severe Overcrowding by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 22.** Homeownership by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 28.** People without Health Insurance by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 39.** Median Hourly Wage by Race and Ethnicity</span>
 - <span style="color: green;">**Figure 40.** Unemployment by Race and Ethnicity</span>
+- **ABOVE this line ------ HAVE been changed to long form, need to fix the ones below ----**
 - <span style="color: green;">**Figure 41.** Working Poor by Race and Ethnicity</span>
   - NOTE: Figure 41 is working poor using person-level weights- civilian workers aged 18 to 64- poverty below in REBCR demographics is household poverty (both same measure if 0<= POVPIP <200) using housing level weights.
 
