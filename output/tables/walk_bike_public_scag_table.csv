@@ -1,8 +1,50 @@
-county,Asian/Pacific Islander,Black,Hispanic/Latino,Multiracial/Other,Native American,White,Total
-Imperial,2.18,14.27,3.67,5.19,5.61,5.65,4.13
-Los Angeles,7.32,10.53,9.96,9.79,9.55,7.19,8.9
-Orange,3.49,7.02,5.94,3.45,3.94,3.45,4.41
-Riverside,3.89,3.56,2.16,2.99,9.91,2.43,2.49
-San Bernardino,2.39,5.45,2.78,4.57,12.27,2.99,3.07
-Ventura,2.67,6.14,3.04,4.19,3,2.97,3.07
-SCAG,5.68,8.73,7.16,6.84,8.8,4.99,6.41
+county,race,walk_bike_public_perc
+Imperial,Asian/Pacific Islander,2.18
+Imperial,Black,14.27
+Imperial,Hispanic/Latino,3.67
+Imperial,Multiracial/Other,5.19
+Imperial,Native American,5.61
+Imperial,White,5.65
+Imperial,SCAG Region,4.13
+Los Angeles,Asian/Pacific Islander,7.32
+Los Angeles,Black,10.53
+Los Angeles,Hispanic/Latino,9.96
+Los Angeles,Multiracial/Other,9.79
+Los Angeles,Native American,9.55
+Los Angeles,White,7.19
+Los Angeles,SCAG Region,8.9
+Orange,Asian/Pacific Islander,3.49
+Orange,Black,7.02
+Orange,Hispanic/Latino,5.94
+Orange,Multiracial/Other,3.45
+Orange,Native American,3.94
+Orange,White,3.45
+Orange,SCAG Region,4.41
+Riverside,Asian/Pacific Islander,3.89
+Riverside,Black,3.56
+Riverside,Hispanic/Latino,2.16
+Riverside,Multiracial/Other,2.99
+Riverside,Native American,9.91
+Riverside,White,2.43
+Riverside,SCAG Region,2.49
+San Bernardino,Asian/Pacific Islander,2.39
+San Bernardino,Black,5.45
+San Bernardino,Hispanic/Latino,2.78
+San Bernardino,Multiracial/Other,4.57
+San Bernardino,Native American,12.27
+San Bernardino,White,2.99
+San Bernardino,SCAG Region,3.07
+Ventura,Asian/Pacific Islander,2.67
+Ventura,Black,6.14
+Ventura,Hispanic/Latino,3.04
+Ventura,Multiracial/Other,4.19
+Ventura,Native American,3
+Ventura,White,2.97
+Ventura,SCAG Region,3.07
+SCAG,Asian/Pacific Islander,5.68
+SCAG,Black,8.73
+SCAG,Hispanic/Latino,7.16
+SCAG,Multiracial/Other,6.84
+SCAG,Native American,8.8
+SCAG,White,4.99
+SCAG,SCAG Region,6.41
