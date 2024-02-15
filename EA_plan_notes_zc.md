@@ -20,7 +20,9 @@ output: html_document
 ---
 
 ### Main Data Files: 
+
 - **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2017-2021](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data)  
+
 - **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2018-2022](https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/)
   - NOTES for using 2022 data: - Has PUMA's for 2010 census for years 2018-2021, the observations from 2022 have PUMA's from the 2020 census- some of which may be new but are still within each SCAG county since the prefix of each PUMA remains the same.
   
@@ -28,17 +30,20 @@ output: html_document
 --- 
 
 ### Docs received from Annaleigh at SCAG from [Temp-Equity Analysis](https://scag.sharepoint.com/sites/PublicLibrary/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FPublicLibrary%2FShared%20Documents%2FEquity%20Working%20Group%2FTemp%2DEquity%20Analysis&p=true&ga=1):
+
 - the SAS script that we have (in case it is helpful to you)
 - the intermediate files that we received from the staff that ran the SAS script (2023_Equity Indicators_ACS1721_...)
 - the list of figures/tables that we'd like to be a part of the baseline conditions section with the county-level data visualizations (2023 Equity indicators, note you can filter by Data Source [PUMS] and Table/Figure numbers in Column K)
   - One note is that the demographics (Historical Demographic Trends) section of the Equity analysis didn't have the same visualizations that the Baseline Conditions Reports had, so we would like to have the option to separate some of these out into new visualizations (maybe this is the purpose of having the "raw" data file!)
 
 ### SCAG expectations/deliverables:
+
   - Develop script (in R) for compiling necessary "raw" data points from baseline conditions report into one document to provide flexibility in what data gets visualized/how the dashboard is structured
   - Develop script (either incorporated in the first, or separate) to create a document (that can be opened in Excel) with one tab for each of the designated topic areas indicated by SCAG
   - Develop separate "walk-through" documentation to show how to run the script(s) for future updates (or prior years)
   
 ### Deliverables:
+
   - Script(s)
   - Documentation
   - "raw" data set for 2021 5-year ACS
@@ -51,6 +56,7 @@ output: html_document
 For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking for something more like the tables from the [Racial Equity Baseline Conditions Report (REBCR)](https://scag.ca.gov/sites/main/files/file-attachments/2022racialequitybaselineconditionsreport_final.pdf) under the demographics/economy sections (starting on PDF page 8). I added new documents to the [Temp-Equity Analysis](https://scag.sharepoint.com/sites/PublicLibrary/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FPublicLibrary%2FShared%20Documents%2FEquity%20Working%20Group%2FTemp%2DEquity%20Analysis&p=true&ga=1) folder (1_Demographics_Figures and 5_Economy_Figures) from the REBCR. They're not clean by any means, but its reflective of what we have for the tabs we have for the Equity Analysis. See full list of charts for demographics below.
 
 ### New list is:
+
 - Figures 5-7, 19-22, 28, and 39-41
 - Tables 9-10- DO NOT NEED- data from NHTS
 - Demographics charts/tables (from Racial Equity Baseline Conditions Report (REBCR))
@@ -65,7 +71,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
   - Median Household Income (REBCR Economy section)
   - Poverty (REBCR Economy section)
   
-### Figures/Tables with Descriptions (21 total to replicate): 
+### Figures/Tables with Descriptions (22 total to replicate, 22 complete): 
 
 *Green color indicates figure is completed in tabbed excel output, red indicates issues or notes with data*
 
@@ -87,7 +93,7 @@ For the demographics charts (instead of Figure 2, and Tables 7-10), I'm looking 
 - <span style="color: green;">**Figure 41.** Working Poor by Race and Ethnicity</span>
   - NOTE: Figure 41 is working poor using person-level weights- civilian workers aged 18 to 64- poverty below in REBCR demographics is household poverty (both same measure if 0<= POVPIP <200) using housing level weights.
 
-##### Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020 and 10 total to replicate)
+##### Demographics charts/tables to produce based on figures from Racial Equity Baseline Conditions Report (REBCR)- (which were ACS 2016-2020; 11 total to replicate- 11 Complete)
 
   - <span style="color: green;">**Total Population**- By county and whole SCAG Region</span>
   - <span style="color: green;">**Race/Ethnicity Distribution**- By county and whole SCAG Region- same racial categories as in EA Report.</span>

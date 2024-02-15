@@ -2,7 +2,9 @@
 title: "SCAG Data Task"
 author: "Zack Crowley"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
-output: html_document
+output: 
+    html_document:
+        df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -11,14 +13,17 @@ output: html_document
 knitr::opts_chunk$set(
     echo = FALSE, 
     warning = FALSE, 
-    message = FALSE 
+    message = FALSE,
+    rows.print = 20 # display 20 rows inline and in document
     # fig.width = 6.5,
     # fig.height = 4
     )
 # Prevents sci notation and sets the output of decimals to 4 (0.0000), suppresses warnings/info for tidyverse:
 options(scipen = 999,
         tidyverse.quiet = TRUE,
-        dplyr.summarise.inform = FALSE)
+        dplyr.summarise.inform = FALSE,
+        rows.print = 20
+        )
 
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently:
 here::i_am("SCAG_data_task_ZC.Rmd")
@@ -177,10 +182,7 @@ county_levels <- c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernar
 # race_levels:
 race_levels <- c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "SCAG Region")
 
-```
-
-
-```{r data dicts, include=FALSE}
+#### Data Dictionaries ----
 ### 2021 ACS: 
 ## Get data dictionary as tibble from tidycensus for 2021:
 # pums_vars_acs5 <- pums_variables %>%
@@ -220,10 +222,7 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 # Read in acs_data_dict_22
 pums_vars_acs5_22 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 
-```
-
-
-```{r setup file paths, include=FALSE}
+#### Setup file paths ----
 # Set up all file paths:
 # file path for all raw data:
 data_fp <- here('data')
@@ -427,7 +426,6 @@ merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 
 
 --- 
-
 
 ## API Calls using tidycensus package:
 <!-- TODO: Fix API calls to US Census using tidycensus -->
@@ -2330,13 +2328,26 @@ categories_dis_scag_table <- map2(disability_list[["var_names"]], disability_lis
                                   ) %>% bind_rows()
 categories_dis_scag_table
 
+# Vector of variable names and a vector of text to add as disability_type to each tibble:
+
+disability_var_names <- c("DDRS", "DEAR", "DEYE", "DOUT", "DPHY", "DREM")
+disability_text_vars <- c("Self-care difficulty", "Hearing difficulty","Vision difficulty", "Independent living", "Ambulatory difficulty", "Cognitive difficulty")
+
+# use map2(), to iterate over both elements of disability_list- the x = "var_names" and y ="text_vars", pass to function and use bind_rows() to turn the list of tibbles into a single tibble that is the full
+# table of each disablity_type percentage by county and all of SCAG 
+categories_dis_scag_table <- map2(.x = disability_var_names, .y =  disability_text_vars, 
+                                  function(x,y) weight_perc_table_filter(df = ca_pums_scag, var = x, weight = "PWGTP", group = "county", filter_value = 1) %>% 
+                                                mutate(disability_type = y) %>% 
+                                                select(county, disability_type, percentage)
+                                  ) %>% bind_rows()
+categories_dis_scag_table
+
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(categories_dis_scag_table, here(tables_fp, "categories_dis_scag_table.csv"))
 if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls(pattern = "categories_dis"))}
 
 ```
 
-<!-- # TODO: ABOVE figures changed to long format, need to change all below this point -->
 
 ### Educational Attainment (%) by Race/ethincity and whole SCAG Region
 
@@ -2400,22 +2411,34 @@ if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls
 
 
 # Get edu percentages for all SCAG:
-scag_edu_perc_total <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% select(PWGTP, edu) %>% count(edu, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(edu) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% mutate(race = "SCAG region")
+# scag_edu_perc_total <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% select(PWGTP, edu) %>% count(edu, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(edu) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% mutate(race = "SCAG region")
+# 
+# # Get edu percentages for by county for each SCAG County:
+# scag_edu_perc_county <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% select(PWGTP, edu, race) %>% group_by(race) %>% count(edu, wt = PWGTP) %>% 
+#                                          mutate(total_pop = sum(n)) %>% ungroup() %>% 
+#                                          group_by(edu, race) %>% summarize(percentage = round( (n / total_pop)*100, 2)) 
+# # Full join all scag_total tables:
+# edu_perc_scag_table <- full_join(scag_edu_perc_county, scag_edu_perc_total, by = join_by(edu, race, percentage)) %>% arrange(edu) %>% ungroup() %>% rename(education_level = edu)
+# edu_perc_scag_table
 
-# Get edu percentages for by county for each SCAG County:
-scag_edu_perc_county <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% select(PWGTP, edu, race) %>% group_by(race) %>% count(edu, wt = PWGTP) %>% 
-                                         mutate(total_pop = sum(n)) %>% ungroup() %>% 
-                                         group_by(edu, race) %>% summarize(percentage = round( (n / total_pop)*100, 2)) 
-# Full join all scag_total tables:
-edu_perc_scag_table <- full_join(scag_edu_perc_county, scag_edu_perc_total, by = join_by(edu, race, percentage)) %>% arrange(edu) %>% ungroup() %>% rename(education_level = edu)
-edu_perc_scag_table
+# Use weight_perc_table_filter():
+# Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "edu", set county to race,  
+# then rename "percentage" to "disabilities_percentage": 
+edu_perc_scag_table <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% weight_perc_table_filter(var = "edu", weight = "PWGTP", group = "race") %>% 
+                                            mutate(race = if_else(race == "SCAG", "SCAG Region", race),
+                                                   race = factor(race, levels = race_levels)) %>% 
+                                            arrange(edu, race) %>% 
+                                            rename(education_level = edu)
+edu_perc_scag_table 
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(edu_perc_scag_table, here(tables_fp, "edu_perc_scag_table.csv"))
 if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(pattern = "edu_perc"))}
 
 ```
+
+<!-- # TODO: ABOVE figures changed to long format, need to change all below this point -->
 
 ### Median Household Income by Race/ethincity and whole SCAG Region
 
@@ -2457,7 +2480,6 @@ if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(patte
 #                                         )
 #                         ) 
                         
-
 # Get median hh income for all SCAG:
 scag_med_hh_income_total <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income)  %>% 
                                              summarize(
@@ -2472,8 +2494,7 @@ scag_med_hh_income_county <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na
                                               ) %>%  select(race, med_hh_income)
 
 # Full join all scag_total tables:
-med_hh_income_scag_table <- full_join(scag_med_hh_income_county, scag_med_hh_income_total, by = join_by(med_hh_income, race)) %>% 
-                                        arrange(housing_income) %>% ungroup() %>% rename(housing_incomecation_level = housing_income)
+med_hh_income_scag_table <- full_join(scag_med_hh_income_county, scag_med_hh_income_total, by = join_by(med_hh_income, race)) %>% rename(median_household_income = med_hh_income)
 med_hh_income_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -2497,7 +2518,9 @@ if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(
 # has and if statement to drop filter_value if NULL, which it is by default
 # 
 # Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "poverty" and filter to "poverty" == "Yes": 
-poverty_hh_scag_table <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% weight_perc_table_filter(var = "poverty", weight = "WGTP", group = "race", filter_value = "Yes")
+poverty_hh_scag_table <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% 
+                            weight_perc_table_filter(var = "poverty", weight = "WGTP", group = "race", filter_value = "Yes") %>% 
+                                rename(household_poverty_percentage = percentage)
 poverty_hh_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -2517,10 +2540,10 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 # Read in all the tables from the folder "output/tables" and keep names from the files:
 table_file_list <- lapply(list.files(here(tables_fp), full.names = TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
 
-# set names of each list element to the actual file name without path and file.extension
+# Set names of each list element to the actual file name without path and file extension:
 table_file_list <- set_names(table_file_list, file_path_sans_ext(path_file(list.files(here(tables_fp), full.names = TRUE))))
 
-# convert each list item into a tibble and save to the current global env:
+# convert each list item into a tibble (map(as_tibble)) and save to the current global env (list2env(envir = .GlobalEnv)):
 table_file_list %>% 
   map(as_tibble) %>%
   list2env(envir = .GlobalEnv)
@@ -2582,6 +2605,39 @@ if (!dir.exists("output")) {dir.create("output")}
 
 # Pass sheet list to write_xlsx() and destination "path/filename.xlsx", write to "output/scag_tabbed.xlsx":
 write_xlsx(sheets, "output/scag_tabbed.xlsx")
+
+# Remove all variables created in this chunk:
+rm(list = (names(table_file_list)), table_file_list, sheets, toc)
+
+### ----
+# Extra bit to "auto" fit all column widths in all sheets of the workbook using openxlsx2 package:
+library(openxlsx2)
+# First, load the excel workbook we just created:
+scag_wb <- wb_load(file = "output/scag_tabbed.xlsx")
+
+# Get a list of sheets from the workbook "scag_wb":
+sheets_scag_wb <- wb_get_sheet_names(scag_wb)
+
+# Simple function to return column dimension of an object:
+ncol0 <- function(x) dim(x)[2]
+
+# Retrieve the number of columns from each sheet in the scag_tabbed.xlsx workbook using ncol0():
+col_list <- map_vec(sheets_scag_wb,  path = "output/scag_tabbed.xlsx", 
+                    function(sheet, path) { 
+                        path %>% read_excel(sheet = sheet) %>% ncol0() 
+                        }
+                    )
+
+# Use map2() to iterate over the sheet list and the col_list, first the function inside will set column widths to "auto" for whole workbook 
+# (by going into each sheet and over the number of columns supplied by col_list), 
+# then the next two functions will to change the font for the header row of each sheet to bold, font size 12 and centered:
+map2(sheets_scag_wb, col_list, function(x, y) scag_wb %>% wb_set_col_widths(sheet = x, cols = c(1:y), widths = "auto") %>% 
+                                              wb_add_font(sheet = x, dims = wb_dims(1, 1:y), bold = TRUE, size = 12) %>% 
+                                              wb_add_cell_style(sheet = x, dims = wb_dims(1, 1:y), horizontal = "center")
+     )
+
+# Save workbook "scag_wb" by overwriting old file "output/scag_tabbed.xlsx":
+wb_save(scag_wb, file = "output/scag_tabbed.xlsx", overwrite = TRUE)
 
 ```
 
