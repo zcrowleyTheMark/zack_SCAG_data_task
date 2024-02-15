@@ -42,7 +42,7 @@ library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect
 # library(survey) # Working with survey data
 # library(srvyr) # Working with survey data with pipes
 
-### Functions ######### ----
+#### Functions ----
 ### weight_perc_table_filter()
 # Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
 # For use when you want to return weighted percentages of one value of a variable and by one group- e.g. people with disability (%) by county
@@ -72,23 +72,23 @@ weight_perc_table_filter <- function(df, var, weight, group, filter_value = NULL
     # Get var percentages for all:
     overall_perc <- df %>% select({{weight}}, {{var}})  %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
                                             group_by(!!sym((var))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                            mutate({{group}} := "SCAG") %>% select({{group}}, percentage)
+                                            mutate({{group}} := "SCAG") %>% select({{var}}, {{group}}, percentage)
                                             
 
     # Get var percentages for by group:
     group_perc <- df %>% select({{weight}}, {{var}}, {{group}}) %>% group_by(!!sym((group))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
                                             group_by(!!sym((var)), !!sym((group))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                             select({{group}}, percentage)
+                                             select({{var}}, {{group}}, percentage)
 
     # Full join all Self-care difficulty tables, and pivot_longer() to have group three columns: age_categories, group, and corresponding percentages:
-    full_table <- full_join(group_perc, overall_perc, by = join_by({{group}}, percentage)) 
+    full_table <- full_join(group_perc, overall_perc, by = join_by({{var}}, {{group}}, percentage)) 
 
     return(full_table)
     }
 }
 
-### ----
-### weight_perc_2groups()
+### 
+### weight_perc_2groups() ----
 # Function to return full table of weighted percentages by two groups and also able to be filtered to one value of a variable if specified: weight_perc_2groups()
 # # For use when you want to return weighted percentages by two groups- e.g. HH without a vehicle (%) by county and race.
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group1 = grouping variable 1 (county), group2 = grouping variable 2 (race),
@@ -169,8 +169,14 @@ weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = 
     return(full_table)
 } # end of weight_perc_2groups()
 
-###
-###
+##### Variables/lists for functions
+# Set up county and race levels to use later on to convert each to factors and arrange tables:
+# county_levels:
+county_levels <- c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
+
+# race_levels:
+race_levels <- c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "SCAG Region")
+
 ```
 
 
@@ -1115,7 +1121,7 @@ race_levels <-  c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multira
 
 ### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
 
-```{r fig 5}
+```{r fig_5}
 ### 
 # Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity:
 # Use person level weights- PWGTP:
@@ -1186,7 +1192,7 @@ if (file.exists(here(tables_fp, 'walk_bike_public_scag_table.csv'))) {rm(list = 
 
 ### Figure 6. Householders without a Vehicle by Race and Ethnicity
 
-```{r fig 6}
+```{r fig_6}
 ### 
 # Figure 6. Householders without a Vehicle by Race and Ethnicity:
 # Filter to only housing data(RELSHIPP == 20) and Use household weights- WGTP:
@@ -1254,7 +1260,7 @@ if (file.exists(here(tables_fp, 'no_veh_scag_table.csv'))) {rm(list = ls(pattern
 
 ### Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
 
-```{r fig 7}
+```{r fig_7}
 # Figure 7. Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity:
 # Use person level weights- PWGTP:
 # Grouped by all_transport and race
@@ -1298,7 +1304,7 @@ scag_transport_mean_totals <- full_join(scag_transport_mean, scag_any_transport_
 # Full join scag_race_transport_mean and cag_transport_mean_overall to get full totals table for SCAG and by race:
 scag_transport_mean <- scag_race_transport_mean %>% full_join(scag_transport_mean_totals)
 
-###########
+#### 
 # Next, do the same as above by broken down by county and join the full county table to scag_race_transport_mean
 # By county
 # Get all_transport means by race for all SCAG non-home workers:
@@ -1392,7 +1398,7 @@ if (file.exists(here(tables_fp, 'transport_mean_scag_table.csv'))) {rm(list = ls
 # 
 # scag_renter_burden_table
 # 
-# ########
+# ###
 # # Repeat above steps for own_home == "Homeowner" and join with "Renters" table
 # # Get housing burden percentages by race for all SCAG:
 # scag_race_housing_burden <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% select(WGTP, race, housing_burden) %>%  
@@ -1442,7 +1448,7 @@ if (file.exists(here(tables_fp, 'transport_mean_scag_table.csv'))) {rm(list = ls
 # # Create new column household_type to denote Homeowners for type of housing burden for this part of table:
 # scag_housing_burden_table <- scag_housing_burden_table %>% mutate(household_type = "Homeowners") %>% select(household_type, everything())
 
-#########
+####
 #### Use  weight_perc_2groups() twice, once for own_home == "Non-Homeowner" on variable "renter_burden" for Renters and again with own_home == "Homeowner" on variable "housing_burden" for Homeowners:
 # Get renter_burden by using weight_perc_2groups() and add a column called household_type = "Renters":
 scag_renter_burden_table <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% 
@@ -1474,7 +1480,7 @@ if (file.exists(here(tables_fp, 'housing_burden_scag_table.csv'))) {
 
 ### Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 
-```{r fig 20}
+```{r fig_20}
 ### 
 # 
 # Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
@@ -1542,7 +1548,7 @@ if (file.exists(here(tables_fp, 'no_kitchen_plumbing_scag_table.csv'))) {rm(list
 
 ### Figure 21. Households with Severe Overcrowding by Race and Ethnicity
 
-```{r fig 21}
+```{r fig_21}
 # ### 
 # # Figure 21. Households with Severe Overcrowding by Race and Ethnicity:
 # # Filter to only housing data (filter(RELSHIPP == 20)) and Use household weights- WGTP, count if "overcrowded" == "Yes":
@@ -1607,7 +1613,7 @@ if (file.exists(here(tables_fp, 'overcrowded_scag_table.csv'))) {rm(list = ls(pa
 
 ### Figure 22. Homeownership by Race and Ethnicity
 
-```{r fig 22}
+```{r fig_22}
 ### 
 # Figure 22. Homeownership by Race and Ethnicity:
 # Filter to only housing data () and Use household weights- WGTP:
@@ -1672,7 +1678,7 @@ if (file.exists(here(tables_fp, 'homeownership_scag_table.csv'))) {rm(list = ls(
 
 ### Figure 28. People without Health Insurance by Race and Ethnicity
 
-```{r fig 28}
+```{r fig_28}
 ### 
 # Figure 28. People without Health Insurance by Race and Ethnicity:
 # # Health insurance coverage
@@ -1748,7 +1754,7 @@ if (file.exists(here(tables_fp, 'no_hicov_scag_table.csv'))) {rm(list = ls(patte
 
 ### Figure 39. Median Hourly Wage by Race and Ethnicity
 
-```{r fig 39}
+```{r fig_39}
 ### 
 # Figure 39. Median Hourly Wage by Race and Ethnicity
 # Use person level weights- PWGTP:
@@ -1802,7 +1808,7 @@ if (file.exists(here(tables_fp, 'med_hr_wage_scag_table.csv'))) {rm(list = ls(pa
 
 ### Figure 40. Unemployment by Race and Ethnicity
 
-```{r fig 40}
+```{r fig_40}
 ### 
 # Figure 40. Unemployment by Race and Ethnicity
 # Use person level weights- PWGTP:
@@ -1851,7 +1857,7 @@ scag_total_unemployed <- ca_pums_scag %>%  select(PWGTP, county, unemployed,ESR)
 scag_total_unemployed_table <- full_join(scag_county_total_unemployed,scag_total_unemployed)
 
 # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-unemployed_scag_table <- full_join(scag_county_race_unemployed,scag_race_unemployed) %>% full_join(.,scag_total_unemployed_table)  %>% 
+unemployed_scag_table <- full_join(scag_county_race_unemployed,scag_race_unemployed) %>% full_join(.,scag_total_unemployed_table) %>% 
                             mutate(county = factor(county, levels = county_levels),
                                    race = factor(race, levels = race_levels)) %>% 
                             arrange(county, race)
@@ -1863,11 +1869,9 @@ if (file.exists(here(tables_fp, 'unemployed_scag_table.csv'))) {rm(list = ls(pat
 
 ```
 
-TODO: ABOVE figures changed to long format, need to change all below this point
-
 ### Figure 41. Working Poor by Race and Ethnicity
 
-```{r fig 41}
+```{r fig_41}
 ### 
 # Figure 41. Working Poor by Race and Ethnicity
 # Use person level weights- PWGTP:
@@ -1878,62 +1882,67 @@ TODO: ABOVE figures changed to long format, need to change all below this point
 # if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line
 
 # Get working poor percentage by race for all SCAG:
-scag_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, race, poverty) %>% drop_na(poverty) %>% 
-                                       group_by(race) %>% 
-                                       summarize(
-                                           total_pop = sum(PWGTP),
-                                           poverty_sum = sum(PWGTP[poverty == "Yes"]),  
-                                           poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
-                                           poverty_perc = round(poverty_prop*100, 2)
-                                         )  %>% mutate(county = "SCAG") %>% select(county, race, poverty_perc) %>% 
-                                       pivot_wider(names_from = race, values_from = poverty_perc) # make into wide table to match excel file table.
+# scag_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, race, poverty) %>% drop_na(poverty) %>% 
+#                                        group_by(race) %>% 
+#                                        summarize(
+#                                            total_pop = sum(PWGTP),
+#                                            poverty_sum = sum(PWGTP[poverty == "Yes"]),  
+#                                            poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+#                                            poverty_perc = round(poverty_prop*100, 2)
+#                                          )  %>% mutate(county = "SCAG") %>% select(county, race, poverty_perc) %>% 
+#                                        pivot_wider(names_from = race, values_from = poverty_perc) # make into wide table to match excel file table.
+# 
+# 
+# # Get working poor percentage by all by race and county:
+# scag_county_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, county, race, poverty) %>% drop_na(poverty) %>%
+#                                          group_by(county, race) %>%
+#                                          summarize(
+#                                            total_pop = sum(PWGTP), 
+#                                            poverty_sum = sum(PWGTP[poverty == "Yes"]),
+#                                            poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+#                                            poverty_perc = round(poverty_prop*100, 2)
+#                                          ) %>% select(county, race, poverty_perc) %>%
+#                                          pivot_wider(names_from = race, values_from = poverty_perc)
+# 
+# 
+# # Get working poor percentage by county for all SCAG:
+# scag_county_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% select(PWGTP, county, poverty,ESR) %>% drop_na(poverty) %>%
+#                                                group_by(county) %>%
+#                                                summarize(
+#                                                        total_pop = sum(PWGTP), 
+#                                                        poverty_sum = sum(PWGTP[poverty == "Yes"]),
+#                                                        poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+#                                                        poverty_perc = round(poverty_prop*100, 2)
+#                                                      ) %>% select(county, poverty_perc) %>% rename(Total = poverty_perc)
+# 
+# # Get working poor for all SCAG:
+# scag_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% select(PWGTP, county, poverty,ESR) %>% drop_na(poverty) %>%
+#                                                summarize(
+#                                                        total_pop = sum(PWGTP), 
+#                                                        poverty_sum = sum(PWGTP[poverty == "Yes"]),
+#                                                        poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
+#                                                        poverty_perc = round(poverty_prop*100, 2)
+#                                                      ) %>% mutate(county = "SCAG") %>% select(county, poverty_perc) %>% rename(Total = poverty_perc)
+# 
+# # Full join all scag_total tables:
+# scag_total_working_poor_table <- full_join(scag_county_total_working_poor,scag_total_working_poor)
+# 
+# # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
+# working_poor_scag_table <- full_join(scag_county_race_working_poor,scag_race_working_poor) %>% left_join(.,scag_total_working_poor_table, by = join_by(county))
+# working_poor_scag_table
 
-
-# Get working poor percentage by all by race and county:
-scag_county_race_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>%  select(PWGTP, county, race, poverty) %>% drop_na(poverty) %>%
-                                         group_by(county, race) %>%
-                                         summarize(
-                                           total_pop = sum(PWGTP), 
-                                           poverty_sum = sum(PWGTP[poverty == "Yes"]),
-                                           poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
-                                           poverty_perc = round(poverty_prop*100, 2)
-                                         ) %>% select(county, race, poverty_perc) %>%
-                                         pivot_wider(names_from = race, values_from = poverty_perc)
-
-
-# Get working poor percentage by county for all SCAG:
-scag_county_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% select(PWGTP, county, poverty,ESR) %>% drop_na(poverty) %>%
-                                               group_by(county) %>%
-                                               summarize(
-                                                       total_pop = sum(PWGTP), 
-                                                       poverty_sum = sum(PWGTP[poverty == "Yes"]),
-                                                       poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
-                                                       poverty_perc = round(poverty_prop*100, 2)
-                                                     ) %>% select(county, poverty_perc) %>% rename(Total = poverty_perc)
-
-# Get working poor for all SCAG:
-scag_total_working_poor <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% select(PWGTP, county, poverty,ESR) %>% drop_na(poverty) %>%
-                                               summarize(
-                                                       total_pop = sum(PWGTP), 
-                                                       poverty_sum = sum(PWGTP[poverty == "Yes"]),
-                                                       poverty_prop = poverty_sum / total_pop, # divide by total_pop for proportion
-                                                       poverty_perc = round(poverty_prop*100, 2)
-                                                     ) %>% mutate(county = "SCAG") %>% select(county, poverty_perc) %>% rename(Total = poverty_perc)
-
-# Full join all scag_total tables:
-scag_total_working_poor_table <- full_join(scag_county_total_working_poor,scag_total_working_poor)
-
-# Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-working_poor_scag_table <- full_join(scag_county_race_working_poor,scag_race_working_poor) %>% left_join(.,scag_total_working_poor_table, by = join_by(county))
-working_poor_scag_table
+# Get working_poor percentages by using weight_perc_2groups(), use person level weights and filter to civilian workers aged 25-64:
+working_poor_scag_table <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% drop_na(poverty) %>% 
+    weight_perc_2groups(var = "poverty", weight = "PWGTP", group1 = "county", group2 = "race", filter_value = "Yes",
+                        group1_levels = county_levels, group2_levels = race_levels) %>% 
+                            rename(working_poor_percentage = percentage)
+working_poor_scag_table 
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(working_poor_scag_table, here(tables_fp, "working_poor_scag_table.csv"))
 if (file.exists(here(tables_fp, 'working_poor_scag_table.csv'))) {rm(list = ls(pattern = "working_poor"))}
 
 ```
-
-
 
 
 ## Tables and Figures from Racial Equity Baseline Conditions Report (REBCR)
@@ -1946,22 +1955,17 @@ if (file.exists(here(tables_fp, 'working_poor_scag_table.csv'))) {rm(list = ls(p
 # Use person level weights- PWGTP:
 # sum over everyone
 # 
-# Get Total Population  for all SCAG:
-scag_total_pop <- ca_pums_scag %>% select(PWGTP) %>%  
-                                         summarize(
-                                           total_pop = sum(PWGTP)
-                                         ) %>% mutate(county = "SCAG") %>% select(county, total_pop)
+# Get Total Population for all SCAG:
+scag_total_pop <- ca_pums_scag %>% select(PWGTP) %>% summarize(total_population = sum(PWGTP)) %>% 
+                                    mutate(county = "SCAG") %>% select(county, total_population)
 
-# Get People without Health Insurance percentages by race for all by race and county:
+# Get Total Population by county:
 scag_county_total_pop <- ca_pums_scag %>% select(PWGTP, county) %>%  
-                                         group_by(county) %>% 
-                                         summarize(
-                                           total_pop = sum(PWGTP)
-                                         ) %>% select(county, total_pop)
+                                group_by(county) %>% summarize(total_population = sum(PWGTP)) %>% select(county, total_population)
 
 
 # Full join all scag_total tables:
-total_pop_scag_table <- full_join(scag_county_total_pop, scag_total_pop, by = join_by(county, total_pop))
+total_pop_scag_table <- full_join(scag_county_total_pop, scag_total_pop, by = join_by(county, total_population)) 
 total_pop_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -1969,6 +1973,7 @@ write_csv(total_pop_scag_table, here(tables_fp, "total_pop_scag_table.csv"))
 if (file.exists(here(tables_fp, 'total_pop_scag_table.csv'))) {rm(list = ls(pattern = "total_pop"))}
 
 ```
+
 
 ### Race/Ethnicity Distribution (%) by County and SCAG Region
 
@@ -1980,18 +1985,30 @@ if (file.exists(here(tables_fp, 'total_pop_scag_table.csv'))) {rm(list = ls(patt
 # race = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White")
 # 
 # Get race percentages for all SCAG:
-scag_race_perc_total <- ca_pums_scag %>% select(PWGTP, race) %>% count(race, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(race) %>% summarize(SCAG = round( (n / total_pop)*100, 2))
+# scag_race_perc_total <- ca_pums_scag %>% select(PWGTP, race) %>% count(race, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(race) %>% summarize(race_percentage = round( (n / total_pop)*100, 2)) %>% 
+#                                         mutate(county = "SCAG") %>% select(county, race, race_percentage)
+# 
+# # Get race percentages for by county for each SCAG County:
+# scag_race_perc_county <- ca_pums_scag %>% select(PWGTP, race, county) %>% group_by(county) %>% count(race, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
+#                                          group_by(race, county) %>% summarize(race_percentage = round( (n / total_pop)*100, 2)) %>% select(county, race, race_percentage)
+# 
+# # Full join all scag_total tables:
+# race_perc_scag_table <- full_join(scag_race_perc_county, scag_race_perc_total) %>% 
+#                             mutate(county = factor(county, levels = county_levels),
+#                                    race = factor(race, levels = race_levels)) %>% 
+#                             arrange(county, race)
+# race_perc_scag_table
 
-# Get race percentages for by county for each SCAG County:
-scag_race_perc_county <- ca_pums_scag %>% select(PWGTP, race, county) %>% group_by(county) %>% count(race, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
-                                         group_by(race, county) %>% summarize(race_perc = round( (n / total_pop)*100, 2)) %>% 
-                                         pivot_wider(names_from = county, values_from = race_perc)
-
-# Full join all scag_total tables:
-race_perc_scag_table <- left_join(scag_race_perc_county, scag_race_perc_total, by = join_by(race)) %>% ungroup()
+# Use weight_perc_table_filter():
+# Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "race", set county to factor, arrange by "race" and "county", 
+# then rename "percentage" to "race_percentage", move county to first column: 
+# 
+race_perc_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "race", weight = "PWGTP", group = "county") %>% 
+                                            mutate(county = factor(county, levels = county_levels)) %>% 
+                                            arrange(county, race) %>% rename(race_percentage = percentage) %>% 
+                                            select(county, everything())
 race_perc_scag_table
-
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(race_perc_scag_table, here(tables_fp, "race_perc_scag_table.csv"))
 if (file.exists(here(tables_fp, 'race_perc_scag_table.csv'))) {rm(list = ls(pattern = "race_perc"))}
@@ -2015,18 +2032,30 @@ if (file.exists(here(tables_fp, 'race_perc_scag_table.csv'))) {rm(list = ls(patt
 # Use "age_3_cat" to get percentages of each category for each SCAG County and the whole SCAG Region: 
 
 # Get age percentages for all SCAG:
-scag_age_perc_total <- ca_pums_scag %>% select(PWGTP, age_3_cat) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(age_3_cat) %>% summarize(SCAG = round( (n / total_pop)*100, 2))  
-                                        
+# scag_age_perc_total <- ca_pums_scag %>% select(PWGTP, age_3_cat) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(age_3_cat) %>% summarize(SCAG = round( (n / total_pop)*100, 2))  
+#                                         
+# 
+# # Get age percentages for by county for each SCAG County:
+# scag_age_perc_county <- ca_pums_scag %>% select(PWGTP, age_3_cat, county) %>% group_by(county) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
+#                                          group_by(age_3_cat, county) %>% summarize(age_perc = round( (n / total_pop)*100, 2)) %>% 
+#                                          pivot_wider(names_from = county, values_from = age_perc)
+# 
+# # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+# age_perc_scag_table <- left_join(scag_age_perc_county, scag_age_perc_total, by = join_by(age_3_cat)) %>% ungroup() %>%
+#                                 pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% rename(age_categories = age_3_cat)
 
-# Get age percentages for by county for each SCAG County:
-scag_age_perc_county <- ca_pums_scag %>% select(PWGTP, age_3_cat, county) %>% group_by(county) %>% count(age_3_cat, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
-                                         group_by(age_3_cat, county) %>% summarize(age_perc = round( (n / total_pop)*100, 2)) %>% 
-                                         pivot_wider(names_from = county, values_from = age_perc)
-
-# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-age_perc_scag_table <- left_join(scag_age_perc_county, scag_age_perc_total, by = join_by(age_3_cat)) %>% ungroup() %>%
-                                pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% rename(age_categories = age_3_cat)
+# Use weight_perc_table_filter():
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
+# has and if statement to drop filter_value if NULL, which it is by default
+# 
+# Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "age_3_cat", set county to factor, arrange by "age_3_cat" and "county", 
+# then rename "age_3_cat" to "age_categories": 
+age_perc_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "age_3_cat", weight = "PWGTP", group = "county") %>% 
+                                            mutate(county = factor(county, levels = county_levels)) %>% 
+                                            arrange(age_3_cat, county) %>% rename(age_categories = age_3_cat) 
+age_perc_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(age_perc_scag_table, here(tables_fp, "age_perc_scag_table.csv"))
@@ -2071,22 +2100,31 @@ if (file.exists(here(tables_fp, 'age_perc_scag_table.csv'))) {rm(list = ls(patte
 #                                                                      ), levels = c("female_hh", "male_hh","cohabit_or_nokids"))
 #                                         ) 
 
-
 # Get Single Parent Households percentages for all SCAG:
-scag_single_hh_total <- ca_pums_scag %>% select(WGTP, single_hh)  %>% count(single_hh, wt = WGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(single_hh) %>% summarize(SCAG = round( (n / total_pop)*100, 2)) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
-                                        
+# scag_single_hh_total <- ca_pums_scag %>% select(WGTP, single_hh)  %>% count(single_hh, wt = WGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(single_hh) %>% summarize(SCAG = round( (n / total_pop)*100, 2)) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
+#                                         
+# 
+# # Get Single Parent Households percentages for by county for each SCAG County:
+# scag_single_hh_county <- ca_pums_scag %>% select(WGTP, single_hh, county) %>% group_by(county) %>% count(single_hh, wt = WGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
+#                                          group_by(single_hh, county) %>% summarize(single_hh_perc = round( (n / total_pop)*100, 2)) %>% 
+#                                          pivot_wider(names_from = county, values_from = single_hh_perc) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
+# 
+# # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+# single_hh_scag_table <- left_join(scag_single_hh_county, scag_single_hh_total, by = join_by(single_hh)) %>% ungroup() %>%
+#                                 pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% 
+#                                 rename(single_parent_households = single_hh)
+# single_hh_scag_table
 
-# Get Single Parent Households percentages for by county for each SCAG County:
-scag_single_hh_county <- ca_pums_scag %>% select(WGTP, single_hh, county) %>% group_by(county) %>% count(single_hh, wt = WGTP) %>% mutate(total_pop = sum(n)) %>% ungroup() %>% 
-                                         group_by(single_hh, county) %>% summarize(single_hh_perc = round( (n / total_pop)*100, 2)) %>% 
-                                         pivot_wider(names_from = county, values_from = single_hh_perc) %>% filter(single_hh %in% c("female_hh","male_hh")) %>% ungroup()
-
-# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-single_hh_scag_table <- left_join(scag_single_hh_county, scag_single_hh_total, by = join_by(single_hh)) %>% ungroup() %>%
-                                pivot_longer(cols = Imperial:SCAG, names_to = "county", values_to = "percentages") %>% 
-                                rename(single_parent_households = single_hh)
+# Use weight_perc_table_filter():
+# Pass in data and calculate weighted percentages using hh level weights- "WGTP", for variable "single_hh", set county to factor, arrange by "single_hh" and "county", 
+# then rename columns: 
+single_hh_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "single_hh", weight = "WGTP", group = "county") %>% 
+                                            filter(single_hh %in% c("female_hh","male_hh")) %>% 
+                                            mutate(county = factor(county, levels = county_levels)) %>% 
+                                            arrange(single_hh, county) %>% rename(gender_head_of_household = single_hh, single_parent_hh_percentage = percentage) 
 single_hh_scag_table
+
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(single_hh_scag_table, here(tables_fp, "single_hh_scag_table.csv"))
 if (file.exists(here(tables_fp, 'single_hh_scag_table.csv'))) {rm(list = ls(pattern = "single_hh"))}
@@ -2109,20 +2147,29 @@ if (file.exists(here(tables_fp, 'single_hh_scag_table.csv'))) {rm(list = ls(patt
 # sum over if NATIVITY == 2 
 
 # Get Foreign born percentages for all SCAG:
-scag_natl_origin_total <- ca_pums_scag %>% select(PWGTP, NATIVITY)  %>% count(NATIVITY, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(NATIVITY) %>% summarize(natl_origin_perc = round( (n / total_pop)*100, 2)) %>% filter(NATIVITY == 2) %>% ungroup() %>% 
-                                        mutate(county = "SCAG") %>% select(county, natl_origin_perc)
-                                        
+# scag_natl_origin_total <- ca_pums_scag %>% select(PWGTP, NATIVITY)  %>% count(NATIVITY, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(NATIVITY) %>% summarize(natl_origin_perc = round( (n / total_pop)*100, 2)) %>% filter(NATIVITY == 2) %>% ungroup() %>% 
+#                                         mutate(county = "SCAG") %>% select(county, natl_origin_perc)
+#                                         
+# 
+# # Get Foreign born percentages for by county for each SCAG County:
+# scag_natl_origin_county <- ca_pums_scag %>% select(PWGTP, NATIVITY, county) %>% group_by(county) %>% count(NATIVITY, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(NATIVITY, county) %>% summarize(natl_origin_perc = round( (n / total_pop)*100, 2)) %>% filter(NATIVITY == 2) %>% ungroup() %>% 
+#                                          select(county, natl_origin_perc)
+# 
+# # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+# natl_origin_scag_table <- full_join(scag_natl_origin_county, scag_natl_origin_total, by = join_by(county, natl_origin_perc)) 
+# 
+# natl_origin_scag_table
 
-# Get Foreign born percentages for by county for each SCAG County:
-scag_natl_origin_county <- ca_pums_scag %>% select(PWGTP, NATIVITY, county) %>% group_by(county) %>% count(NATIVITY, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(NATIVITY, county) %>% summarize(natl_origin_perc = round( (n / total_pop)*100, 2)) %>% filter(NATIVITY == 2) %>% ungroup() %>% 
-                                         select(county, natl_origin_perc)
-
-# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-natl_origin_scag_table <- full_join(scag_natl_origin_county, scag_natl_origin_total, by = join_by(county, natl_origin_perc)) 
-
+# Use weight_perc_table_filter():
+# Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "age_3_cat", set county to factor, arrange by "age_3_cat" and "county", 
+# then rename "age_3_cat" to "age_categories": 
+natl_origin_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "NATIVITY", weight = "PWGTP", group = "county", filter_value = 2) %>% 
+                                            mutate(county = factor(county, levels = county_levels)) %>% 
+                                            rename(foreign_born_percentage = percentage) 
 natl_origin_scag_table
+
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(natl_origin_scag_table, here(tables_fp, "natl_origin_scag_table.csv"))
 if (file.exists(here(tables_fp, 'natl_origin_scag_table.csv'))) {rm(list = ls(pattern = "natl_origin"))}
@@ -2160,18 +2207,26 @@ if (file.exists(here(tables_fp, 'natl_origin_scag_table.csv'))) {rm(list = ls(pa
 #                                         )
 
 # Get LEP percentages for all SCAG:
-scag_lep_total <- ca_pums_scag %>% select(PWGTP, lep)  %>% count(lep, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(lep) %>% summarize(lep_perc = round( (n / total_pop)*100, 2)) %>% filter(lep == "limited_english_proficiency") %>% ungroup() %>% 
-                                        mutate(county = "SCAG") %>% select(county, lep_perc)
-                                        
+# scag_lep_total <- ca_pums_scag %>% select(PWGTP, lep)  %>% count(lep, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(lep) %>% summarize(lep_perc = round( (n / total_pop)*100, 2)) %>% filter(lep == "limited_english_proficiency") %>% ungroup() %>% 
+#                                         mutate(county = "SCAG") %>% select(county, lep_perc)
+#                                         
+# 
+# # Get LEP percentages for by county for each SCAG County:
+# scag_lep_county <- ca_pums_scag %>% select(PWGTP, lep, county) %>% group_by(county) %>% count(lep, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(lep, county) %>% summarize(lep_perc = round( (n / total_pop)*100, 2)) %>% filter(lep == "limited_english_proficiency") %>% ungroup() %>% 
+#                                          select(county, lep_perc)
+# 
+# # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+# lep_scag_table <- full_join(scag_lep_county, scag_lep_total, by = join_by(county, lep_perc)) 
+# lep_scag_table
 
-# Get LEP percentages for by county for each SCAG County:
-scag_lep_county <- ca_pums_scag %>% select(PWGTP, lep, county) %>% group_by(county) %>% count(lep, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(lep, county) %>% summarize(lep_perc = round( (n / total_pop)*100, 2)) %>% filter(lep == "limited_english_proficiency") %>% ungroup() %>% 
-                                         select(county, lep_perc)
-
-# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-lep_scag_table <- full_join(scag_lep_county, scag_lep_total, by = join_by(county, lep_perc)) 
+# Use weight_perc_table_filter():
+# Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "lep", set county to factor,  
+# then rename "percentage" to "limited_english_proficiency_percentage": 
+lep_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "lep", weight = "PWGTP", group = "county", filter_value = "limited_english_proficiency") %>% 
+                                            mutate(county = factor(county, levels = county_levels)) %>% 
+                                            rename(limited_english_proficiency_percentage = percentage) 
 lep_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -2195,18 +2250,26 @@ if (file.exists(here(tables_fp, 'lep_scag_table.csv'))) {rm(list = ls(pattern = 
 # 2	    Without a disability
 
 # Get People with Disabilities percentages for all SCAG:
-scag_dis_total <- ca_pums_scag %>% select(PWGTP, DIS)  %>% count(DIS, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(DIS) %>% summarize(dis_perc = round( (n / total_pop)*100, 2)) %>% filter(DIS == 1 ) %>% ungroup() %>% 
-                                        mutate(county = "SCAG") %>% select(county, dis_perc)
-                                        
+# scag_dis_total <- ca_pums_scag %>% select(PWGTP, DIS)  %>% count(DIS, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(DIS) %>% summarize(dis_perc = round( (n / total_pop)*100, 2)) %>% filter(DIS == 1 ) %>% ungroup() %>% 
+#                                         mutate(county = "SCAG") %>% select(county, dis_perc)
+#                                         
+# 
+# # Get People with Disabilities percentages for by county for each SCAG County:
+# scag_dis_county <- ca_pums_scag %>% select(PWGTP, DIS, county) %>% group_by(county) %>% count(DIS, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
+#                                         group_by(DIS, county) %>% summarize(dis_perc = round( (n / total_pop)*100, 2)) %>% filter(DIS == 1 ) %>% ungroup() %>% 
+#                                          select(county, dis_perc)
+# 
+# # Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
+# dis_scag_table <- full_join(scag_dis_county, scag_dis_total, by = join_by(county, dis_perc)) 
+# dis_scag_table
 
-# Get People with Disabilities percentages for by county for each SCAG County:
-scag_dis_county <- ca_pums_scag %>% select(PWGTP, DIS, county) %>% group_by(county) %>% count(DIS, wt = PWGTP) %>% mutate(total_pop = sum(n)) %>% 
-                                        group_by(DIS, county) %>% summarize(dis_perc = round( (n / total_pop)*100, 2)) %>% filter(DIS == 1 ) %>% ungroup() %>% 
-                                         select(county, dis_perc)
-
-# Full join all scag_total tables, and pivot_longer() to have county three columns: age_categories, county, and corresponding percentages:
-dis_scag_table <- full_join(scag_dis_county, scag_dis_total, by = join_by(county, dis_perc)) 
+# Use weight_perc_table_filter():
+# Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "DIS", set county to factor,  
+# then rename "percentage" to "disabilities_percentage": 
+dis_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "DIS", weight = "PWGTP", group = "county", filter_value = 1) %>% 
+                                            mutate(county = factor(county, levels = county_levels)) %>% 
+                                            rename(disabilities_percentage = percentage) 
 dis_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -2272,6 +2335,8 @@ write_csv(categories_dis_scag_table, here(tables_fp, "categories_dis_scag_table.
 if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls(pattern = "categories_dis"))}
 
 ```
+
+<!-- # TODO: ABOVE figures changed to long format, need to change all below this point -->
 
 ### Educational Attainment (%) by Race/ethincity and whole SCAG Region
 
@@ -2418,10 +2483,6 @@ if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(
 ```
 
 
---- 
-
-
-
 ### Household Poverty (%) by Race/ethincity and whole SCAG Region
 
 ```{r poverty_hh}
@@ -2437,7 +2498,7 @@ if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(
 # 
 # Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "poverty" and filter to "poverty" == "Yes": 
 poverty_hh_scag_table <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% weight_perc_table_filter(var = "poverty", weight = "WGTP", group = "race", filter_value = "Yes")
-
+poverty_hh_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(poverty_hh_scag_table, here(tables_fp, "poverty_hh_scag_table.csv"))
@@ -2451,7 +2512,7 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 
 ### Write out excel file with all sheets:
 
-```{r write excel}
+```{r write_excel}
 # Read in completed tables and set to tibbles in current global env:
 # Read in all the tables from the folder "output/tables" and keep names from the files:
 table_file_list <- lapply(list.files(here(tables_fp), full.names = TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
@@ -2573,7 +2634,7 @@ full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels
 full_table
 
 # 
-### Functions ######### ----
+### Functions ----
 ### weight_perc_2groups()
 # Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_2groups
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group1 = grouping variable 1 (county), group2 = grouping variable 2 (race),
