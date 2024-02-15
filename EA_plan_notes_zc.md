@@ -7,7 +7,9 @@ output: html_document
 
 ### To Do:
 
-- Change all tables in tabbed excel output "scag_tabbed.xlsx" to long form
+*Green color = completed*
+
+- <span style="color: green;">Change all tables in tabbed excel output "scag_tabbed.xlsx" to long form</span>
 
 - Clean up R code in .Rmd, double-check all code works and confirm folder structure/ imports and outputs work.
 

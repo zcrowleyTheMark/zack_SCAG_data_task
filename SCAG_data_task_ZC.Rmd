@@ -2639,6 +2639,8 @@ map2(sheets_scag_wb, col_list, function(x, y) scag_wb %>% wb_set_col_widths(shee
 # Save workbook "scag_wb" by overwriting old file "output/scag_tabbed.xlsx":
 wb_save(scag_wb, file = "output/scag_tabbed.xlsx", overwrite = TRUE)
 
+# Remove all variables created in this chunk:
+rm(col_list, scag_wb, sheets_scag_wb)
 ```
 
 --- 
