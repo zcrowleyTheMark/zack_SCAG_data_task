@@ -23,6 +23,10 @@ Imperial,White,Any Transportation,19.21
 Imperial,White,Private,19.16
 Imperial,White,Public,0
 Imperial,White,Other,19.82
+Imperial,All Races,Any Transportation,22.38
+Imperial,All Races,Private,22.55
+Imperial,All Races,Public,29.37
+Imperial,All Races,Other,15.77
 Los Angeles,Asian/Pacific Islander,Any Transportation,31.4
 Los Angeles,Asian/Pacific Islander,Private,31.05
 Los Angeles,Asian/Pacific Islander,Public,52.04
@@ -47,6 +51,10 @@ Los Angeles,White,Any Transportation,30.36
 Los Angeles,White,Private,30.44
 Los Angeles,White,Public,50.46
 Los Angeles,White,Other,18.56
+Los Angeles,All Races,Any Transportation,31.33
+Los Angeles,All Races,Private,30.75
+Los Angeles,All Races,Public,50.38
+Los Angeles,All Races,Other,19.03
 Orange,Asian/Pacific Islander,Any Transportation,29.38
 Orange,Asian/Pacific Islander,Private,29.1
 Orange,Asian/Pacific Islander,Public,54.63
@@ -71,6 +79,10 @@ Orange,White,Any Transportation,27.41
 Orange,White,Private,27.37
 Orange,White,Public,56.93
 Orange,White,Other,20.1
+Orange,All Races,Any Transportation,27.53
+Orange,All Races,Private,27.35
+Orange,All Races,Public,49.91
+Orange,All Races,Other,21.06
 Riverside,Asian/Pacific Islander,Any Transportation,34.72
 Riverside,Asian/Pacific Islander,Private,35.05
 Riverside,Asian/Pacific Islander,Public,53.53
@@ -95,6 +107,10 @@ Riverside,White,Any Transportation,34.43
 Riverside,White,Private,34.49
 Riverside,White,Public,65.14
 Riverside,White,Other,22.57
+Riverside,All Races,Any Transportation,33.89
+Riverside,All Races,Private,33.94
+Riverside,All Races,Public,55.26
+Riverside,All Races,Other,23.39
 San Bernardino,Asian/Pacific Islander,Any Transportation,33.09
 San Bernardino,Asian/Pacific Islander,Private,32.75
 San Bernardino,Asian/Pacific Islander,Public,67.24
@@ -119,6 +135,10 @@ San Bernardino,White,Any Transportation,31.27
 San Bernardino,White,Private,31.57
 San Bernardino,White,Public,60.92
 San Bernardino,White,Other,17.88
+San Bernardino,All Races,Any Transportation,32.13
+San Bernardino,All Races,Private,32.1
+San Bernardino,All Races,Public,65.68
+San Bernardino,All Races,Other,18.57
 Ventura,Asian/Pacific Islander,Any Transportation,28.09
 Ventura,Asian/Pacific Islander,Private,27.87
 Ventura,Asian/Pacific Islander,Public,49.35
@@ -143,6 +163,10 @@ Ventura,White,Any Transportation,27.04
 Ventura,White,Private,27
 Ventura,White,Public,59.2
 Ventura,White,Other,17.97
+Ventura,All Races,Any Transportation,26.4
+Ventura,All Races,Private,26.36
+Ventura,All Races,Public,52.38
+Ventura,All Races,Other,18.14
 SCAG,Asian/Pacific Islander,Any Transportation,31.1
 SCAG,Asian/Pacific Islander,Private,30.81
 SCAG,Asian/Pacific Islander,Public,52.82
@@ -167,7 +191,7 @@ SCAG,White,Any Transportation,30.03
 SCAG,White,Private,30.09
 SCAG,White,Public,52.72
 SCAG,White,Other,19.08
-SCAG,SCAG Region,Any Transportation,30.77
-SCAG,SCAG Region,Private,30.42
-SCAG,SCAG Region,Public,51.01
-SCAG,SCAG Region,Other,19.62
+SCAG,All Races,Any Transportation,30.77
+SCAG,All Races,Private,30.42
+SCAG,All Races,Public,51.01
+SCAG,All Races,Other,19.62

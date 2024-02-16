@@ -1,8 +1,50 @@
-race,household_poverty_percentage
-Asian/Pacific Islander,25.42
-Black,37.09
-Hispanic/Latino,38.39
-Multiracial/Other,24.82
-Native American,35.52
-White,19.95
-SCAG,28.89
+county,race,household_poverty_percentage
+Imperial,Asian/Pacific Islander,20.92
+Imperial,Black,58.73
+Imperial,Hispanic/Latino,51.84
+Imperial,Multiracial/Other,21.62
+Imperial,Native American,39.83
+Imperial,White,27.35
+Imperial,All Races,47.36
+Los Angeles,Asian/Pacific Islander,26.43
+Los Angeles,Black,38.4
+Los Angeles,Hispanic/Latino,39.97
+Los Angeles,Multiracial/Other,25.44
+Los Angeles,Native American,35.78
+Los Angeles,White,20.72
+Los Angeles,All Races,30.73
+Orange,Asian/Pacific Islander,24.34
+Orange,Black,26.61
+Orange,Hispanic/Latino,32.96
+Orange,Multiracial/Other,18.66
+Orange,Native American,23.64
+Orange,White,15.24
+Orange,All Races,21.81
+Riverside,Asian/Pacific Islander,22.15
+Riverside,Black,29.35
+Riverside,Hispanic/Latino,37.81
+Riverside,Multiracial/Other,27.51
+Riverside,Native American,41.46
+Riverside,White,22.63
+Riverside,All Races,29.28
+San Bernardino,Asian/Pacific Islander,27.05
+San Bernardino,Black,40.83
+San Bernardino,Hispanic/Latino,36.86
+San Bernardino,Multiracial/Other,31.56
+San Bernardino,Native American,39.84
+San Bernardino,White,25.85
+San Bernardino,All Races,32.42
+Ventura,Asian/Pacific Islander,14.5
+Ventura,Black,20.38
+Ventura,Hispanic/Latino,33.03
+Ventura,Multiracial/Other,19.18
+Ventura,Native American,17.07
+Ventura,White,15.58
+Ventura,All Races,21.2
+SCAG,Asian/Pacific Islander,25.42
+SCAG,Black,37.09
+SCAG,Hispanic/Latino,38.39
+SCAG,Multiracial/Other,24.82
+SCAG,Native American,35.52
+SCAG,White,19.95
+SCAG,All Races,28.89

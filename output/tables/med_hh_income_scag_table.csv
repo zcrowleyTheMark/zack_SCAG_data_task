@@ -1,8 +1,50 @@
-race,median_household_income
-Asian/Pacific Islander,93517.74
-Black,57918.45
-Hispanic/Latino,66943.16
-Multiracial/Other,86696.87
-Native American,65439.84
-White,96171.5
-SCAG region,79645.22
+county,race,median_household_income
+Imperial,Asian/Pacific Islander,54116.77
+Imperial,Black,22362.65
+Imperial,Hispanic/Latino,45424.22
+Imperial,Multiracial/Other,54491.45
+Imperial,Native American,51447.82
+Imperial,White,74545.34
+Imperial,All Races,49126.56
+Los Angeles,Asian/Pacific Islander,88501.09
+Los Angeles,Black,53892.77
+Los Angeles,Hispanic/Latino,64213.7
+Los Angeles,Multiracial/Other,83372.67
+Los Angeles,Native American,55988.17
+Los Angeles,White,96342.9
+Los Angeles,All Races,76005.41
+Orange,Asian/Pacific Islander,103841.75
+Orange,Black,86319.14
+Orange,Hispanic/Latino,79113.34
+Orange,Multiracial/Other,107998.29
+Orange,Native American,93931.95
+Orange,White,111324.6
+Orange,All Races,100043.4
+Riverside,Asian/Pacific Islander,96903.29
+Riverside,Black,75624.41
+Riverside,Hispanic/Latino,67326.17
+Riverside,Multiracial/Other,83095.79
+Riverside,Native American,55439.83
+Riverside,White,83506.12
+Riverside,All Races,76217.57
+San Bernardino,Asian/Pacific Islander,87728.48
+San Bernardino,Black,55641.37
+San Bernardino,Hispanic/Latino,68440.55
+San Bernardino,Multiracial/Other,69097.93
+San Bernardino,Native American,56903.52
+San Bernardino,White,76416.51
+San Bernardino,All Races,70315.79
+Ventura,Asian/Pacific Islander,123077.8
+Ventura,Black,96292.58
+Ventura,Hispanic/Latino,75500.78
+Ventura,Multiracial/Other,107081.87
+Ventura,Native American,87388.68
+Ventura,White,103841.75
+Ventura,All Races,93782.12
+SCAG,Asian/Pacific Islander,93517.74
+SCAG,Black,57918.45
+SCAG,Hispanic/Latino,66943.16
+SCAG,Multiracial/Other,86696.87
+SCAG,Native American,65439.84
+SCAG,White,96171.5
+SCAG,All Races,79645.22
