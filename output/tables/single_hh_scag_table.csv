@@ -1,15 +1,15 @@
-gender_head_of_household,county,single_parent_hh_percentage
-female_hh,Imperial,11.26
-female_hh,Los Angeles,6.2
-female_hh,Orange,4.7
-female_hh,Riverside,5.95
-female_hh,San Bernardino,7.62
-female_hh,Ventura,4.62
-female_hh,SCAG,6.04
-male_hh,Imperial,1.6
-male_hh,Los Angeles,1.53
-male_hh,Orange,1.31
-male_hh,Riverside,1.59
-male_hh,San Bernardino,1.77
-male_hh,Ventura,1.04
-male_hh,SCAG,1.51
+county,gender_head_of_household,single_parent_hh_percentage
+Imperial,female_hh,11.26
+Los Angeles,female_hh,6.2
+Orange,female_hh,4.7
+Riverside,female_hh,5.95
+San Bernardino,female_hh,7.62
+Ventura,female_hh,4.62
+SCAG,female_hh,6.04
+Imperial,male_hh,1.6
+Los Angeles,male_hh,1.53
+Orange,male_hh,1.31
+Riverside,male_hh,1.59
+San Bernardino,male_hh,1.77
+Ventura,male_hh,1.04
+SCAG,male_hh,1.51

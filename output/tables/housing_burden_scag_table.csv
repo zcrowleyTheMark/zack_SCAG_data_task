@@ -1,99 +1,99 @@
-household_type,county,race,burden_percentage
-Renters,Imperial,Asian/Pacific Islander,13.58
-Renters,Imperial,Black,55.77
-Renters,Imperial,Hispanic/Latino,49.4
-Renters,Imperial,Multiracial/Other,0
-Renters,Imperial,Native American,15.57
-Renters,Imperial,White,26.18
-Renters,Imperial,SCAG Region,46.59
-Renters,Los Angeles,Asian/Pacific Islander,28.36
-Renters,Los Angeles,Black,37.97
-Renters,Los Angeles,Hispanic/Latino,41
-Renters,Los Angeles,Multiracial/Other,27.02
-Renters,Los Angeles,Native American,32
-Renters,Los Angeles,White,23.69
-Renters,Los Angeles,SCAG Region,33.47
-Renters,Orange,Asian/Pacific Islander,30.05
-Renters,Orange,Black,26.04
-Renters,Orange,Hispanic/Latino,37.29
-Renters,Orange,Multiracial/Other,20.77
-Renters,Orange,Native American,25.19
-Renters,Orange,White,18.57
-Renters,Orange,SCAG Region,27.47
-Renters,Riverside,Asian/Pacific Islander,34.52
-Renters,Riverside,Black,36.92
-Renters,Riverside,Hispanic/Latino,41.73
-Renters,Riverside,Multiracial/Other,40.4
-Renters,Riverside,Native American,38.93
-Renters,Riverside,White,29.66
-Renters,Riverside,SCAG Region,36.68
-Renters,San Bernardino,Asian/Pacific Islander,33.73
-Renters,San Bernardino,Black,47.14
-Renters,San Bernardino,Hispanic/Latino,41.01
-Renters,San Bernardino,Multiracial/Other,40.77
-Renters,San Bernardino,Native American,23.85
-Renters,San Bernardino,White,31.12
-Renters,San Bernardino,SCAG Region,38.59
-Renters,Ventura,Asian/Pacific Islander,19.64
-Renters,Ventura,Black,31.59
-Renters,Ventura,Hispanic/Latino,37.63
-Renters,Ventura,Multiracial/Other,18.02
-Renters,Ventura,Native American,11.18
-Renters,Ventura,White,21.11
-Renters,Ventura,SCAG Region,28.51
-Renters,SCAG,Asian/Pacific Islander,29.08
-Renters,SCAG,Black,38.53
-Renters,SCAG,Hispanic/Latino,40.58
-Renters,SCAG,Multiracial/Other,28.04
-Renters,SCAG,Native American,30.19
-Renters,SCAG,White,23.64
-Renters,SCAG,SCAG Region,33.16
-Homeowners,Imperial,Asian/Pacific Islander,9.13
-Homeowners,Imperial,Black,27.54
-Homeowners,Imperial,Hispanic/Latino,20.61
-Homeowners,Imperial,Multiracial/Other,4.08
-Homeowners,Imperial,Native American,3.45
-Homeowners,Imperial,White,8.47
-Homeowners,Imperial,SCAG Region,17.71
-Homeowners,Los Angeles,Asian/Pacific Islander,11.03
-Homeowners,Los Angeles,Black,14.75
-Homeowners,Los Angeles,Hispanic/Latino,15.58
-Homeowners,Los Angeles,Multiracial/Other,10.44
-Homeowners,Los Angeles,Native American,10.11
-Homeowners,Los Angeles,White,9.32
-Homeowners,Los Angeles,SCAG Region,12.06
-Homeowners,Orange,Asian/Pacific Islander,9.65
-Homeowners,Orange,Black,10.35
-Homeowners,Orange,Hispanic/Latino,10.57
-Homeowners,Orange,Multiracial/Other,8.17
-Homeowners,Orange,Native American,4.03
-Homeowners,Orange,White,7.66
-Homeowners,Orange,SCAG Region,8.64
-Homeowners,Riverside,Asian/Pacific Islander,11.15
-Homeowners,Riverside,Black,9.83
-Homeowners,Riverside,Hispanic/Latino,18.13
-Homeowners,Riverside,Multiracial/Other,11.68
-Homeowners,Riverside,Native American,17.52
-Homeowners,Riverside,White,11.93
-Homeowners,Riverside,SCAG Region,14.04
-Homeowners,San Bernardino,Asian/Pacific Islander,13.18
-Homeowners,San Bernardino,Black,14.49
-Homeowners,San Bernardino,Hispanic/Latino,15.74
-Homeowners,San Bernardino,Multiracial/Other,10.25
-Homeowners,San Bernardino,Native American,24.54
-Homeowners,San Bernardino,White,11.75
-Homeowners,San Bernardino,SCAG Region,13.73
-Homeowners,Ventura,Asian/Pacific Islander,6.94
-Homeowners,Ventura,Black,2.96
-Homeowners,Ventura,Hispanic/Latino,11.86
-Homeowners,Ventura,Multiracial/Other,8.47
-Homeowners,Ventura,Native American,20.2
-Homeowners,Ventura,White,7.88
-Homeowners,Ventura,SCAG Region,8.74
-Homeowners,SCAG,Asian/Pacific Islander,10.7
-Homeowners,SCAG,Black,13.62
-Homeowners,SCAG,Hispanic/Latino,15.51
-Homeowners,SCAG,Multiracial/Other,10.05
-Homeowners,SCAG,Native American,13.68
-Homeowners,SCAG,White,9.52
-Homeowners,SCAG,SCAG Region,11.8
+county,race,household_type,burden_percentage
+Imperial,Asian/Pacific Islander,Renters,13.58
+Imperial,Black,Renters,55.77
+Imperial,Hispanic/Latino,Renters,49.4
+Imperial,Multiracial/Other,Renters,0
+Imperial,Native American,Renters,15.57
+Imperial,White,Renters,26.18
+Imperial,SCAG Region,Renters,46.59
+Los Angeles,Asian/Pacific Islander,Renters,28.36
+Los Angeles,Black,Renters,37.97
+Los Angeles,Hispanic/Latino,Renters,41
+Los Angeles,Multiracial/Other,Renters,27.02
+Los Angeles,Native American,Renters,32
+Los Angeles,White,Renters,23.69
+Los Angeles,SCAG Region,Renters,33.47
+Orange,Asian/Pacific Islander,Renters,30.05
+Orange,Black,Renters,26.04
+Orange,Hispanic/Latino,Renters,37.29
+Orange,Multiracial/Other,Renters,20.77
+Orange,Native American,Renters,25.19
+Orange,White,Renters,18.57
+Orange,SCAG Region,Renters,27.47
+Riverside,Asian/Pacific Islander,Renters,34.52
+Riverside,Black,Renters,36.92
+Riverside,Hispanic/Latino,Renters,41.73
+Riverside,Multiracial/Other,Renters,40.4
+Riverside,Native American,Renters,38.93
+Riverside,White,Renters,29.66
+Riverside,SCAG Region,Renters,36.68
+San Bernardino,Asian/Pacific Islander,Renters,33.73
+San Bernardino,Black,Renters,47.14
+San Bernardino,Hispanic/Latino,Renters,41.01
+San Bernardino,Multiracial/Other,Renters,40.77
+San Bernardino,Native American,Renters,23.85
+San Bernardino,White,Renters,31.12
+San Bernardino,SCAG Region,Renters,38.59
+Ventura,Asian/Pacific Islander,Renters,19.64
+Ventura,Black,Renters,31.59
+Ventura,Hispanic/Latino,Renters,37.63
+Ventura,Multiracial/Other,Renters,18.02
+Ventura,Native American,Renters,11.18
+Ventura,White,Renters,21.11
+Ventura,SCAG Region,Renters,28.51
+SCAG,Asian/Pacific Islander,Renters,29.08
+SCAG,Black,Renters,38.53
+SCAG,Hispanic/Latino,Renters,40.58
+SCAG,Multiracial/Other,Renters,28.04
+SCAG,Native American,Renters,30.19
+SCAG,White,Renters,23.64
+SCAG,SCAG Region,Renters,33.16
+Imperial,Asian/Pacific Islander,Homeowners,9.13
+Imperial,Black,Homeowners,27.54
+Imperial,Hispanic/Latino,Homeowners,20.61
+Imperial,Multiracial/Other,Homeowners,4.08
+Imperial,Native American,Homeowners,3.45
+Imperial,White,Homeowners,8.47
+Imperial,SCAG Region,Homeowners,17.71
+Los Angeles,Asian/Pacific Islander,Homeowners,11.03
+Los Angeles,Black,Homeowners,14.75
+Los Angeles,Hispanic/Latino,Homeowners,15.58
+Los Angeles,Multiracial/Other,Homeowners,10.44
+Los Angeles,Native American,Homeowners,10.11
+Los Angeles,White,Homeowners,9.32
+Los Angeles,SCAG Region,Homeowners,12.06
+Orange,Asian/Pacific Islander,Homeowners,9.65
+Orange,Black,Homeowners,10.35
+Orange,Hispanic/Latino,Homeowners,10.57
+Orange,Multiracial/Other,Homeowners,8.17
+Orange,Native American,Homeowners,4.03
+Orange,White,Homeowners,7.66
+Orange,SCAG Region,Homeowners,8.64
+Riverside,Asian/Pacific Islander,Homeowners,11.15
+Riverside,Black,Homeowners,9.83
+Riverside,Hispanic/Latino,Homeowners,18.13
+Riverside,Multiracial/Other,Homeowners,11.68
+Riverside,Native American,Homeowners,17.52
+Riverside,White,Homeowners,11.93
+Riverside,SCAG Region,Homeowners,14.04
+San Bernardino,Asian/Pacific Islander,Homeowners,13.18
+San Bernardino,Black,Homeowners,14.49
+San Bernardino,Hispanic/Latino,Homeowners,15.74
+San Bernardino,Multiracial/Other,Homeowners,10.25
+San Bernardino,Native American,Homeowners,24.54
+San Bernardino,White,Homeowners,11.75
+San Bernardino,SCAG Region,Homeowners,13.73
+Ventura,Asian/Pacific Islander,Homeowners,6.94
+Ventura,Black,Homeowners,2.96
+Ventura,Hispanic/Latino,Homeowners,11.86
+Ventura,Multiracial/Other,Homeowners,8.47
+Ventura,Native American,Homeowners,20.2
+Ventura,White,Homeowners,7.88
+Ventura,SCAG Region,Homeowners,8.74
+SCAG,Asian/Pacific Islander,Homeowners,10.7
+SCAG,Black,Homeowners,13.62
+SCAG,Hispanic/Latino,Homeowners,15.51
+SCAG,Multiracial/Other,Homeowners,10.05
+SCAG,Native American,Homeowners,13.68
+SCAG,White,Homeowners,9.52
+SCAG,SCAG Region,Homeowners,11.8

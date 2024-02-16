@@ -21,8 +21,7 @@ knitr::opts_chunk$set(
 # Prevents sci notation and sets the output of decimals to 4 (0.0000), suppresses warnings/info for tidyverse:
 options(scipen = 999,
         tidyverse.quiet = TRUE,
-        dplyr.summarise.inform = FALSE,
-        rows.print = 20
+        dplyr.summarise.inform = FALSE
         )
 
 # Un-comment next two lines to install/update all necesary packages:
@@ -68,7 +67,8 @@ weight_perc_table_filter <- function(df, var, weight, group, filter_value = NULL
                                              select({{group}}, percentage)
 
     # Full join all Self-care difficulty tables, and pivot_longer() to have group three columns: age_categories, group, and corresponding percentages:
-    full_table <- full_join(group_perc, overall_perc, by = join_by({{group}}, percentage)) 
+    full_table <- full_join(group_perc, overall_perc, by = join_by({{group}}, percentage)) %>% 
+                                             select({{group}}, percentage)
 
     return(full_table)
     
@@ -86,7 +86,8 @@ weight_perc_table_filter <- function(df, var, weight, group, filter_value = NULL
                                              select({{var}}, {{group}}, percentage)
 
     # Full join all Self-care difficulty tables, and pivot_longer() to have group three columns: age_categories, group, and corresponding percentages:
-    full_table <- full_join(group_perc, overall_perc, by = join_by({{var}}, {{group}}, percentage)) 
+    full_table <- full_join(group_perc, overall_perc, by = join_by({{var}}, {{group}}, percentage)) %>% 
+                                             select({{group}}, {{var}}, percentage)
 
     return(full_table)
     }
@@ -129,47 +130,62 @@ weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = 
     group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
 
     # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) 
+    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) %>% 
+                                     select({{group1}}, {{group2}}, percentage)
+        
+        # If both group1_levels and group2_levels are NOT NULL:
+        if (!is.null(group1_levels) & !is.null(group2_levels)) {
+            
+        # If levels are provided for both group1_levels and group2_levels- set each as a factor with levels and then arrange by group1,group2:
+        full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels = group1_levels),
+                                            {{group2}} := factor(!!sym((group2)), levels = group2_levels)) %>% 
+                                     arrange(!!sym((group1)),!!sym((group2))) %>% 
+                                     select({{group1}}, {{group2}}, percentage)
+        } 
     
     } else { # else filter_value is NULL:
         
     # Get percent for group1 (usually county):
     group1_total <-  df %>% select({{weight}}, {{var}}, {{group1}}) %>% group_by(!!sym((group1))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
                                                 group_by(!!sym((var)), !!sym((group1))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                                mutate({{group2}} := "SCAG Region") %>% select({{group1}}, {{group2}},  percentage)
+                                                mutate({{group2}} := "SCAG Region") %>% select({{var}}, {{group1}}, {{group2}},  percentage)
 
     # Get percent for group2 (usually county):
     group2_total <-  df %>% select({{weight}}, {{var}}, {{group2}}) %>% group_by(!!sym((group2))) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
                                                 group_by(!!sym((var)), !!sym((group2))) %>% summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, {{group2}},  percentage)
+                                                mutate({{group1}} := "SCAG") %>% select({{var}}, {{group1}}, {{group2}},  percentage)
 
     # Get percent for group2 (usually county):
     group1_by_group2_total <-  df %>% select({{weight}}, {{var}}, {{group1}}, {{group2}}) %>% group_by(!!sym((group1)), !!sym((group2))) %>% 
                                               count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
                                                 group_by(!!sym((var)), !!sym((group1)), !!sym((group2))) %>% 
                                                 summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>% 
-                                                 select({{group1}}, {{group2}},  percentage)
+                                                 select({{var}}, {{group1}}, {{group2}},  percentage)
 
     # Get percent for group2 (usually county):
     total_overall <-  df %>% select({{weight}}, {{var}}) %>% count(!!sym((var)), wt = !!sym((weight))) %>% mutate(total_pop = sum(n)) %>% 
                                               group_by(!!sym((var))) %>%  summarize(percentage = round( (n / total_pop)*100, 2)) %>% ungroup() %>%  
-                                                mutate({{group1}} := "SCAG") %>% select({{group1}}, percentage)
+                                                mutate({{group1}} := "SCAG") %>% select({{var}}, {{group1}}, percentage)
 
     # Full join all scag_total tables:
     group1_total_overall_tbl <- full_join(group1_total, total_overall) %>% mutate(race = "SCAG Region")
 
     # Full join all scag_race tables, then left join scag_total_no_veh_table by county:
-    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total)
+    full_table <- full_join(group1_by_group2_total,group1_total_overall_tbl) %>% full_join(.,group2_total) %>% 
+                                     select({{group1}}, {{group2}}, {{var}}, percentage)
+        
+        # If both group1_levels and group2_levels are NOT NULL:
+        if (!is.null(group1_levels) & !is.null(group2_levels)) {
+            
+        # If levels are provided for both group1_levels and group2_levels- set each as a factor with levels and then arrange by group1,group2:
+        full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels = group1_levels),
+                                            {{group2}} := factor(!!sym((group2)), levels = group2_levels)) %>% 
+                                     arrange(!!sym((group1)), !!sym((var)), !!sym((group1))) %>% 
+                                     select({{group1}}, {{group2}}, {{var}}, percentage)
+        } 
     
     } # End of main if/else.
     
-    if (!is.null(group1_levels) & !is.null(group2_levels)) {
-        
-    # If levels are provided for both group1_levels and group2_levels- set each as a factor with levels and then arrange by group1,group2:
-    full_table <- full_table %>% mutate({{group1}} := factor(!!sym((group1)), levels = group1_levels),
-                                        {{group2}} := factor(!!sym((group2)), levels = group2_levels)) %>% 
-                                 arrange(!!sym((group1)),!!sym((group2)))
-    } 
     
     return(full_table)
 } # end of weight_perc_2groups()
@@ -2431,7 +2447,12 @@ edu_perc_scag_table <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% w
                                                    race = factor(race, levels = race_levels)) %>% 
                                             arrange(edu, race) %>% 
                                             rename(education_level = edu)
-edu_perc_scag_table 
+edu_perc_scag_table
+
+ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% weight_perc_2groups(var = "edu", weight = "PWGTP", group1 = "county", group2 = "race",
+                        group1_levels = county_levels, group2_levels = race_levels)
+
+ 
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
 write_csv(edu_perc_scag_table, here(tables_fp, "edu_perc_scag_table.csv"))
