@@ -19,6 +19,9 @@ output: html_document
 
 - Complete separate Documentation: high-level walk through/broad explanation of R code and inputs/outputs.
 
+- Mock up a shiny dashboard with a couple of the metrics from the table output (maybe unemployed or homeownership by race and county (could use chloropleth leaflet map of the SCAG counties))
+  - use dashboard tests/mock-ups in the `R_reporting` folder.
+
 ---
 
 ### Main Data Files: 
