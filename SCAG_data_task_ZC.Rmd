@@ -25,27 +25,27 @@ options(scipen = 999,
         rows.print = 20
         )
 
+# Un-comment next two lines to install/update all necesary packages:
+# install.packages("remotes") # first install remotes to use update_packages()
+# remotes::update_packages(c("here", "rstudioapi", "magrittr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update all packages
+
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently:
 here::i_am("SCAG_data_task_ZC.Rmd")
 
 # Load libraries:
 library(here) # package to manage file paths
-library(fs)  # package to work with system file paths
-library(tools) # another package to work with system file paths
+# library(fs)  # package to work with system file paths
+# library(tools) # another package to work with system file paths
 library(rstudioapi) # package accessing Rstudio API 
-# library(rlang) # package for R helpers
-# library(rstatix)
 library(magrittr) # pipe function package
-library(janitor) # package for functions that help clean data
+# library(janitor) # package for functions that help clean data
 library(spatstat) # package for weighted.median() function
 library(readxl) # reading excel files
-library(writexl) # writing excel files
+library(openxlsx2) # writing excel files and manipulating excel workbooks.
 library(data.table) # package for data manipulation and reads in large files faster using fread()
 library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
 library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect, stringR, etc.
 
-# library(survey) # Working with survey data
-# library(srvyr) # Working with survey data with pipes
 
 #### Functions ----
 ### weight_perc_table_filter()
@@ -222,7 +222,8 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 # Read in acs_data_dict_22
 pums_vars_acs5_22 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 
-#### Setup file paths ----
+
+################# Setup file paths ----
 # Set up all file paths:
 # file path for all raw data:
 data_fp <- here('data')
@@ -2536,12 +2537,14 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 ### Write out excel file with all sheets:
 
 ```{r write_excel}
+library(tidyverse)
+library(here)
 # Read in completed tables and set to tibbles in current global env:
 # Read in all the tables from the folder "output/tables" and keep names from the files:
 table_file_list <- lapply(list.files(here(tables_fp), full.names = TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
 
 # Set names of each list element to the actual file name without path and file extension:
-table_file_list <- set_names(table_file_list, file_path_sans_ext(path_file(list.files(here(tables_fp), full.names = TRUE))))
+table_file_list <- set_names(table_file_list, tools::file_path_sans_ext(fs::path_file(list.files(here(tables_fp), full.names = TRUE))))
 
 # convert each list item into a tibble (map(as_tibble)) and save to the current global env (list2env(envir = .GlobalEnv)):
 table_file_list %>% 
@@ -2603,44 +2606,56 @@ sheets <- list("TOC" = toc,
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}
 
-# Pass sheet list to write_xlsx() and destination "path/filename.xlsx", write to "output/scag_tabbed.xlsx":
-write_xlsx(sheets, "output/scag_tabbed.xlsx")
+# Pass sheet list ("sheets") to openxlsx2::write_xlsx() and destination "path/filename.xlsx", write to "output/scag_tabbed.xlsx":
+scag_wb <- openxlsx2::write_xlsx(sheets, "output/scag_tabbed.xlsx", col_widths = "auto")
 
-# Remove all variables created in this chunk:
-rm(list = (names(table_file_list)), table_file_list, sheets, toc)
+# use walk()- this applies functions over a vector and is only for the side-affects of the functions, in this case:
+# This walk will change all sheets in workbook "scag_wb" to have a header row of bold and size 12 font:
+walk(names(sheets), ~ wb_add_font(wb = scag_wb, sheet = .x, dims = wb_dims(1, 1:5), bold = TRUE, size = 12))
+# This walk will change all sheets in workbook "scag_wb" to have a header row of column names centered horizontally:
+walk(names(sheets), ~ wb_add_cell_style(wb = scag_wb, sheet = .x, dims = wb_dims(1, 1:5), horizontal = "center"))
 
-### ----
-# Extra bit to "auto" fit all column widths in all sheets of the workbook using openxlsx2 package:
-library(openxlsx2)
-# First, load the excel workbook we just created:
-scag_wb <- wb_load(file = "output/scag_tabbed.xlsx")
-
-# Get a list of sheets from the workbook "scag_wb":
-sheets_scag_wb <- wb_get_sheet_names(scag_wb)
-
-# Simple function to return column dimension of an object:
-ncol0 <- function(x) dim(x)[2]
-
-# Retrieve the number of columns from each sheet in the scag_tabbed.xlsx workbook using ncol0():
-col_list <- map_vec(sheets_scag_wb,  path = "output/scag_tabbed.xlsx", 
-                    function(sheet, path) { 
-                        path %>% read_excel(sheet = sheet) %>% ncol0() 
-                        }
-                    )
-
-# Use map2() to iterate over the sheet list and the col_list, first the function inside will set column widths to "auto" for whole workbook 
-# (by going into each sheet and over the number of columns supplied by col_list), 
-# then the next two functions will to change the font for the header row of each sheet to bold, font size 12 and centered:
-map2(sheets_scag_wb, col_list, function(x, y) scag_wb %>% wb_set_col_widths(sheet = x, cols = c(1:y), widths = "auto") %>% 
-                                              wb_add_font(sheet = x, dims = wb_dims(1, 1:y), bold = TRUE, size = 12) %>% 
-                                              wb_add_cell_style(sheet = x, dims = wb_dims(1, 1:y), horizontal = "center")
-     )
-
-# Save workbook "scag_wb" by overwriting old file "output/scag_tabbed.xlsx":
+# Save workbook "scag_wb" to file "output/scag_tabbed.xlsx" and  if it exists it will be overwritten:
 wb_save(scag_wb, file = "output/scag_tabbed.xlsx", overwrite = TRUE)
 
 # Remove all variables created in this chunk:
-rm(col_list, scag_wb, sheets_scag_wb)
+rm(list = (names(table_file_list)), table_file_list, sheets, toc, scag_wb)
+
+### ----
+# Extra bit of code to make the format of the workbook more reader friendly, 
+# below will "auto" fit all column widths in all sheets of the workbook using openxlsx2 package:
+# remotes::update_packages("openxlsx2") # un-comment to install/update package
+# library(openxlsx2)
+# # First, load the excel workbook we just created:
+# scag_wb <- wb_load(file = "output/scag_tabbed.xlsx")
+# 
+# # Get a list of sheets from the workbook "scag_wb":
+# sheets_scag_wb <- wb_get_sheet_names(scag_wb)
+# 
+# # Simple function to return the number of columns dimension of an object like a tibble:
+# ncol0 <- function(x) dim(x)[2]
+# 
+# # Retrieve the number of columns from each sheet in the scag_tabbed.xlsx workbook using ncol0():
+# col_list <- map_vec(sheets_scag_wb,  path = "output/scag_tabbed.xlsx", 
+#                     function(sheet, path) { 
+#                         path %>% read_excel(sheet = sheet) %>% ncol0() 
+#                         }
+#                     )
+# 
+# # Use map2() to iterate over the sheet list and the col_list, first the function inside will set column widths to "auto" for whole workbook 
+# # (by going into each sheet and over the number of columns supplied by col_list), 
+# # then the next two functions will to change the font for the header row of each sheet to bold, font size 12 and centered:
+# map2(sheets_scag_wb, col_list, function(x, y) scag_wb %>% wb_set_col_widths(sheet = x, cols = c(1:y), widths = "auto") %>% 
+#                                               wb_add_font(sheet = x, dims = wb_dims(1, 1:y), bold = TRUE, size = 12) %>% 
+#                                               wb_add_cell_style(sheet = x, dims = wb_dims(1, 1:y), horizontal = "center")
+#      )
+# 
+# # Save workbook "scag_wb" by overwriting old file "output/scag_tabbed.xlsx":
+# wb_save(scag_wb, file = "output/scag_tabbed.xlsx", overwrite = TRUE)
+
+# # Remove all variables created in this chunk:
+# rm(col_list, scag_wb, sheets_scag_wb)
+# rm(list = (names(table_file_list)), table_file_list, sheets, toc)
 ```
 
 --- 
