@@ -27,18 +27,15 @@ options(scipen = 999,
 
 # Un-comment next two lines to install/update all necesary packages:
 # install.packages("remotes") # first install remotes to use update_packages()
-# remotes::update_packages(c("here", "rstudioapi", "magrittr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update all packages
+# remotes::update_packages(c("here", "rstudioapi", "magrittr", "janitor", "fs", "tools" "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
 
-# Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently:
+# Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently (if you re-name this file, also change inside this if using an .Rproj/R project:
 here::i_am("SCAG_data_task_ZC.Rmd")
 
 # Load libraries:
 library(here) # package to manage file paths
-# library(fs)  # package to work with system file paths
-# library(tools) # another package to work with system file paths
 library(rstudioapi) # package accessing Rstudio API 
 library(magrittr) # pipe function package
-# library(janitor) # package for functions that help clean data
 library(spatstat) # package for weighted.median() function
 library(readxl) # reading excel files
 library(openxlsx2) # writing excel files and manipulating excel workbooks.
@@ -48,13 +45,13 @@ library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect
 
 
 #### Functions ----
-### weight_perc_table_filter()
-# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+### weight_perc_table()
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table()
 # For use when you want to return weighted percentages of one value of a variable and by one group- e.g. people with disability (%) by county
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to, and 
 # group_label_totals = "SCAG" - this is the label for the group total of the grouped variable, defaults to "SCAG".
 # has and if statement to drop filter_value if NULL, which it is by default
-weight_perc_table_filter <- function(df, var, weight, group, filter_value = NULL, group_label_totals = "SCAG") {
+weight_perc_table <- function(df, var, weight, group, filter_value = NULL, group_label_totals = "SCAG") {
     # If filter_value is not NULL:
     if (!is.null(filter_value)) {
     # Get var percentages for all:
@@ -1362,11 +1359,11 @@ if (file.exists(here(tables_fp, 'total_pop_scag_table.csv'))) {rm(list = ls(patt
 # Percentages of race by county and SCAG
 # race = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White")
 
-# Use weight_perc_table_filter():
+# Use weight_perc_table():
 # Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "race", set county to factor, arrange by "race" and "county", 
 # then rename "percentage" to "race_percentage", move county to first column: 
 # 
-race_perc_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "race", weight = "PWGTP", group = "county") %>% 
+race_perc_scag_table <- ca_pums_scag %>% weight_perc_table(var = "race", weight = "PWGTP", group = "county") %>% 
                                             mutate(county = factor(county, levels = county_levels)) %>% 
                                             arrange(county, race) %>% rename(race_percentage = percentage) %>% 
                                             select(county, everything())
@@ -1393,14 +1390,14 @@ if (file.exists(here(tables_fp, 'race_perc_scag_table.csv'))) {rm(list = ls(patt
 # if AGEP ge 65 then ac1=3; 
 # Use "age_3_cat" to get percentages of each category for each SCAG County and the whole SCAG Region: 
 
-# Use weight_perc_table_filter():
-# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# Use weight_perc_table():
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table()
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
 # has and if statement to drop filter_value if NULL, which it is by default
 # 
 # Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "age_3_cat", set county to factor, arrange by "age_3_cat" and "county", 
 # then rename "age_3_cat" to "age_categories": 
-age_perc_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "age_3_cat", weight = "PWGTP", group = "county") %>% 
+age_perc_scag_table <- ca_pums_scag %>% weight_perc_table(var = "age_3_cat", weight = "PWGTP", group = "county") %>% 
                                             mutate(county = factor(county, levels = county_levels)) %>% 
                                             arrange(age_3_cat, county) %>% rename(age_categories = age_3_cat) 
 age_perc_scag_table
@@ -1420,10 +1417,10 @@ if (file.exists(here(tables_fp, 'age_perc_scag_table.csv'))) {rm(list = ls(patte
 # Use household level weights- WGTP:
 # Percentages of Single Parent Household categories by gender of Head of Household by county and SCAG
 
-# Use weight_perc_table_filter():
+# Use weight_perc_table():
 # Pass in data and calculate weighted percentages using hh level weights- "WGTP", for variable "single_hh", set county to factor, arrange by "single_hh" and "county", 
 # then rename columns: 
-single_hh_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "single_hh", weight = "WGTP", group = "county") %>% 
+single_hh_scag_table <- ca_pums_scag %>% weight_perc_table(var = "single_hh", weight = "WGTP", group = "county") %>% 
                                             filter(single_hh %in% c("female_hh","male_hh")) %>% 
                                             mutate(county = factor(county, levels = county_levels)) %>% 
                                             arrange(single_hh, county) %>% rename(gender_head_of_household = single_hh, single_parent_hh_percentage = percentage) 
@@ -1450,10 +1447,10 @@ if (file.exists(here(tables_fp, 'single_hh_scag_table.csv'))) {rm(list = ls(patt
 #  
 # sum over if NATIVITY == 2 
 
-# Use weight_perc_table_filter():
+# Use weight_perc_table():
 # Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "NATIVITY", filter_value = 2, set county to factor, arrange by "age_3_cat" and "county", 
 # then rename "percentage" to "foreign_born_percentage": 
-natl_origin_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "NATIVITY", weight = "PWGTP", group = "county", filter_value = 2) %>% 
+natl_origin_scag_table <- ca_pums_scag %>% weight_perc_table(var = "NATIVITY", weight = "PWGTP", group = "county", filter_value = 2) %>% 
                                             mutate(county = factor(county, levels = county_levels)) %>% 
                                             rename(foreign_born_percentage = percentage) 
 natl_origin_scag_table
@@ -1473,10 +1470,10 @@ if (file.exists(here(tables_fp, 'natl_origin_scag_table.csv'))) {rm(list = ls(pa
 # Use person level weights- PWGTP:
 # Percentages of LEP by county and SCAG
 
-# Use weight_perc_table_filter():
+# Use weight_perc_table():
 # Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "lep", filter_value = "limited_english_proficiency", set county to factor,  
 # then rename "percentage" to "limited_english_proficiency_percentage": 
-lep_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "lep", weight = "PWGTP", group = "county", filter_value = "limited_english_proficiency") %>% 
+lep_scag_table <- ca_pums_scag %>% weight_perc_table(var = "lep", weight = "PWGTP", group = "county", filter_value = "limited_english_proficiency") %>% 
                                             mutate(county = factor(county, levels = county_levels)) %>% 
                                             rename(limited_english_proficiency_percentage = percentage) 
 lep_scag_table
@@ -1501,10 +1498,10 @@ if (file.exists(here(tables_fp, 'lep_scag_table.csv'))) {rm(list = ls(pattern = 
 # 1	    With a disability
 # 2	    Without a disability
 
-# Use weight_perc_table_filter():
+# Use weight_perc_table():
 # Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "DIS", filter_value = 1, set county to factor,  
 # then rename "percentage" to "disabilities_percentage": 
-dis_scag_table <- ca_pums_scag %>% weight_perc_table_filter(var = "DIS", weight = "PWGTP", group = "county", filter_value = 1) %>% 
+dis_scag_table <- ca_pums_scag %>% weight_perc_table(var = "DIS", weight = "PWGTP", group = "county", filter_value = 1) %>% 
                                             mutate(county = factor(county, levels = county_levels)) %>% 
                                             rename(disabilities_percentage = percentage) 
 dis_scag_table
@@ -1550,7 +1547,7 @@ if (file.exists(here(tables_fp, 'dis_scag_table.csv'))) {rm(list = ls(pattern = 
 # 1	Yes
 # 2	2	No
 
-# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table()
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
 # has and if statement to drop filter_value if NULL, which it is by default
 
@@ -1561,7 +1558,7 @@ disability_text_vars <- c("Self-care difficulty", "Hearing difficulty","Vision d
 # use map2(), to iterate over both elements of disability_list- the x = "var_names" and y ="text_vars", pass to function and use bind_rows() to turn the list of tibbles into a single tibble that is the full
 # table of each disablity_type percentage by county and all of SCAG 
 categories_dis_scag_table <- map2(.x = disability_var_names, .y =  disability_text_vars, 
-                                  function(x,y) weight_perc_table_filter(df = ca_pums_scag, var = x, weight = "PWGTP", group = "county", filter_value = 1) %>% 
+                                  function(x,y) weight_perc_table(df = ca_pums_scag, var = x, weight = "PWGTP", group = "county", filter_value = 1) %>% 
                                                 mutate(disability_type = y) %>% 
                                                 select(county, disability_type, percentage)
                                   ) %>% bind_rows()
@@ -1587,7 +1584,7 @@ if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls
 #   COLLEGE", "AA DEGREE", "BA DEGREE", "MA DEGREE". By race and also report the whole SCAG Region
 # Education Categories: named var "edu"
 
-# Use weight_perc_table_filter():
+# Use weight_perc_table():
 # Pass in data and calculate weighted percentages using person level weights- "PWGTP", for variable "edu",  
 # then rename "edu" to "education_level": 
 edu_perc_scag_table <- ca_pums_scag %>% filter(AGEP > 25) %>% drop_na(edu) %>% 
@@ -1698,8 +1695,8 @@ if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(
 # Filter only households: filter(RELSHIPP == 20)
 # if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line
 
-# Use weight_perc_table_filter():
-# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table_filter()
+# Use weight_perc_table():
+# Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table()
 # df = dataframe of all data, var = variable to sum over,  weight = weights, group = grouping variable, filter_value = value of a variable to filter output to.
 # has and if statement to drop filter_value if NULL, which it is by default
 # 

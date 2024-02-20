@@ -7,7 +7,7 @@ output: html_document
 
 ### To Do:
 
-*Green color = completed*
+*<span style="color: green;">Green color</span> = completed*
 
 - <span style="color: green;">Change all tables in tabbed excel output "scag_tabbed.xlsx" to long form</span>
 
