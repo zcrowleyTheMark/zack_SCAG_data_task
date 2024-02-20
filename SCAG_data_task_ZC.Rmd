@@ -444,17 +444,17 @@ rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
 # 2017-2021 ACS PUMS merged data
 # If you want to use 2017-2021 ACS PUMS merged data use the next line otherwise comment out/don't run the next line and go the next line:
 # Read in merged ACS data SCAG from 2017-2021:
-ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"), show_col_types = FALSE)
+# ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"), show_col_types = FALSE)
 
 # 2018-2022 ACS PUMS merged data
 # Un-comment the next line (and comment out the above line)if you want to use the merged 2018-2022 ACS PUMS data file
 # Read in merged ACS data SCAG from 2018-2022:
-# ca_pums_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"), show_col_types = FALSE)
+ca_pums_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"), show_col_types = FALSE)
 
 ### Recode/Create New Variables for analysis -----
 
 # Pull out the first 4 digits from SERIALNO, which is the year of ACS for that observation:
-ca_pums_scag <- ca_pums_scag %>% mutate(year = str_extract(SERIALNO, "\\d{4}"))
+ca_pums_scag <- ca_pums_scag %>% mutate(year = as.numeric(str_extract(SERIALNO, "\\d{4}")))
 
 
 # Code county as a factor variable:
@@ -482,6 +482,36 @@ ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  
                                                                      AGEP > 64 ~ "65+ years"
                                                                      ), levels = c("<18 years", "18 - 64 years","65+ years"))
                                         ) 
+# Household Income (different adjustments of income for 2017-21 ACS data and 2018-22 ACS data):
+# ADJINC has 6 implied decimal places so need to divide by 1000000
+ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = HINCP * (ADJINC/1000000))
+
+# # If statement to switch between 2017-21 ACS data and 2018-22 ACS data:
+# # If the min of year is 2017 and max is 2021, its the 2017-21 ACS data and use the ADJINC below to create "housing_income" variable:
+# if (min(ca_pums_scag$year, na.rm = TRUE) == 2017 & max(ca_pums_scag$year, na.rm = TRUE) == 2021) {
+# # Household Income for 2017-2021 ACS data:
+# # # Create new variable "housing_income" by multiplying HINCP (household income) by ADJINC for correct year:
+# ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * (1117630/1000000), # 2017 Adjust Income
+#                                                                    ADJINC == 1093093 ~ HINCP * (1093093/1000000), # 2018 Adjust Income
+#                                                                    ADJINC == 1070512 ~ HINCP * (1070512/1000000), # 2019 Adjust Income
+#                                                                    ADJINC == 1053131 ~ HINCP * (1053131/1000000), # 2020 Adjust Income
+#                                                                    ADJINC == 1029928 ~ HINCP * (1029928/1000000), # 2021 Adjust Income
+#                                                                   )
+#                                         ) 
+# }
+# 
+# # If the min of year is 2018 and max is 2022, its the 2018-2022 ACS data and use the ADJINC below to create "housing_income" variable:
+# if (min(ca_pums_scag$year, na.rm = TRUE) == 2018 & max(ca_pums_scag$year, na.rm = TRUE) == 2022) {
+# # Household Income for 2018-2022 ACS data:
+# # # Create new variable "housing_income" by multiplying HINCP (household income) by ADJINC for correct year:
+# ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * 1.011189 * 1.10526316, # 2017 Adjust Income
+#                                                                    ADJINC == 1093093 ~ HINCP * 1.013097 * 1.07896160, # 2018 Adjust Income
+#                                                                    ADJINC == 1070512 ~ HINCP * 1.010145 * 1.05976096, # 2019 Adjust Income
+#                                                                    ADJINC == 1053131 ~ HINCP * 1.006149 * 1.04669465, # 2020 Adjust Income
+#                                                                    ADJINC == 1029928 ~ HINCP * 1.029928 * 1.00000000, # 2021 Adjust Income
+#                                                                   )
+#                                         ) 
+# }
 
 # Education Categories: named var "edu"
 # Create "edu" var based on the following conditions for 6 total categories, and convert to factor: 
@@ -566,15 +596,18 @@ ca_pums_scag <- ca_pums_scag %>% mutate(crowd = case_when(RMSP > 0  ~ NP/RMSP,
 # First, adjust the wages with the Adjust Income for the correct year named "wage";
 # Second, get the weekly wages by dividing by 52 named "weekly_wage", then divide by WKHP (usual hours worked per week)
 # Finally: get hourly wage by dividing weekly_wage by WKHP (usual hours worked per week) if  WKHP > 0: 
-ca_pums_scag <- ca_pums_scag %>% mutate(wage = case_when(ADJINC == 1117630 ~ WAGP * 1.011189 * 1.10526316, # 2017 Adjust Income
-                                                         ADJINC == 1093093 ~ WAGP * 1.013097 * 1.07896160, # 2018 Adjust Income
-                                                         ADJINC == 1070512 ~ WAGP * 1.010145 * 1.05976096, # 2019 Adjust Income
-                                                         ADJINC == 1053131 ~ WAGP * 1.006149 * 1.04669465, # 2020 Adjust Income
-                                                         ADJINC == 1029928 ~ WAGP * 1.029928 * 1.00000000, # 2021 Adjust Income
-                                        ),
-                        weekly_wage = wage/52,
-                        hourly_wage = if_else(WKHP > 0,weekly_wage/WKHP, NA_real_)
-                        )
+# HINCP * (ADJINC/1000000)
+# ca_pums_scag <- ca_pums_scag %>% mutate(wage = case_when(ADJINC == 1117630 ~ WAGP * 1.011189 * 1.10526316, # 2017 Adjust Income
+#                                                          ADJINC == 1093093 ~ WAGP * 1.013097 * 1.07896160, # 2018 Adjust Income
+#                                                          ADJINC == 1070512 ~ WAGP * 1.010145 * 1.05976096, # 2019 Adjust Income
+#                                                          ADJINC == 1053131 ~ WAGP * 1.006149 * 1.04669465, # 2020 Adjust Income
+#                                                          ADJINC == 1029928 ~ WAGP * 1.029928 * 1.00000000, # 2021 Adjust Income
+#                                         ),
+#                         weekly_wage = wage/52,
+#                         hourly_wage = if_else(WKHP > 0,weekly_wage/WKHP, NA_real_)
+#                         )
+ca_pums_scag <- ca_pums_scag %>% mutate(hourly_wage = if_else(WKHP > 0, ((WAGP * (ADJINC/1000000))/52)/WKHP, NA_real_)
+                                        )
 
 # Unemployment -named variable "unemployed"- if "Yes", unemployed, "No" otherwise. 
 # Unemployment -named variable "unemployed"- if ESR (Employment status recode) == 3 then "Yes" (unemployed), or "No" otherwise if ESR does not equal 3 and set as a factor. 
@@ -604,16 +637,6 @@ ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~
                                                     levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
                                                     )
                                         )
-
-# Household Income:
-# # Create new variable "housing_income" by multiplying HINCP (household income) by ADJINC for correct year:
-ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * 1.011189 * 1.10526316, # 2017 Adjust Income
-                                                                   ADJINC == 1093093 ~ HINCP * 1.013097 * 1.07896160, # 2018 Adjust Income
-                                                                   ADJINC == 1070512 ~ HINCP * 1.010145 * 1.05976096, # 2019 Adjust Income
-                                                                   ADJINC == 1053131 ~ HINCP * 1.006149 * 1.04669465, # 2020 Adjust Income
-                                                                   ADJINC == 1029928 ~ HINCP * 1.029928 * 1.00000000, # 2021 Adjust Income
-                                                                  )
-                                        ) 
 
 # Set up county and race levels to use to convert each to factors and arrange tables:
 # county_levels:
@@ -1223,7 +1246,7 @@ if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(patte
 
 ### Median Household Income by Race/ethincity and whole SCAG Region
 
-```{r med_hh_incom}
+```{r med_hh_income}
 # Median Household Income by Race/ethincity and whole SCAG Region
 # Use person level weights- WGTP; filter(RELSHIPP == 20) Only household level
 # use weighted median for only households

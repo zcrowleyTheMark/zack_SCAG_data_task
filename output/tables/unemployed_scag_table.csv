@@ -1,50 +1,50 @@
 county,race,unemployed_percentage
-Imperial,Asian/Pacific Islander,3.54
-Imperial,Black,14.23
-Imperial,Hispanic/Latino,16.08
-Imperial,Multiracial/Other,9.8
-Imperial,Native American,8.73
-Imperial,White,5.06
-Imperial,All Races,14.56
-Los Angeles,Asian/Pacific Islander,5.48
-Los Angeles,Black,10.1
-Los Angeles,Hispanic/Latino,6.8
-Los Angeles,Multiracial/Other,9.1
-Los Angeles,Native American,6.77
-Los Angeles,White,6.77
+Imperial,Asian/Pacific Islander,6.02
+Imperial,Black,8.59
+Imperial,Hispanic/Latino,15.19
+Imperial,Multiracial/Other,11.95
+Imperial,Native American,8.1
+Imperial,White,6.13
+Imperial,All Races,13.93
+Los Angeles,Asian/Pacific Islander,5.36
+Los Angeles,Black,10.22
+Los Angeles,Hispanic/Latino,6.82
+Los Angeles,Multiracial/Other,8.68
+Los Angeles,Native American,6.85
+Los Angeles,White,6.81
 Los Angeles,All Races,6.9
-Orange,Asian/Pacific Islander,5.39
-Orange,Black,8.59
-Orange,Hispanic/Latino,5.44
-Orange,Multiracial/Other,8.29
-Orange,Native American,5.73
-Orange,White,5.13
-Orange,All Races,5.45
-Riverside,Asian/Pacific Islander,5.36
-Riverside,Black,10.63
-Riverside,Hispanic/Latino,7.74
-Riverside,Multiracial/Other,8.02
-Riverside,Native American,10.14
-Riverside,White,6.44
-Riverside,All Races,7.35
-San Bernardino,Asian/Pacific Islander,5.89
-San Bernardino,Black,11.66
-San Bernardino,Hispanic/Latino,7.74
-San Bernardino,Multiracial/Other,10.44
-San Bernardino,Native American,11.79
-San Bernardino,White,6.67
-San Bernardino,All Races,7.68
-Ventura,Asian/Pacific Islander,4.25
-Ventura,Black,9.59
-Ventura,Hispanic/Latino,6.13
-Ventura,Multiracial/Other,6.39
-Ventura,Native American,6.83
-Ventura,White,5.08
-Ventura,All Races,5.58
-SCAG,Asian/Pacific Islander,5.44
-SCAG,Black,10.29
-SCAG,Hispanic/Latino,6.96
-SCAG,Multiracial/Other,8.83
-SCAG,Native American,8.03
-SCAG,White,6.22
-SCAG,All Races,6.78
+Orange,Asian/Pacific Islander,5.36
+Orange,Black,7.96
+Orange,Hispanic/Latino,5.47
+Orange,Multiracial/Other,8.32
+Orange,Native American,3.9
+Orange,White,5.12
+Orange,All Races,5.44
+Riverside,Asian/Pacific Islander,5.38
+Riverside,Black,10.19
+Riverside,Hispanic/Latino,7.02
+Riverside,Multiracial/Other,7.38
+Riverside,Native American,11.26
+Riverside,White,6.29
+Riverside,All Races,6.89
+San Bernardino,Asian/Pacific Islander,5.6
+San Bernardino,Black,10.87
+San Bernardino,Hispanic/Latino,7.04
+San Bernardino,Multiracial/Other,9.2
+San Bernardino,Native American,11.94
+San Bernardino,White,6.89
+San Bernardino,All Races,7.24
+Ventura,Asian/Pacific Islander,4.13
+Ventura,Black,8.68
+Ventura,Hispanic/Latino,5.86
+Ventura,Multiracial/Other,6.13
+Ventura,Native American,7.08
+Ventura,White,4.76
+Ventura,All Races,5.31
+SCAG,Asian/Pacific Islander,5.35
+SCAG,Black,10.16
+SCAG,Hispanic/Latino,6.78
+SCAG,Multiracial/Other,8.39
+SCAG,Native American,8.23
+SCAG,White,6.23
+SCAG,All Races,6.66
