@@ -8,8 +8,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-# Set R chunk options:
-## Set default options for R code chunks:
+### Set R chunk options:
+# Set default options for R code chunks:
 knitr::opts_chunk$set(
     echo = FALSE, 
     warning = FALSE, 
@@ -32,7 +32,7 @@ options(scipen = 999,
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently (if you re-name this file, also change inside this if using an .Rproj/R project:
 here::i_am("SCAG_data_task_ZC.Rmd")
 
-# Load libraries:
+### Load libraries:
 library(here) # package to manage file paths
 library(rstudioapi) # package accessing Rstudio API 
 library(magrittr) # pipe function package
@@ -43,8 +43,7 @@ library(data.table) # package for data manipulation and reads in large files fas
 library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
 library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect, stringR, etc.
 
-
-#### Functions ----
+### Functions ----
 ### weight_perc_table()
 # Function to return full table of weighted percentages by group and filtered to one value of a variable: weight_perc_table()
 # For use when you want to return weighted percentages of one value of a variable and by one group- e.g. people with disability (%) by county
@@ -198,7 +197,7 @@ county_levels <- c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernar
 # race_levels:
 race_levels <-  c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
 
-#### Data Dictionaries ----
+### Data Dictionaries ----
 ### 2021 ACS: 
 ## Get data dictionary as tibble from tidycensus for 2021:
 # pums_vars_acs5 <- pums_variables %>%
@@ -239,7 +238,7 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 pums_vars_acs5_22 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv")
 
 
-################# Setup file paths ----
+### Setup file paths ----
 # Set up all file paths:
 # file path for all raw data:
 data_fp <- here('data')
@@ -313,7 +312,7 @@ tables_fp <- here(output_fp, 'tables')
 
 ### 2017-2021 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
 
-```{r ACS 2021 FTP data}
+```{r ACS 2021 FTP data, eval=FALSE, include=FALSE}
 # Total list of vars to get from ACS PUMS HHT
 vars_list_pums <- c("SERIALNO", "PUMA", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HHT2", "HISP",
                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "DDRS", "DEAR", "DEYE", "DOUT", "DPHY", "DREM", "SCHL", "ESR", "JWMNP",
@@ -337,9 +336,6 @@ person_data <- fread(here(person_2021_fp), select = person_vars_list) %>% as_tib
 
 # # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
 merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST", "PUMA", "ADJINC"))
-
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 1826332 obs. with 40 variables
-write_csv(merged_data, here(acs_data_21_fp, "merged_acs_data.csv"))
 
 # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
 scag_county_list <- c("Imperial",
@@ -365,17 +361,15 @@ merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Im
 write_csv(merged_data_scag, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
 
 # check variables from the merged_data using str() and summary():
-str(merged_data)
-#
+# str(merged_data)
 # Remove all large files if no longer needed:
 rm(housing_data, person_data, merged_data_scag, merged_data)
-
 ```
 
 
 ### 2018-2022 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
 
-```{r ACS 2022 FTP data}
+```{r ACS 2022 FTP data, eval=FALSE, include=FALSE}
 # Total list of vars to get from ACS PUMS 22- change from 21 is PUMA is in 2010 and 2020 census columns: "PUMA10" and "PUMA20"
 vars_list_pums_22 <- c("SERIALNO", "PUMA10", "PUMA20", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HHT2", "HISP",
                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "DDRS", "DEAR", "DEYE", "DOUT", "DPHY", "DREM", "SCHL", "ESR", "JWMNP", "JWTRNS",
@@ -404,9 +398,6 @@ merged_data_22 <- person_data_22 %>% left_join(., housing_data_22, by = c("SERIA
 merged_data_22 <- merged_data_22 %>% mutate(PUMA = case_when(PUMA10 == -9 ~ PUMA20,
                                                                      TRUE ~ PUMA10))
 
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22": 1839928 obs. with 31 variables
-# write_csv(merged_data_22, here(acs_data_22_fp, "merged_acs_22.csv"))
-
 # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
 scag_county_list <- c("Imperial",
                       "Los Angeles",
@@ -425,20 +416,18 @@ merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500
                                                                     PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
                                                                     )) %>%
                                           filter(county %in% scag_county_list) %>%
-                                          select(SERIALNO, ST,PUMA,county, everything())
+                                          select(SERIALNO, ST, PUMA,county, everything())
 
 # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
-# write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv"))
+write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 
 # Read in merged_data_22_scag from  here(acs_data_22_fp, "merged_acs_22_scag.csv")
 merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 
 # check variables from the merged_data_22_scag using str() and summary():
 # str(merged_data_22_scag)
-# 
-# # Remove all large files if no longer needed:
-# rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
-
+# Remove all large files if no longer needed:
+rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
 ```
 
 
@@ -463,6 +452,11 @@ ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"), show_
 # ca_pums_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"), show_col_types = FALSE)
 
 ### Recode/Create New Variables for analysis -----
+
+# Pull out the first 4 digits from SERIALNO, which is the year of ACS for that observation:
+ca_pums_scag <- ca_pums_scag %>% mutate(year = str_extract(SERIALNO, "\\d{4}"))
+
+
 # Code county as a factor variable:
 ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")))
 
@@ -632,6 +626,8 @@ race_levels <-  c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multira
 
 # Analysis and Replication of Tables and Figures for SCAG
 
+- Each of the following code chunks will create a table and write it out to a .csv file to the folder `output/tables`.
+
 ## Tables and Figures from Equity Analysis Technical Report- (EA report)
 
 ### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
@@ -661,7 +657,9 @@ if (file.exists(here(tables_fp, 'walk_bike_public_scag_table.csv'))) {rm(list = 
 # Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "VEH" and filter to "VEH" = 0: 
 no_veh_scag_table <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% 
     weight_perc_2groups(var = "VEH", weight = "WGTP", group1 = "county", group2 = "race", filter_value = 0,
-                        group1_levels = county_levels, group2_levels = race_levels) %>% rename(no_vehicle_percentage = percentage)
+                        group1_levels = county_levels, group2_levels = race_levels) %>% 
+    complete(county, race) %>% mutate(percentage = replace_na(percentage, 0)) %>% 
+    rename(no_vehicle_percentage = percentage)
 no_veh_scag_table
 
 # Write out table to .csv in "output/tables" folder and once the file exists remove from current environment all tibbles used to make the final table:
@@ -779,13 +777,11 @@ if (file.exists(here(tables_fp, 'transport_mean_scag_table.csv'))) {rm(list = ls
 scag_renter_burden_table <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% 
     weight_perc_2groups(var = "renter_burden", weight = "WGTP", group1 = "county", group2 = "race", filter_value = "Yes",
                         group1_levels = county_levels, group2_levels = race_levels) %>% mutate(household_type = "Renters")
-scag_renter_burden_table
 
 # Get housing_burden by using weight_perc_2groups() and add a column called household_type = "Homeowners":
 scag_housing_burden_table <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Homeowner") %>% 
     weight_perc_2groups(var = "housing_burden", weight = "WGTP", group1 = "county", group2 = "race", filter_value = "Yes",
                         group1_levels = county_levels, group2_levels = race_levels) %>% mutate(household_type = "Homeowners")
-scag_housing_burden_table
 
 # Join renters and Homeowners tables, add all complete cases to bring back any NA's in percentage and turn into 0, then re-order columns:
 housing_burden_scag_table <- full_join(scag_renter_burden_table, scag_housing_burden_table, by = join_by(county, race, percentage, household_type)) %>% 
@@ -830,6 +826,7 @@ if (file.exists(here(tables_fp, 'no_kitchen_plumbing_scag_table.csv'))) {rm(list
 overcrowded_scag_table <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% 
     weight_perc_2groups(var = "overcrowded", weight = "WGTP", group1 = "county", group2 = "race", filter_value = "Yes",
                         group1_levels = county_levels, group2_levels = race_levels) %>% 
+                        complete(county, race) %>% mutate(percentage = replace_na(percentage, 0)) %>% 
                             rename(overcrowded_percentage = percentage)
 overcrowded_scag_table 
 
@@ -1294,9 +1291,13 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 --- 
 
 
-# Write out excel workbook file with all sheets:
+# Write out Excel workbook file with all sheets:
 
-```{r write_excel}
+- Finally, the last step is taking all of the tables created above and writing each table to a sheet into an Excel workbook.
+
+- The output file `scag_tabbed.xlsx`, has a table of contents for the first sheet that includes the name of each sheet and a description of each table.
+
+```{r write_excel, include=FALSE}
 # Read in completed tables and set to tibbles in current global env:
 # Read in all the tables from the folder "output/tables" to a list and keep names from the files:
 table_file_list <- lapply(list.files(here(tables_fp), full.names = TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
@@ -1308,33 +1309,33 @@ table_file_list <- set_names(table_file_list, tools::file_path_sans_ext(fs::path
 table_file_list %>% 
   map(as_tibble) %>%
   list2env(envir = .GlobalEnv)
-
+                    
 ### Create tabbed excel workbook for SCAG:
 # Set up up a tibble named "toc" to use as a table of contents (toc) for output tabbed excel workbook named "scag_tabbed.xlsx":
 # Two columns: "sheet_name" and "figure_description"
-toc <- tribble(~sheet_name, ~ figure_description,
-              "Figure_5",  "Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity",
-              "Figure_6",  "Figure 6. Householders without a Vehicle by Race and Ethnicity",
-              "Figure_7",  "Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity",
-              "Figure_19", "Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity",
-              "Figure_20", "Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity",
-              "Figure_21",  "Figure 21. Households with Severe Overcrowding by Race and Ethniciy",
-              "Figure_22",  "Figure 22. Homeownership by Race and Ethniciy",
-              "Figure_28",  "Figure 28. People without Health Insurance by Race and Ethnicity",
-              "Figure_39", "Figure 39. Median Hourly Wage by Race and Ethnicity",
-              "Figure_40", "Figure 40. Unemployment by Race and Ethnicity",
-              "Figure_41", "Figure 41. Working Poor by Race and Ethnicity",
-              "Total_Population", "Total Population by County and SCAG Region",
-              "Race_Ethnicity", "Race/Ethnicity Distribution (%) by County and SCAG Region",
-              "Age", "Age Distribution (%) by County and SCAG Region",
-              "Singe_Parent_HHs", "Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region",
-              "Natl_Origin", "National Origin (% Foreign born) by County and SCAG Region",
-              "LEP", "Limited English Proficiency (%) by County and SCAG Region",
-              "Disablity", "People with Disabilities (%) by County and SCAG Region",
-              "Categories_Disablity", "Disabilites by 6 categories (%) and then by County and SCAG Region: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive",
-              "Education", "Educational Attainment (%) by Race/ethincity and whole SCAG Region",
-              "Median_HH_Income", "Median Household Income by Race/ethincity and whole SCAG Region",
-              "Poverty_HH","Household Poverty (%) by Race/ethincity and whole SCAG Region") 
+toc <- tribble(~ sheet_name,           ~ description,
+                 "Figure_5",             "Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity",
+                 "Figure_6",             "Figure 6. Householders without a Vehicle by Race and Ethnicity",
+                 "Figure_7",             "Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity",
+                 "Figure_19",            "Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity",
+                 "Figure_20",            "Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity",
+                 "Figure_21",            "Figure 21. Households with Severe Overcrowding by Race and Ethniciy",
+                 "Figure_22",            "Figure 22. Homeownership by Race and Ethniciy",
+                 "Figure_28",            "Figure 28. People without Health Insurance by Race and Ethnicity",
+                 "Figure_39",            "Figure 39. Median Hourly Wage by Race and Ethnicity",
+                 "Figure_40",            "Figure 40. Unemployment by Race and Ethnicity",
+                 "Figure_41",            "Figure 41. Working Poor by Race and Ethnicity",
+                 "Total_Population",     "Total Population by County and SCAG Region",
+                 "Race_Ethnicity",       "Race/Ethnicity Distribution (%) by County and SCAG Region",
+                 "Age",                  "Age Distribution (%) by County and SCAG Region",
+                 "Singe_Parent_HHs",     "Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region",
+                 "Natl_Origin",          "National Origin (% Foreign born) by County and SCAG Region",
+                 "LEP",                  "Limited English Proficiency (%) by County and SCAG Region",
+                 "Disablity",            "People with Disabilities (%) by County and SCAG Region",
+                 "Categories_Disablity", "Disabilites by 6 categories (%) and then by County and SCAG Region: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive",
+                 "Education",            "Educational Attainment (%) by Race/ethincity and whole SCAG Region",
+                 "Median_HH_Income",     "Median Household Income by Race/ethincity and whole SCAG Region",
+                 "Poverty_HH",           "Household Poverty (%) by Race/ethincity and whole SCAG Region") 
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name of each sheet (sheet_name from TOC above) and the df/tibble that will populate it- 
