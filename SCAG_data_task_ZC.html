@@ -11,7 +11,7 @@
 
 <meta name="author" content="Zack Crowley" />
 
-<meta name="date" content="2024-02-20" />
+<meta name="date" content="2024-02-21" />
 
 <title>SCAG Data Task</title>
 
@@ -1623,7 +1623,7 @@ display: none;
 
 <h1 class="title toc-ignore">SCAG Data Task</h1>
 <h4 class="author">Zack Crowley</h4>
-<h4 class="date">February 20, 2024</h4>
+<h4 class="date">February 21, 2024</h4>
 
 </div>
 
@@ -1647,6 +1647,152 @@ data:</h3>
 </div>
 <div id="data-recoding" class="section level1">
 <h1>Data Recoding:</h1>
+<div id="data-dictionary-table-new-variables-for-analysis" class="section level2">
+<h2>Data Dictionary Table (New Variables for Analysis):</h2>
+<table>
+<colgroup>
+<col width="8%" />
+<col width="45%" />
+<col width="2%" />
+<col width="42%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">variable_name</th>
+<th align="left">description</th>
+<th align="left">type</th>
+<th align="left">levels</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">year</td>
+<td align="left">Year of ACS</td>
+<td align="left">numeric</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">county</td>
+<td align="left">6 counties that make up SCAG Region</td>
+<td align="left">factor</td>
+<td align="left">Imperial , Los Angeles , Orange , Riverside , San
+Bernardino, Ventura</td>
+</tr>
+<tr class="odd">
+<td align="left">race</td>
+<td align="left">6 categories of race and ethnicity</td>
+<td align="left">factor</td>
+<td align="left">Asian/Pacific Islander, Black , Hispanic/Latino ,
+Multiracial/Other , Native American , White</td>
+</tr>
+<tr class="even">
+<td align="left">age_3_cat</td>
+<td align="left">3 categories of age</td>
+<td align="left">factor</td>
+<td align="left">&lt;18 years , 18 - 64 years, 65+ years</td>
+</tr>
+<tr class="odd">
+<td align="left">housing_income</td>
+<td align="left">Household Income US dollars, adjusted for
+inflation</td>
+<td align="left">numeric</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">edu</td>
+<td align="left">6 categories of educational attainment</td>
+<td align="left">factor</td>
+<td align="left">Less than HS Diploma, HS Diploma , Some College , AA
+Degree , BA degree , MA degree or higher</td>
+</tr>
+<tr class="odd">
+<td align="left">own_home</td>
+<td align="left">2 categories of Homeownership</td>
+<td align="left">factor</td>
+<td align="left">Homeowner , Non-Homeowner</td>
+</tr>
+<tr class="even">
+<td align="left">walk_bike_public_transport</td>
+<td align="left">2 categories of Workers who Commute by Walk, Bike, or
+Public Transit or Other Transport</td>
+<td align="left">factor</td>
+<td align="left">Walk/Bike/Public, Other Transport</td>
+</tr>
+<tr class="odd">
+<td align="left">all_transport</td>
+<td align="left">3 categories of means of transportation to work-
+Public, Private or Other</td>
+<td align="left">factor</td>
+<td align="left">Other , Public , Private</td>
+</tr>
+<tr class="even">
+<td align="left">poverty</td>
+<td align="left">2 categories: If Yes, the HH income is below 200
+percent of the poverty line</td>
+<td align="left">factor</td>
+<td align="left">Yes, No</td>
+</tr>
+<tr class="odd">
+<td align="left">housing_burden</td>
+<td align="left">2 categories: If Yes, Homeowner, owner costs as a
+percentage of hh income 30% or more (OCPIP), and 200 below percent
+poverty line (POVPIP)</td>
+<td align="left">factor</td>
+<td align="left">Yes, No</td>
+</tr>
+<tr class="even">
+<td align="left">renter_burden</td>
+<td align="left">2 categories: If Yes, Rent a home, Gross rent as a
+percentage of hh income 30% or more (GRPIP) and 200 below percent
+poverty line (POVPIP)</td>
+<td align="left">factor</td>
+<td align="left">Yes, No</td>
+</tr>
+<tr class="odd">
+<td align="left">no_kitchen_plumbing</td>
+<td align="left">2 categories, If Yes, no kitchen and no plumbing
+facilities in home</td>
+<td align="left">factor</td>
+<td align="left">Yes, No</td>
+</tr>
+<tr class="even">
+<td align="left">overcrowded</td>
+<td align="left">2 categories of Overcrowding of households, If Yes,
+household has more than 1.5 persons per room</td>
+<td align="left">factor</td>
+<td align="left">Yes, No</td>
+</tr>
+<tr class="odd">
+<td align="left">hourly_wage</td>
+<td align="left">Hourly Wage US dollars, adjusted for inflation</td>
+<td align="left">numeric</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">unemployed</td>
+<td align="left">Unemployment: if Yes, unemployed, No otherwise.</td>
+<td align="left">factor</td>
+<td align="left">Yes, No</td>
+</tr>
+<tr class="odd">
+<td align="left">age_3_cat</td>
+<td align="left">3 categories of Single Parent Households by gender:
+female head of HH, male head of HH, or cohabitates or no kids</td>
+<td align="left">factor</td>
+<td align="left">female_hh , male_hh , cohabit_or_nokids</td>
+</tr>
+<tr class="even">
+<td align="left">lep</td>
+<td align="left">3 categories of English Proficiency: Limited English
+Proficiency, English Proficient or Younger than 5 yos or no English
+spoken</td>
+<td align="left">factor</td>
+<td align="left">limited_english_proficiency, english_proficient ,
+&lt;5yos_or_no_eng</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div id="scag-data-recoding-variables-for-use-in-acs-pums-analysis" class="section level2">
 <h2>SCAG Data Recoding variables for use in ACS PUMS Analysis:</h2>
 </div>

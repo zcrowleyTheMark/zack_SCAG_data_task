@@ -27,7 +27,7 @@ options(scipen = 999,
 
 # Un-comment next two lines to install/update all necesary packages:
 # install.packages("remotes") # first install remotes to use update_packages()
-# remotes::update_packages(c("here", "rstudioapi", "magrittr", "janitor", "fs", "tools" "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
+# remotes::update_packages(c("here", "rstudioapi", "magrittr", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
 
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently (if you re-name this file, also change inside this if using an .Rproj/R project:
 here::i_am("SCAG_data_task_ZC.Rmd")
@@ -36,7 +36,6 @@ here::i_am("SCAG_data_task_ZC.Rmd")
 library(here) # package to manage file paths
 library(rstudioapi) # package accessing Rstudio API 
 library(magrittr) # pipe function package
-library(spatstat) # package for weighted.median() function
 library(readxl) # reading excel files
 library(openxlsx2) # writing excel files and manipulating excel workbooks.
 library(data.table) # package for data manipulation and reads in large files faster using fread()
@@ -421,13 +420,13 @@ merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500
 # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
 write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 
-# Read in merged_data_22_scag from  here(acs_data_22_fp, "merged_acs_22_scag.csv")
-merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"))
+# # Read in merged_data_22_scag from  here(acs_data_22_fp, "merged_acs_22_scag.csv")
+# merged_data_22_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 
 # check variables from the merged_data_22_scag using str() and summary():
 # str(merged_data_22_scag)
 # Remove all large files if no longer needed:
-rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
+rm(housing_data_22, person_data_22, merged_data_22, merged_data_22_scag)
 ```
 
 
@@ -435,6 +434,54 @@ rm(housing_data_22, person_data_22, merged_data_22_scag, merged_data_22)
 
 
 # Data Recoding: 
+
+## Data Dictionary Table (New Variables for Analysis):
+
+```{r ACS_data_new_vars_tbl, cols.print=4}
+
+# Set up up a tibble named "ACS_data_new_vars_tbl" to use reference/data dictionary for new variables that will be created for the creation of the tables below:
+# 4 columns: "variable_name", "description", "type", "levels":
+ACS_data_new_vars_tbl <- tribble(~ variable_name,           ~ description,       ~ type,   ~ levels,
+                                 "year", "Year of ACS", "numeric", NA,
+                                  "county", "6 counties that make up SCAG Region", "factor", c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura"),
+                                  "race", "6 categories of race and ethnicity", "factor", c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White"),
+                                  "age_3_cat", "3 categories of age", "factor",c("<18 years", "18 - 64 years","65+ years"),
+                                 "housing_income", "Household Income US dollars, adjusted for inflation","numeric", NA,
+                                  "edu", "6 categories of educational attainment", "factor", c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher"),
+                                 "own_home", "2 categories of Homeownership", "factor", c("Homeowner", "Non-Homeowner"),
+                                 "walk_bike_public_transport", "2 categories of Workers who Commute by Walk, Bike, or Public Transit or Other Transport", "factor", c("Walk/Bike/Public", "Other Transport"),
+                                 "all_transport", "3 categories of means of transportation to work- Public, Private or Other", "factor", c("Other", "Public","Private"),
+                                 "poverty", "2 categories: If Yes, the HH income is below 200 percent of the poverty line", "factor", c("Yes","No"),
+                                 "housing_burden", "2 categories: If Yes, Homeowner, owner costs as a percentage of hh income 30% or more (OCPIP), and 200 below percent poverty line (POVPIP)", 
+                                 "factor", c("Yes","No"),
+                                 "renter_burden", "2 categories: If Yes, Rent a home, Gross rent as a percentage of hh income 30% or more (GRPIP) and 200 below percent poverty line (POVPIP)", 
+                                 "factor", c("Yes","No"),
+                                 "no_kitchen_plumbing", "2 categories, If Yes, no kitchen and no plumbing facilities in home", "factor", c("Yes","No"),
+                                "overcrowded",  "2 categories of Overcrowding of households, If Yes, household has more than 1.5 persons per room", "factor", c("Yes","No"),
+                                 "hourly_wage", "Hourly Wage US dollars, adjusted for inflation","numeric", NA,
+                                "unemployed", "Unemployment: if Yes, unemployed, No otherwise.", "factor", c("Yes","No"),
+                                "age_3_cat", "3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids", 
+                                "factor", c("female_hh", "male_hh","cohabit_or_nokids"),
+                                 "lep", "3 categories of English Proficiency: Limited English Proficiency, English Proficient or Younger than 5 yos or no English spoken", 
+                                "factor", c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
+                                 )
+
+# For each factor variable in above table- Pull out each levels, name them and set to current environment as vectors to use later to set levels for corresponding variables:
+# Filter to factor vars:
+ACS_data_new_vars_factors <- ACS_data_new_vars_tbl %>% filter(type == "factor")
+# Use map to pull out each level for all factor variables:
+map(.x = unique(ACS_data_new_vars_factors$variable_name), function(x) ACS_data_new_vars_factors %>% filter(variable_name == x) %>% 
+                                                     unnest(levels) %>% pull(levels)) %>% 
+    set_names(., unique(str_glue("{ACS_data_new_vars_factors$variable_name}_levels"))) %>% # set names
+    list2env(envir = .GlobalEnv) %>% invisible() # set to current environment and silence messages
+
+# Write out to CSV for later reference:
+write_csv(ACS_data_new_vars_tbl, "data_dicts_ACS_PUMS/ACS_data_new_vars_tbl.csv")
+
+# Print out nice table:
+ACS_data_new_vars_tbl %>% knitr::kable()
+```
+
 
 ## SCAG Data Recoding variables for use in ACS PUMS Analysis:
 
@@ -453,9 +500,8 @@ ca_pums_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"), show_co
 
 ### Recode/Create New Variables for analysis -----
 
-# Pull out the first 4 digits from SERIALNO, which is the year of ACS for that observation:
+# Year of ACS- Pull out the first 4 digits from SERIALNO, which is the year of ACS for that observation:
 ca_pums_scag <- ca_pums_scag %>% mutate(year = as.numeric(str_extract(SERIALNO, "\\d{4}")))
-
 
 # Code county as a factor variable:
 ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")))
@@ -483,35 +529,9 @@ ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  
                                                                      ), levels = c("<18 years", "18 - 64 years","65+ years"))
                                         ) 
 # Household Income (different adjustments of income for 2017-21 ACS data and 2018-22 ACS data):
-# ADJINC has 6 implied decimal places so need to divide by 1000000
+# ADJINC has 6 implied decimal places so need to divide it by 1000000 to get the inflation adjustment for today's dollar values:
 ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = HINCP * (ADJINC/1000000))
 
-# # If statement to switch between 2017-21 ACS data and 2018-22 ACS data:
-# # If the min of year is 2017 and max is 2021, its the 2017-21 ACS data and use the ADJINC below to create "housing_income" variable:
-# if (min(ca_pums_scag$year, na.rm = TRUE) == 2017 & max(ca_pums_scag$year, na.rm = TRUE) == 2021) {
-# # Household Income for 2017-2021 ACS data:
-# # # Create new variable "housing_income" by multiplying HINCP (household income) by ADJINC for correct year:
-# ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * (1117630/1000000), # 2017 Adjust Income
-#                                                                    ADJINC == 1093093 ~ HINCP * (1093093/1000000), # 2018 Adjust Income
-#                                                                    ADJINC == 1070512 ~ HINCP * (1070512/1000000), # 2019 Adjust Income
-#                                                                    ADJINC == 1053131 ~ HINCP * (1053131/1000000), # 2020 Adjust Income
-#                                                                    ADJINC == 1029928 ~ HINCP * (1029928/1000000), # 2021 Adjust Income
-#                                                                   )
-#                                         ) 
-# }
-# 
-# # If the min of year is 2018 and max is 2022, its the 2018-2022 ACS data and use the ADJINC below to create "housing_income" variable:
-# if (min(ca_pums_scag$year, na.rm = TRUE) == 2018 & max(ca_pums_scag$year, na.rm = TRUE) == 2022) {
-# # Household Income for 2018-2022 ACS data:
-# # # Create new variable "housing_income" by multiplying HINCP (household income) by ADJINC for correct year:
-# ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = case_when(ADJINC == 1117630 ~ HINCP * 1.011189 * 1.10526316, # 2017 Adjust Income
-#                                                                    ADJINC == 1093093 ~ HINCP * 1.013097 * 1.07896160, # 2018 Adjust Income
-#                                                                    ADJINC == 1070512 ~ HINCP * 1.010145 * 1.05976096, # 2019 Adjust Income
-#                                                                    ADJINC == 1053131 ~ HINCP * 1.006149 * 1.04669465, # 2020 Adjust Income
-#                                                                    ADJINC == 1029928 ~ HINCP * 1.029928 * 1.00000000, # 2021 Adjust Income
-#                                                                   )
-#                                         ) 
-# }
 
 # Education Categories: named var "edu"
 # Create "edu" var based on the following conditions for 6 total categories, and convert to factor: 
@@ -527,7 +547,7 @@ ca_pums_scag <- ca_pums_scag %>% mutate(edu = factor(case_when(SCHL %in% c(1:15)
                                                      levels = c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher"))
                                         )
 
-# Homeownership: named var "own_home"
+# Homeownership: named var "own_home" 
 # Create "own_home" var based on the following conditions for 2 total categories, and convert to factor: 
 # If TEN is in (1 2) then "Homeowner"; If TEN in (3 4) then "Non-Homeowner";
 ca_pums_scag <- ca_pums_scag %>% mutate(own_home = factor(case_when(TEN %in% c(1:2) ~ "Homeowner",
@@ -536,13 +556,13 @@ ca_pums_scag <- ca_pums_scag %>% mutate(own_home = factor(case_when(TEN %in% c(1
                                         )
 
 
-# Means of transportation to work for Workers who Commute by Walk, Bike, or Public Transit: named var "walk_bike_public_transport":
+# Means of transportation to work for Workers who Commute by Walk, Bike, or Public Transit: named var "walk_bike_public_transport": 
 # Create "walk_bike_public_transport" var based on the following conditions for 2 total categories, and convert to factor: 
 # If JWTRNS is eqaul to any of the following 2,3,4,5,9, or 10 then "Walk/Bike/Public"; otherwise "Other Transport":
 ca_pums_scag <- ca_pums_scag %>% mutate(walk_bike_public_transport = factor(case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
                                                          TRUE ~ "Other Transport"), levels = c("Walk/Bike/Public", "Other Transport"))
                                                          ) 
-# Means of transportation to work: named var "all_transport"- Public, Private or Other
+# Means of transportation to work: named var "all_transport"- Public, Private or Other 
 # Create "all_transport" var based on the following conditions for 3 total categories, and convert to factor: 
 #  Workers who Commute by bus, rail, taxi, or ferry: coded level "Public": JWTRNS %in% c(2:7)
 #  Workers who Commute by Car or Motorcycle: coded level "Private": JWTRNS %in% c(1,8)
@@ -553,6 +573,12 @@ ca_pums_scag <- ca_pums_scag %>% mutate(all_transport = factor(case_when(JWTRNS 
                                                                  ), levels = c("Other", "Public","Private"))
                                         ) 
 
+# Poverty - Create "poverty" var based on the following conditions for 2 total categories, and convert to factor: 
+# If POVPIP less than 200 then "Yes"; otherwise "No"
+# If poverty == "Yes", the HH income is below 200 percent of the poverty line:
+ca_pums_scag <- ca_pums_scag %>% mutate(poverty = factor(case_when(POVPIP %in% c(0:199) ~ "Yes",
+                                                                   POVPIP >= 200 ~ "No",), levels = c("Yes","No"))
+                                                         )
 
 # Housing and Renter Burden: Two variables
 # Housing Burden is named "housing_burden" coded "Yes" if 
@@ -568,12 +594,6 @@ ca_pums_scag <- ca_pums_scag %>% mutate(housing_burden = factor(case_when(own_ho
                                                           TRUE ~ "No",), levels = c("Yes","No"))
                                                          ) 
 
-# Poverty - Create "poverty" var based on the following conditions for 2 total categories, and convert to factor: 
-# If POVPIP less than 200 then "Yes"; otherwise "No"
-# If poverty == "Yes", the HH income is below 200 percent of the poverty line:
-ca_pums_scag <- ca_pums_scag %>% mutate(poverty = factor(case_when(POVPIP %in% c(0:199) ~ "Yes",
-                                                                   POVPIP >= 200 ~ "No",), levels = c("Yes","No"))
-                                                         )
 
 # No kitchen and no plumbing facilities in home: named var "no_kitchen_plumbing"
 # Create "no_kitchen_plumbing" var based on the following conditions for 2 total categories, and convert to factor: 
@@ -638,12 +658,12 @@ ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~
                                                     )
                                         )
 
-# Set up county and race levels to use to convert each to factors and arrange tables:
-# county_levels:
-county_levels <-  c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
+# Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
+# county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
+county_levels <- append(county_levels, "SCAG") 
 
-# race_levels:
-race_levels <-  c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
+# race_levels: c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
+race_levels <-  append(race_levels,  "All Races")
 
 ```
 
@@ -898,13 +918,12 @@ if (file.exists(here(tables_fp, 'no_hicov_scag_table.csv'))) {rm(list = ls(patte
 # Figure 39. Median Hourly Wage by Race and Ethnicity
 # Use person level weights- PWGTP; Filter to age 25-64 and a civilian worker; if AGEP greater than or equal to 25 and AGEP less than or equal to 64 AND if ESR in (1 2); *Civilian worker;
 # Then use weighted.median of hourly_wage
-
 # Get Median Hourly Wage by race for all SCAG:
 scag_race_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
                                        select(PWGTP, race, hourly_wage)  %>% 
                                        group_by(race) %>% 
                                        summarize(
-                                         med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                         med_hr_wage = round(spatstat.geom::weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
                                        ) %>% mutate(county = "SCAG") %>% select(county, race, med_hr_wage) 
 
 # Get Median Hourly Wage by race for all by race and county:
@@ -912,7 +931,7 @@ scag_county_race_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %
                                        select(PWGTP, county, race, hourly_wage) %>% 
                                          group_by(county, race) %>% 
                                          summarize(
-                                         med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                         med_hr_wage = round(spatstat.geom::weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
                                          ) %>% select(county, race, med_hr_wage) 
 
 # Get Median Hourly Wage by county for all SCAG:
@@ -920,13 +939,13 @@ scag_county_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP 
                                        select(PWGTP, county, race, hourly_wage) %>%  
                                                group_by(county) %>% 
                                                summarize(
-                                           med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                           med_hr_wage = round(spatstat.geom::weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
                                          ) %>% select(county, med_hr_wage) %>% mutate(race = "All Races")
 # Get Median Hourly Wage for all SCAG:
 scag_total_med_hr_wage <- ca_pums_scag %>% filter(ESR %in% c(1:2) & AGEP %in% c(25:64)) %>% 
                                        select(PWGTP, race, hourly_wage) %>%  
                                          summarize(
-                                           med_hr_wage = round(weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
+                                           med_hr_wage = round(spatstat.geom::weighted.median(hourly_wage, PWGTP, na.rm = TRUE),2)
                                            ) %>% mutate(county = "SCAG", race = "All Races") %>% select(county, race, med_hr_wage)
 
 # Full join all scag_total tables:
@@ -1253,14 +1272,14 @@ if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(patte
 # Get median hh income for all races for all SCAG:
 scag_med_hh_income_all_races <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income)  %>% 
                                              summarize(
-                                               med_hh_income = round(weighted.median(housing_income, WGTP, na.rm = TRUE),2)
+                                               med_hh_income = round(spatstat.geom::weighted.median(housing_income, WGTP, na.rm = TRUE),2)
                                              ) %>% mutate(county = "SCAG", race = "All Races") %>% select(county, race, med_hh_income)
 
 # Get median hh income for all races by county:
 scag_med_hh_income_all_races_county <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, county, housing_income) %>% 
                                              group_by(county) %>% 
                                              summarize(
-                                               med_hh_income = round(weighted.median(housing_income, WGTP, na.rm = TRUE),2)
+                                               med_hh_income = round(spatstat.geom::weighted.median(housing_income, WGTP, na.rm = TRUE),2)
                                              ) %>% mutate(race = "All Races") %>% select(county, race, med_hh_income)
 
 
@@ -1268,14 +1287,14 @@ scag_med_hh_income_all_races_county <- ca_pums_scag %>% filter(RELSHIPP == 20) %
 scag_med_hh_income_race <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income, race)  %>% 
                                               group_by(race) %>% 
                                               summarize(
-                                                med_hh_income = round(weighted.median(housing_income, WGTP, na.rm = TRUE),2)
+                                                med_hh_income = round(spatstat.geom::weighted.median(housing_income, WGTP, na.rm = TRUE),2)
                                               ) %>% mutate(county = "SCAG") %>%  select(county, race, med_hh_income) 
 
 # Get median hh income for by race and by county:
 scag_med_hh_income_race_county <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income, race, county)  %>% 
                                               group_by(county, race) %>% 
                                               summarize(
-                                                med_hh_income = round(weighted.median(housing_income, WGTP, na.rm = TRUE),2)
+                                                med_hh_income = round(spatstat.geom::weighted.median(housing_income, WGTP, na.rm = TRUE),2)
                                               ) %>%  select(county, race, med_hh_income)
 
 
@@ -1331,7 +1350,7 @@ table_file_list <- set_names(table_file_list, tools::file_path_sans_ext(fs::path
 # Convert each list item into a tibble (map(as_tibble)) and save to the current global env (list2env(envir = .GlobalEnv)):
 table_file_list %>% 
   map(as_tibble) %>%
-  list2env(envir = .GlobalEnv)
+  list2env(envir = .GlobalEnv) %>% invisible()
                     
 ### Create tabbed excel workbook for SCAG:
 # Set up up a tibble named "toc" to use as a table of contents (toc) for output tabbed excel workbook named "scag_tabbed.xlsx":
