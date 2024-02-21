@@ -311,7 +311,7 @@ tables_fp <- here(output_fp, 'tables')
 
 ### Data Dictionary Table (New Variables Created for Analysis):
 
-```{r ACS_data_new_vars_tbl, cols.print=4}
+```{r ACS_data_new_vars_tbl}
 
 # Set up up a tibble named "ACS_data_new_vars_tbl" to use reference/data dictionary for new variables that will be created for the creation of the tables below:
 # 4 columns: "variable_name", "description", "type", "levels":
@@ -588,14 +588,15 @@ rm(merged_data_22_scag, clean_acs_scag_22)
 --- 
 
 
-# Data Recoding: 
+# Read in clean SCAG Data:
 
-## Read in clean SCAG Data and recode factor variables for use in ACS PUMS Analysis:
+- Read in clean SCAG Data and recode factor variables for use in ACS PUMS Analysis.
 
 ```{r read recode SCAG data}
 ### Read in dataset -----
 
-# First, create a list of the column types to convert all specified variables to factors with levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl":
+# First, create a list of the column types to convert all specified variables to factors with levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl",
+# list is structured variable_name = col_factor({variable_name}_levels):
 acs_col_type_list <- list(county = col_factor(county_levels),
                           race = col_factor(race_levels),
                           age_3_cat = col_factor(age_3_cat_levels),
@@ -615,32 +616,13 @@ acs_col_type_list <- list(county = col_factor(county_levels),
 
 # 2017-2021 ACS PUMS merged data
 # If you want to use 2017-2021 ACS PUMS merged data use the next line otherwise comment out/don't run the next line and go the next line:
-# Read in merged ACS data SCAG from 2017-2021:
+# Read in merged ACS data SCAG from 2017-2021, specifying col_types to list above "acs_col_type_list":
 ca_pums_scag <- read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), col_types = acs_col_type_list)
 
 # 2018-2022 ACS PUMS merged data
 # Un-comment the next line (and comment out the above line)if you want to use the merged 2018-2022 ACS PUMS data file
 # Read in merged ACS data SCAG from 2018-2022:
 # ca_pums_scag <- read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), col_types = acs_col_type_list)
-
-### Recode factor variables for analysis -----
-# Use the levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl" and set all variables to factors:
-ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = county_levels),
-                                        race = factor(race, levels = race_levels),
-                                        age_3_cat = factor(age_3_cat, levels = age_3_cat_levels),
-                                        edu = factor(edu, levels = edu_levels),
-                                        own_home = factor(own_home, levels = own_home_levels),
-                                        walk_bike_public_transport = factor(walk_bike_public_transport, levels = walk_bike_public_transport_levels),
-                                        all_transport = factor(all_transport, levels = all_transport_levels),
-                                        poverty = factor(poverty, levels = yes_no_levels),
-                                        housing_burden = factor(housing_burden, levels = yes_no_levels),
-                                        renter_burden = factor(renter_burden, levels = yes_no_levels),
-                                        no_kitchen_plumbing = factor(no_kitchen_plumbing, levels = yes_no_levels),
-                                        overcrowded = factor(overcrowded, levels = yes_no_levels),
-                                        unemployed = factor(unemployed, levels = yes_no_levels),
-                                        single_hh = factor(single_hh, levels = single_hh_levels),
-                                        lep = factor(lep, levels = lep_levels),
-                                        ) # end of mutate for ca_pums_scag to factor variables
 
 # Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
 # county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
@@ -649,8 +631,12 @@ if (county_levels[7] != "SCAG") {append(county_levels, "SCAG")}
 # race_levels: c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
 if (race_levels[7] != "SCAG") {append(race_levels,  "All Races")}
 
-# Confirm variable types:
+# Confirm variable types with str() or Use spec() to double check the variable types and levels if factors::
+# spec(ca_pums_scag)
 # str(ca_pums_scag)
+
+# Print out first 10 rows to preview in document:
+head(ca_pums_scag, 10)
 ```
 
 # Analysis and Replication of Tables and Figures for SCAG
