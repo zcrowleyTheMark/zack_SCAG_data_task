@@ -1,0 +1,68 @@
+/*  Custom CSS to style html output- Zack Crowley- The Mark USA/* 
+
+
+/* Change font and size of body, ordered/un-ordered lists */
+body, ul, li{
+  font-family: "Gill Sans MT";
+  font-size: 16px;
+}
+/* Change font of inline code*/
+code {
+  font-family: "MesloLGS-NF-Regular";
+}
+
+/* Change font/size/color of headers */
+h1 {
+  font-family: "Gill Sans MT";
+  background-color: #2C2C4F;
+  color: white;
+  font-size: 38px;
+  font-weight: 500;
+}
+
+h2 {
+  font-family: "Gill Sans MT";
+  background-color: #dadada;
+  color: #2C2C4F;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+h3 {
+  font-family: "Gill Sans MT";
+  background-color: #dadada;
+  color: #4B9FA6;
+  font-size: 28px;
+  font-weight: bold;
+}
+    
+h4 {
+  font-family: "Gill Sans MT";
+  color: #2C2C4F; 
+  font-size: 26px;
+}
+  
+h5 {
+  font-family: "Gill Sans MT";
+  color: #4B9FA6; 
+  font-size: 24px;
+}
+/* Change size/color of horizontal rule/line */
+hr {
+  height: 3px;
+  background-color: #2C2C4F;
+}
+
+/* Fix TOC indentation: add one for each level of header and add 1 em to each new header- this is for two: H1 and H2 */
+/* Fix TOC indentation for H1 */
+#TOC > ul.tocify-header > li:first-child {
+  text-indent: initial;
+  padding-left: 1em;
+}
+/* Fix TOC indentation for H2 */
+#TOC ul.tocify-subheader[data-tag="2"] > li.tocify-item {
+  text-indent: initial;
+  padding-left: 2em;
+}
+
+

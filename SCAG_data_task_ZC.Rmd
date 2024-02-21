@@ -4,7 +4,19 @@ author: "Zack Crowley"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
     html_document:
+        css: "css/style.css"
         df_print: paged
+        toc: true
+        toc_depth: 2
+        toc_float:
+            collapsed: false
+            smooth_scroll: false
+params:
+  region:
+    label: "ACS Dataset:"
+    value: "2017-2021"
+    input: select
+    choices: ["2017-2021", "2018-2022"]
 ---
 
 ```{r setup, include=FALSE}
@@ -304,6 +316,7 @@ if (!dir.exists(here(output_fp, 'tables'))) {dir.create(here(output_fp, 'tables'
 tables_fp <- here(output_fp, 'tables')
 
 ```
+
 
 # Load and Clean data from US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) File Transfer Protocol (FTP) site:
 
@@ -626,10 +639,10 @@ ca_pums_scag <- read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), col_type
 
 # Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
 # county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
-if (county_levels[7] != "SCAG") {append(county_levels, "SCAG")}
+if (is.na(county_levels[7] == "SCAG")) {county_levels <- append(county_levels, "SCAG")}
 
 # race_levels: c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
-if (race_levels[7] != "SCAG") {append(race_levels,  "All Races")}
+if (is.na(race_levels[7] == "All Races")) {race_levels <- append(race_levels,  "All Races")}
 
 # Confirm variable types with str() or Use spec() to double check the variable types and levels if factors::
 # spec(ca_pums_scag)
@@ -1285,7 +1298,7 @@ write_csv(med_hh_income_scag_table, here(tables_fp, "med_hh_income_scag_table.cs
 if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(pattern = "med_hh_income"))}
 ```
 
-### Household Poverty (%) by Race/ethincity and whole SCAG Region
+### Household Poverty (%) by Race/ethnicity and whole SCAG Region
 
 ```{r poverty_hh}
 # if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line; Use household level weights- WGTP; Filter only households: filter(RELSHIPP == 20)

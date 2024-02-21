@@ -1,43 +1,43 @@
 county,disability_type,percentage
-Imperial,Self-care difficulty,4.04
-Los Angeles,Self-care difficulty,3.16
-Orange,Self-care difficulty,2.38
-Riverside,Self-care difficulty,2.73
-San Bernardino,Self-care difficulty,2.73
-Ventura,Self-care difficulty,2.7
-SCAG,Self-care difficulty,2.91
-Imperial,Hearing difficulty,3.03
-Los Angeles,Hearing difficulty,2.6
-Orange,Hearing difficulty,2.52
+Imperial,Self-care difficulty,3.89
+Los Angeles,Self-care difficulty,3.02
+Orange,Self-care difficulty,2.2
+Riverside,Self-care difficulty,2.66
+San Bernardino,Self-care difficulty,2.67
+Ventura,Self-care difficulty,2.56
+SCAG,Self-care difficulty,2.78
+Imperial,Hearing difficulty,3.01
+Los Angeles,Hearing difficulty,2.56
+Orange,Hearing difficulty,2.54
 Riverside,Hearing difficulty,3.35
-San Bernardino,Hearing difficulty,3.23
-Ventura,Hearing difficulty,3.35
-SCAG,Hearing difficulty,2.8
-Imperial,Vision difficulty,2.64
-Los Angeles,Vision difficulty,2.15
-Orange,Vision difficulty,1.6
-Riverside,Vision difficulty,2.28
-San Bernardino,Vision difficulty,2.49
-Ventura,Vision difficulty,2.16
-SCAG,Vision difficulty,2.12
-Imperial,Independent living,5.59
-Los Angeles,Independent living,4.95
-Orange,Independent living,3.88
-Riverside,Independent living,4.67
-San Bernardino,Independent living,4.61
-Ventura,Independent living,4.58
-SCAG,Independent living,4.68
-Imperial,Ambulatory difficulty,7.99
-Los Angeles,Ambulatory difficulty,5.87
-Orange,Ambulatory difficulty,4.54
-Riverside,Ambulatory difficulty,6.03
-San Bernardino,Ambulatory difficulty,5.85
-Ventura,Ambulatory difficulty,5.6
-SCAG,Ambulatory difficulty,5.67
-Imperial,Cognitive difficulty,6.18
-Los Angeles,Cognitive difficulty,4.41
-Orange,Cognitive difficulty,3.53
-Riverside,Cognitive difficulty,4.5
-San Bernardino,Cognitive difficulty,4.91
-Ventura,Cognitive difficulty,4.44
-SCAG,Cognitive difficulty,4.35
+San Bernardino,Hearing difficulty,3.19
+Ventura,Hearing difficulty,3.32
+SCAG,Hearing difficulty,2.77
+Imperial,Vision difficulty,2.12
+Los Angeles,Vision difficulty,2.03
+Orange,Vision difficulty,1.56
+Riverside,Vision difficulty,2.25
+San Bernardino,Vision difficulty,2.42
+Ventura,Vision difficulty,2.03
+SCAG,Vision difficulty,2.02
+Imperial,Independent living,5.78
+Los Angeles,Independent living,4.7
+Orange,Independent living,3.65
+Riverside,Independent living,4.5
+San Bernardino,Independent living,4.55
+Ventura,Independent living,4.53
+SCAG,Independent living,4.48
+Imperial,Ambulatory difficulty,7.94
+Los Angeles,Ambulatory difficulty,5.65
+Orange,Ambulatory difficulty,4.39
+Riverside,Ambulatory difficulty,6.07
+San Bernardino,Ambulatory difficulty,5.87
+Ventura,Ambulatory difficulty,5.51
+SCAG,Ambulatory difficulty,5.53
+Imperial,Cognitive difficulty,6.56
+Los Angeles,Cognitive difficulty,4.17
+Orange,Cognitive difficulty,3.35
+Riverside,Cognitive difficulty,4.31
+San Bernardino,Cognitive difficulty,4.9
+Ventura,Cognitive difficulty,4.27
+SCAG,Cognitive difficulty,4.16
