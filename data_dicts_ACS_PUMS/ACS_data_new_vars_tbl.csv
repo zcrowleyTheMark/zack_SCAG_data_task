@@ -15,5 +15,5 @@ no_kitchen_plumbing,"2 categories, If Yes, no kitchen and no plumbing facilities
 overcrowded,"2 categories of Overcrowding of households, If Yes, household has more than 1.5 persons per room","factor: Yes, No",
 hourly_wage,"Hourly Wage US dollars, adjusted for inflation",numeric,
 unemployed,"Unemployment: if Yes, unemployed, No otherwise.","factor: Yes, No",
-age_3_cat,"3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids",factor,
+single_hh,"3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids",factor,
 lep,"3 categories of English Proficiency: Limited English Proficiency, English Proficient or Younger than 5 yos or no English spoken",factor,

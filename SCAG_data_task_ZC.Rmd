@@ -309,7 +309,7 @@ tables_fp <- here(output_fp, 'tables')
 
 - Both 5 year estimates from 2017-2021 and 2018-2022 ACS data
 
-## Data Dictionary Table (New Variables Created for Analysis):
+### Data Dictionary Table (New Variables Created for Analysis):
 
 ```{r ACS_data_new_vars_tbl, cols.print=4}
 
@@ -334,7 +334,7 @@ ACS_data_new_vars_tbl <- tribble(~ variable_name,           ~ description,      
                                 "overcrowded",  "2 categories of Overcrowding of households, If Yes, household has more than 1.5 persons per room", "factor: Yes, No", c("Yes","No"),
                                  "hourly_wage", "Hourly Wage US dollars, adjusted for inflation", "numeric", NA,
                                 "unemployed", "Unemployment: if Yes, unemployed, No otherwise.", "factor: Yes, No", c("Yes","No"),
-                                "age_3_cat", "3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids", 
+                                "single_hh", "3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids", 
                                 "factor", c("female_hh", "male_hh","cohabit_or_nokids"),
                                  "lep", "3 categories of English Proficiency: Limited English Proficiency, English Proficient or Younger than 5 yos or no English spoken", 
                                 "factor", c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
@@ -407,6 +407,66 @@ write_csv(merged_data_scag, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
 # str(merged_data)
 # Remove all large files if no longer needed:
 rm(housing_data, person_data, merged_data_scag, merged_data)
+
+### Data Recode/Create New Variables for analysis -----
+
+# Read in merged_acs_data_scag from  here(acs_data_21_fp, "merged_acs_data_scag.csv")
+merged_acs_data_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"), show_col_types = FALSE)
+
+# Create all new variables, see Data Dictionary Table above and separate R script named "data_cleaning_ACS.R" for detailed breakdown of each new variable:
+clean_acs_scag_21 <- merged_acs_data_scag %>% mutate(year = as.numeric(str_extract(SERIALNO, "\\d{4}")),
+                                                    county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")),
+                                                    race = factor(case_when(HISP != 1  ~ "Hispanic/Latino",
+                                                                            HISP == 1 & RAC1P == 1 ~ "White", 
+                                                                            HISP == 1 & RAC1P == 2 ~ "Black", 
+                                                                            HISP == 1 & RAC1P %in% c(6,7) ~ "Asian/Pacific Islander", 
+                                                                            HISP == 1 & RAC1P %in% c(3:5) ~ "Native American", 
+                                                                            HISP == 1 & RAC1P %in% c(8,9) ~ "Multiracial/Other"
+                                                         ), levels = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White")),
+                                                    age_3_cat = factor(case_when(AGEP < 18  ~ "<18 years",
+                                                                                 AGEP %in% c(18:64) ~ "18 - 64 years",
+                                                                                 AGEP > 64 ~ "65+ years"
+                                                                     ), levels = c("<18 years", "18 - 64 years","65+ years")),
+                                                    housing_income = HINCP * (ADJINC/1000000),
+                                                    edu = factor(case_when(SCHL %in% c(1:15)  ~ "Less than HS Diploma",
+                                                                           SCHL %in% c(16:17) ~ "HS Diploma",
+                                                                           SCHL %in% c(18:19) ~ "Some College",
+                                                                           SCHL == 20 ~ "AA Degree",
+                                                                           SCHL == 21 ~ "BA degree",
+                                                                           SCHL %in% c(22:24) ~ "MA degree or higher"
+                                                               ), levels = c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher")),
+                                                    own_home = factor(case_when(TEN %in% c(1:2) ~ "Homeowner",
+                                                                                TEN %in% c(3:4) ~ "Non-Homeowner"), levels = c("Homeowner", "Non-Homeowner")),
+                                                    walk_bike_public_transport = factor(case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
+                                                                                                  TRUE ~ "Other Transport"), levels = c("Walk/Bike/Public", "Other Transport")),
+                                                    all_transport = factor(case_when(JWTRNS %in% c(1,8) ~ "Private",
+                                                                                     JWTRNS %in% c(2:7) ~  "Public",
+                                                                                     JWTRNS %in% c(9,10,12) ~ "Other"
+                                                                                    ), levels = c("Other", "Public","Private")),
+                                                    poverty = factor(case_when(POVPIP %in% c(0:199) ~ "Yes", POVPIP >= 200 ~ "No",), levels = c("Yes","No")),
+                                                    housing_burden = factor(case_when(own_home == "Homeowner" & OCPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
+                                                                                      TRUE ~ "No",), levels = c("Yes","No")),
+                                                    renter_burden = factor(case_when(own_home == "Non-Homeowner" & GRPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
+                                                                                     TRUE ~ "No",), levels = c("Yes","No")),
+                                                    no_kitchen_plumbing = factor(case_when(KIT == 2 & PLM == 2 ~ "Yes", KIT == 1 | PLM == 1 ~ "No"), levels = c("Yes","No")),
+                                                    crowd = case_when(RMSP > 0  ~ NP/RMSP, TRUE ~ NA),
+                                                    overcrowded = factor(case_when(crowd >= 1.5  ~ "Yes", crowd < 1.5 ~ "No"), levels = c("Yes","No")),
+                                                    hourly_wage = if_else(WKHP > 0, ((WAGP * (ADJINC/1000000))/52)/WKHP, NA_real_),
+                                                    unemployed = factor(case_when(ESR == 3  ~ "Yes", ESR != 3 ~ "No"), levels = c("Yes","No")),
+                                                    single_hh = factor(case_when(HHT2 == 6  ~ "female_hh",
+                                                                                 HHT2 == 10  ~ "male_hh",
+                                                                                 HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"), levels = c("female_hh", "male_hh","cohabit_or_nokids")),
+                                                    lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
+                                                                           ENG %in% c(1:2) ~ "english_proficient",
+                                                                           TRUE ~ "<5yos_or_no_eng"), levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")),
+                                                    
+                                                    ) # end of mutate for clean_acs_scag_21
+
+# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21":  881207 obs.  with 34 variables
+write_csv(clean_acs_scag_21, here(acs_data_21_fp, "clean_acs_scag_21.csv"))
+
+# Remove all large tibbles/dfs:
+rm(merged_acs_data_scag, clean_acs_scag_21)
 ```
 
 
@@ -503,7 +563,7 @@ clean_acs_scag_22 <- merged_data_22_scag %>% mutate(year = as.numeric(str_extrac
                                                                                       TRUE ~ "No",), levels = c("Yes","No")),
                                                     renter_burden = factor(case_when(own_home == "Non-Homeowner" & GRPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
                                                                                      TRUE ~ "No",), levels = c("Yes","No")),
-                                                    no_kitchen_plumbing = factor(case_when(KIT == 2 & PLM == 2 ~ "Yes", KIT == 1 | PLM == 1 ~ "No",), levels = c("Yes","No")),
+                                                    no_kitchen_plumbing = factor(case_when(KIT == 2 & PLM == 2 ~ "Yes", KIT == 1 | PLM == 1 ~ "No"), levels = c("Yes","No")),
                                                     crowd = case_when(RMSP > 0  ~ NP/RMSP, TRUE ~ NA),
                                                     overcrowded = factor(case_when(crowd >= 1.5  ~ "Yes", crowd < 1.5 ~ "No"), levels = c("Yes","No")),
                                                     hourly_wage = if_else(WKHP > 0, ((WAGP * (ADJINC/1000000))/52)/WKHP, NA_real_),
@@ -516,13 +576,6 @@ clean_acs_scag_22 <- merged_data_22_scag %>% mutate(year = as.numeric(str_extrac
                                                                            TRUE ~ "<5yos_or_no_eng"), levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")),
                                                     
                                                     ) # end of mutate for clean_acs_scag_22
-
-# Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
-# county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
-county_levels <- append(county_levels, "SCAG") 
-
-# race_levels: c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
-race_levels <-  append(race_levels,  "All Races")
 
 # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
 write_csv(clean_acs_scag_22, here(acs_data_22_fp, "clean_acs_scag_22.csv"))
@@ -537,188 +590,67 @@ rm(merged_data_22_scag, clean_acs_scag_22)
 
 # Data Recoding: 
 
-## SCAG Data Recoding variables for use in ACS PUMS Analysis:
+## Read in clean SCAG Data and recode factor variables for use in ACS PUMS Analysis:
 
 ```{r read recode SCAG data}
 ### Read in dataset -----
 
+# First, create a list of the column types to convert all specified variables to factors with levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl":
+acs_col_type_list <- list(county = col_factor(county_levels),
+                          race = col_factor(race_levels),
+                          age_3_cat = col_factor(age_3_cat_levels),
+                          edu = col_factor(edu_levels),
+                          own_home = col_factor(own_home_levels),
+                          walk_bike_public_transport = col_factor(walk_bike_public_transport_levels),
+                          all_transport = col_factor(all_transport_levels),
+                          poverty = col_factor(yes_no_levels),
+                          housing_burden = col_factor(yes_no_levels),
+                          renter_burden = col_factor(yes_no_levels),
+                          no_kitchen_plumbing = col_factor(yes_no_levels),
+                          overcrowded = col_factor(yes_no_levels),
+                          unemployed = col_factor(yes_no_levels),
+                          single_hh = col_factor(single_hh_levels),
+                          lep = col_factor(lep_levels)
+                          )
+
 # 2017-2021 ACS PUMS merged data
 # If you want to use 2017-2021 ACS PUMS merged data use the next line otherwise comment out/don't run the next line and go the next line:
 # Read in merged ACS data SCAG from 2017-2021:
-# ca_pums_scag <- read_csv(here(acs_data_21_fp, "merged_acs_data_scag.csv"), show_col_types = FALSE)
+ca_pums_scag <- read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), col_types = acs_col_type_list)
 
 # 2018-2022 ACS PUMS merged data
 # Un-comment the next line (and comment out the above line)if you want to use the merged 2018-2022 ACS PUMS data file
 # Read in merged ACS data SCAG from 2018-2022:
-ca_pums_scag <- read_csv(here(acs_data_22_fp, "merged_acs_22_scag.csv"), show_col_types = FALSE)
+# ca_pums_scag <- read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), col_types = acs_col_type_list)
 
-### Recode/Create New Variables for analysis -----
-
-# Year of ACS- Pull out the first 4 digits from SERIALNO, which is the year of ACS for that observation:
-ca_pums_scag <- ca_pums_scag %>% mutate(year = as.numeric(str_extract(SERIALNO, "\\d{4}")))
-
-# Code county as a factor variable:
-ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")))
-
-# Race and Ethnicity: named var "race" for brevity:
-# Create "race" var based on the following conditions for 6 total categories, and convert to factor: 
-# If HISP is NOT equal to 1, then  "Hispanic/Latino"
-# For the rest- if HISP is equal to 1 and
-# If RAC1P = 1 "White", If RAC1P = 2 "Black", If RAC1P = 6 or 7 "Asian/Pacific Islander", If If RAC1P = 3,4 or 5  "Native American", If RAC1P = 8 or 9 "Multiracial/Other":
-ca_pums_scag <- ca_pums_scag %>% mutate(race = factor(case_when(HISP != 1  ~ "Hispanic/Latino",
-                                                         HISP == 1 & RAC1P == 1 ~ "White", 
-                                                         HISP == 1 & RAC1P == 2 ~ "Black", 
-                                                         HISP == 1 & RAC1P %in% c(6,7) ~ "Asian/Pacific Islander", 
-                                                         HISP == 1 & RAC1P %in% c(3:5) ~ "Native American", 
-                                                         HISP == 1 & RAC1P %in% c(8,9) ~ "Multiracial/Other"
-                                                         ), levels = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White"))
-                                        ) 
-
-# Age Categories: named var "age_3_cat"
-# Create "age_3_cat" var based on the following conditions for 3 total categories, and convert to factor: 
-# If AGEP < 18 "<18 years", If AGEP is greater than or equal to 18 and less than or equal to 64 "18 - 64 years", If AGEP > 64 ~ "65+ years"
-ca_pums_scag <- ca_pums_scag %>% mutate(age_3_cat = factor(case_when(AGEP < 18  ~ "<18 years",
-                                                                     AGEP %in% c(18:64) ~ "18 - 64 years",
-                                                                     AGEP > 64 ~ "65+ years"
-                                                                     ), levels = c("<18 years", "18 - 64 years","65+ years"))
-                                        ) 
-# Household Income (different adjustments of income for 2017-21 ACS data and 2018-22 ACS data):
-# ADJINC has 6 implied decimal places so need to divide it by 1000000 to get the inflation adjustment for today's dollar values:
-ca_pums_scag <- ca_pums_scag %>% mutate(housing_income = HINCP * (ADJINC/1000000))
-
-
-# Education Categories: named var "edu"
-# Create "edu" var based on the following conditions for 6 total categories, and convert to factor: 
-# If SCHL is greater than or equal to 1 and less than or equal 15) "Less than HS Diploma", If SCHL is equal to 16 or 17 "HS Diploma", If SCHL is equal to 18 or 19 "Some College", 
-# If SCHL equal to 20 "AA Degree", If SCHL equal to 21 "BA degree", If SCHL equal to 22, 23 or 24 "MA degree or higher":
-ca_pums_scag <- ca_pums_scag %>% mutate(edu = factor(case_when(SCHL %in% c(1:15)  ~ "Less than HS Diploma",
-                                                               SCHL %in% c(16:17) ~ "HS Diploma",
-                                                               SCHL %in% c(18:19) ~ "Some College",
-                                                               SCHL == 20 ~ "AA Degree",
-                                                               SCHL == 21 ~ "BA degree",
-                                                               SCHL %in% c(22:24) ~ "MA degree or higher"
-                                                               ), 
-                                                     levels = c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher"))
-                                        )
-
-# Homeownership: named var "own_home" 
-# Create "own_home" var based on the following conditions for 2 total categories, and convert to factor: 
-# If TEN is in (1 2) then "Homeowner"; If TEN in (3 4) then "Non-Homeowner";
-ca_pums_scag <- ca_pums_scag %>% mutate(own_home = factor(case_when(TEN %in% c(1:2) ~ "Homeowner",
-                                                                    TEN %in% c(3:4) ~ "Non-Homeowner"), 
-                                                          levels = c("Homeowner", "Non-Homeowner"))
-                                        )
-
-
-# Means of transportation to work for Workers who Commute by Walk, Bike, or Public Transit: named var "walk_bike_public_transport": 
-# Create "walk_bike_public_transport" var based on the following conditions for 2 total categories, and convert to factor: 
-# If JWTRNS is eqaul to any of the following 2,3,4,5,9, or 10 then "Walk/Bike/Public"; otherwise "Other Transport":
-ca_pums_scag <- ca_pums_scag %>% mutate(walk_bike_public_transport = factor(case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
-                                                         TRUE ~ "Other Transport"), levels = c("Walk/Bike/Public", "Other Transport"))
-                                                         ) 
-# Means of transportation to work: named var "all_transport"- Public, Private or Other 
-# Create "all_transport" var based on the following conditions for 3 total categories, and convert to factor: 
-#  Workers who Commute by bus, rail, taxi, or ferry: coded level "Public": JWTRNS %in% c(2:7)
-#  Workers who Commute by Car or Motorcycle: coded level "Private": JWTRNS %in% c(1,8)
-#  Workers who Commute by Walk, Bike, or Other: coded level "Other": JWTRNS %in% c(9,10,12)
-ca_pums_scag <- ca_pums_scag %>% mutate(all_transport = factor(case_when(JWTRNS %in% c(1,8) ~ "Private",
-                                                                  JWTRNS %in% c(2:7) ~  "Public",
-                                                                  JWTRNS %in% c(9,10,12) ~ "Other"
-                                                                 ), levels = c("Other", "Public","Private"))
-                                        ) 
-
-# Poverty - Create "poverty" var based on the following conditions for 2 total categories, and convert to factor: 
-# If POVPIP less than 200 then "Yes"; otherwise "No"
-# If poverty == "Yes", the HH income is below 200 percent of the poverty line:
-ca_pums_scag <- ca_pums_scag %>% mutate(poverty = factor(case_when(POVPIP %in% c(0:199) ~ "Yes",
-                                                                   POVPIP >= 200 ~ "No",), levels = c("Yes","No"))
-                                                         )
-
-# Housing and Renter Burden: Two variables
-# Housing Burden is named "housing_burden" coded "Yes" if 
-# Homeowner, owner costs as a percentage of household income (housing cost burden) 30% or more (OCPIP), and 200 below percent poverty line (POVPIP):
-# own_home == "Homeowner" & OCPIP >= 30 & POVPIP %in% c(0:199) Then "Yes"; otherwise "No"
-# Renter Burden is named "renter_burden" coded "Yes" if 
-# Rent a home, Gross rent as a percentage of household income (Rent burden) 30% or more (GRPIP) and 200 below percent poverty line (POVPIP):
-# own_home == "Non-Homeowner" & GRPIP >= 30 & POVPIP %in% c(0:199) Then "Yes"; otherwise "No"
-# Housing and Rent burdens: variable for homeowner burden named: "housing_burden"; variable for homeowner burden named: "renter_burden"
-ca_pums_scag <- ca_pums_scag %>% mutate(housing_burden = factor(case_when(own_home == "Homeowner" & OCPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
-                                                          TRUE ~ "No",), levels = c("Yes","No")),
-                                        renter_burden = factor(case_when(own_home == "Non-Homeowner" & GRPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
-                                                          TRUE ~ "No",), levels = c("Yes","No"))
-                                                         ) 
-
-
-# No kitchen and no plumbing facilities in home: named var "no_kitchen_plumbing"
-# Create "no_kitchen_plumbing" var based on the following conditions for 2 total categories, and convert to factor: 
-# If KIT == 2 AND PLM == 2 then "Yes"; KIT == 1 OR PLM == 1 then "No"
-ca_pums_scag <- ca_pums_scag %>% mutate(no_kitchen_plumbing = factor(case_when(KIT == 2 & PLM == 2 ~ "Yes",
-                                                                   KIT == 1 | PLM == 1 ~ "No",), levels = c("Yes","No"))
-                                                         )
-
-### 
-# Overcrowding of households: defined as "severe overcrowding is measured as the percentage of householders that have more than 1.5 persons per room"
-# named variable: "overcrowded" if "Yes", greater than or equal to 1.5 people per room, "No" otherwise. 
-# First define the number of occupants/number or rooms and name "crowd" if RMSP is greater than 0- NP/RMSP = "crowd", if "crowd is greater than or equal to 1.5 then "overcrowded" = "Yes" and "No" if less than 1.5:
-ca_pums_scag <- ca_pums_scag %>% mutate(crowd = case_when(RMSP > 0  ~ NP/RMSP,
-                                                           TRUE ~ NA),
-                                        overcrowded = factor(case_when(crowd >= 1.5  ~ "Yes",
-                                                           crowd < 1.5 ~ "No"), levels = c("Yes","No"))
-                                                         ) 
-
-## Hourly wage: variable named "hourly_wage"
-# First, adjust the wages with the Adjust Income for the correct year named "wage";
-# Second, get the weekly wages by dividing by 52 named "weekly_wage", then divide by WKHP (usual hours worked per week)
-# Finally: get hourly wage by dividing weekly_wage by WKHP (usual hours worked per week) if  WKHP > 0: 
-# HINCP * (ADJINC/1000000)
-# ca_pums_scag <- ca_pums_scag %>% mutate(wage = case_when(ADJINC == 1117630 ~ WAGP * 1.011189 * 1.10526316, # 2017 Adjust Income
-#                                                          ADJINC == 1093093 ~ WAGP * 1.013097 * 1.07896160, # 2018 Adjust Income
-#                                                          ADJINC == 1070512 ~ WAGP * 1.010145 * 1.05976096, # 2019 Adjust Income
-#                                                          ADJINC == 1053131 ~ WAGP * 1.006149 * 1.04669465, # 2020 Adjust Income
-#                                                          ADJINC == 1029928 ~ WAGP * 1.029928 * 1.00000000, # 2021 Adjust Income
-#                                         ),
-#                         weekly_wage = wage/52,
-#                         hourly_wage = if_else(WKHP > 0,weekly_wage/WKHP, NA_real_)
-#                         )
-ca_pums_scag <- ca_pums_scag %>% mutate(hourly_wage = if_else(WKHP > 0, ((WAGP * (ADJINC/1000000))/52)/WKHP, NA_real_)
-                                        )
-
-# Unemployment -named variable "unemployed"- if "Yes", unemployed, "No" otherwise. 
-# Unemployment -named variable "unemployed"- if ESR (Employment status recode) == 3 then "Yes" (unemployed), or "No" otherwise if ESR does not equal 3 and set as a factor. 
-ca_pums_scag <- ca_pums_scag %>% mutate(unemployed = factor(case_when(ESR == 3  ~ "Yes",
-                                                           ESR != 3 ~ "No"), levels = c("Yes","No"))
-                                                         )
-###
-# Single Parent Households by gender: Use HHT2 to create new variable named "single_hh"
-# If HHT2 == 06	Female householder, no spouse/partner present, with children of the householder less than 18
-# # Then single_hh == "female_hh"
-# If HHT2 == 10	 Male householder, no spouse/partner present, with children of the householder less than 18
-# Then single_hh == "male_hh"
-# Otherwise, single_hh == "cohabit_or_nokids"
-ca_pums_scag <- ca_pums_scag %>% mutate(single_hh = factor(case_when(HHT2 == 6  ~ "female_hh",
-                                                                     HHT2 == 10  ~ "male_hh",
-                                                                     HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"
-                                                                     ), levels = c("female_hh", "male_hh","cohabit_or_nokids"))
-                                        )
-
-# Limited English Proficiency: New variable named "lep"
-# lep == "limited_english_proficiency" if ENG == 3 | if ENG == 4
-# lep == "english_proficient" if ENG == 3 | if ENG == 4
-# lep == "<5yos_or_no_eng" if is.na(ENG) or TRUE
-ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
-                                                               ENG %in% c(1:2) ~ "english_proficient",
-                                                               TRUE ~ "<5yos_or_no_eng"),
-                                                    levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
-                                                    )
-                                        )
+### Recode factor variables for analysis -----
+# Use the levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl" and set all variables to factors:
+ca_pums_scag <- ca_pums_scag %>% mutate(county = factor(county, levels = county_levels),
+                                        race = factor(race, levels = race_levels),
+                                        age_3_cat = factor(age_3_cat, levels = age_3_cat_levels),
+                                        edu = factor(edu, levels = edu_levels),
+                                        own_home = factor(own_home, levels = own_home_levels),
+                                        walk_bike_public_transport = factor(walk_bike_public_transport, levels = walk_bike_public_transport_levels),
+                                        all_transport = factor(all_transport, levels = all_transport_levels),
+                                        poverty = factor(poverty, levels = yes_no_levels),
+                                        housing_burden = factor(housing_burden, levels = yes_no_levels),
+                                        renter_burden = factor(renter_burden, levels = yes_no_levels),
+                                        no_kitchen_plumbing = factor(no_kitchen_plumbing, levels = yes_no_levels),
+                                        overcrowded = factor(overcrowded, levels = yes_no_levels),
+                                        unemployed = factor(unemployed, levels = yes_no_levels),
+                                        single_hh = factor(single_hh, levels = single_hh_levels),
+                                        lep = factor(lep, levels = lep_levels),
+                                        ) # end of mutate for ca_pums_scag to factor variables
 
 # Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
 # county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
-county_levels <- append(county_levels, "SCAG") 
+if (county_levels[7] != "SCAG") {append(county_levels, "SCAG")}
 
 # race_levels: c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
-race_levels <-  append(race_levels,  "All Races")
+if (race_levels[7] != "SCAG") {append(race_levels,  "All Races")}
 
+# Confirm variable types:
+# str(ca_pums_scag)
 ```
 
 # Analysis and Replication of Tables and Figures for SCAG
