@@ -24,25 +24,22 @@ options(scipen = 999,
         pillar.print_min = 40
 )
 
-# Un-comment next two lines to install/update all necesary packages:
+# Un-comment next two lines to install/update all necessary packages:
 # install.packages("remotes") # first install remotes to use update_packages()
-# remotes::update_packages(c("here", "rstudioapi", "magrittr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update all packages
+# remotes::update_packages(c("here", "rstudioapi", "magrittr", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
 
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently:
 here::i_am("SCAG_data_task_ZC.Rmd")
 
 # Load libraries:
 library(here) # package to manage file paths
-# library(fs)  # package to work with system file paths
-# library(tools) # another package to work with system file paths
 library(rstudioapi) # package accessing Rstudio API 
 library(magrittr) # pipe function package
-# library(janitor) # package for functions that help clean data
 library(spatstat) # package for weighted.median() function
 library(readxl) # reading excel files
 library(openxlsx2) # writing excel files and manipulating excel workbooks.
 library(data.table) # package for data manipulation and reads in large files faster using fread()
-library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
+library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see access, edit, and save use this code: usethis::edit_r_environ()
 library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect, stringR, etc.
 
 

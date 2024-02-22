@@ -12,7 +12,7 @@ output:
             collapsed: false
             smooth_scroll: false
 params:
-  region:
+  acs_data:
     label: "ACS Dataset:"
     value: "2017-2021"
     input: select
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
     echo = FALSE, 
     warning = FALSE, 
     message = FALSE,
-    rows.print = 20 # display 20 rows inline and in document
+    rows.print = 20 # display 20 rows for output of tibbles/tables inline code chunks and in document
     # fig.width = 6.5,
     # fig.height = 4
     )
@@ -37,7 +37,7 @@ options(scipen = 999,
         pillar.print_min = 40
         )
 
-# Un-comment next two lines to install/update all necesary packages:
+# Un-comment next two lines to install/update all necessary packages:
 # install.packages("remotes") # first install remotes to use update_packages()
 # remotes::update_packages(c("here", "rstudioapi", "magrittr", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
 
@@ -51,7 +51,7 @@ library(magrittr) # pipe function package
 library(readxl) # reading excel files
 library(openxlsx2) # writing excel files and manipulating excel workbooks.
 library(data.table) # package for data manipulation and reads in large files faster using fread()
-library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
+# library(tidycensus) # API for US Census- can access ACS PUMS directly from API- key set in .Renviron- to see use: usethis::edit_r_environ()
 library(tidyverse) # package loads all tidyverse packages like dplyr, tidyselect, stringR, etc.
 
 ### Functions ----
@@ -249,13 +249,17 @@ pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.c
 pums_vars_acs5_22 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv", show_col_types = FALSE)
 
 
-### Setup file paths ----
+### Create directories and setup file paths ----
+# Creates a new folder called "data" if it doesn't already exist in working directory:
+if (!dir.exists("data")) {dir.create("data")}
 # Set up all file paths:
 # file path for all raw data:
 data_fp <- here('data')
 # list.files(data_fp)
 
-### IMPORTS filepaths 
+### IMPORTS directories and filepaths 
+# Creates a new folder called "data" if it doesn't already exist in working directory:
+if (!dir.exists(here(data_fp, '2017_2021_ACS_PUMS'))) {dir.create(here(data_fp, '2017_2021_ACS_PUMS'))}
 # file path for 2021 5-year ACS PUMS Data:
 acs_2021_fp <- here(data_fp, '2017_2021_ACS_PUMS')
 # list.files(acs_2021_fp) 
@@ -266,6 +270,8 @@ person_2021_fp <- here(acs_2021_fp, "csv_pca", "psam_p06.csv")
 # file path for 2021 household level data
 hh_2021_fp <- here(acs_2021_fp, "csv_hca", "psam_h06.csv")
 
+# Creates a new folder called "data" if it doesn't already exist in working directory:
+if (!dir.exists(here(data_fp, '2018_2022_ACS_PUMS'))) {dir.create(here(data_fp, '2018_2022_ACS_PUMS'))}
 # Set up file path for 2022 5-year ACS PUMS Data:
 acs_2022_fp <- here(data_fp, '2018_2022_ACS_PUMS')
 # list.files(acs_2022_fp)
@@ -302,7 +308,7 @@ if (!dir.exists(here(clean_data_fp, 'acs_api'))) {dir.create(here(clean_data_fp,
 # file path for clean_data acs_data_22
 acs_api_fp <- here(clean_data_fp, "acs_api")
 
-### OUTPUTS filepaths
+### OUTPUT filepaths
 # output folder
 # Creates a new folder called "output" (if it doesn't already exist in working directory)- this will be where the outputs from the R script will be stored:
 if (!dir.exists(here('output'))) {dir.create(here('output'))}
@@ -318,9 +324,43 @@ tables_fp <- here(output_fp, 'tables')
 ```
 
 
-# Load and Clean data from US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) File Transfer Protocol (FTP) site:
+# Download, Read in and Clean data from US Census ACS PUMS:
 
-- Both 5 year estimates from 2017-2021 and 2018-2022 ACS data
+### Download data from US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) File Transfer Protocol (FTP) site
+
+- The first step is retrieving the .csv files that make up both 5 year estimates from 2017-2021 and 2018-2022.
+- These files are located on the US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) [File Transfer Protocol (FTP) site](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/)
+- This process takes about 4-5 minutes depending on your internet connectin and can be skipped if you have the full .zip drive with the data files already downloaded.
+
+```{r acs_data_dwnld, include=FALSE}
+# 2017-2021 ACS PUMS DATA Download: Housing and Person level files
+# Housing- Link for Housing csv file for California as a zip file: (clicking link/visiting it will download the zip file to where default downloads for your browser) https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip
+# 2021 Housing .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2017_2021_ACS_PUMS/csv_hca.zip" or use here(acs_2021_fp, "csv_hca.zip"):
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip", destfile = here(acs_2021_fp, "csv_hca.zip"))
+# Decompress/unzip "csv_hca.zip" and save in same folder "data/2017_2021_ACS_PUMS/" or acs_2021_fp
+unzip(zipfile = here(acs_2021_fp, "csv_hca.zip"), exdir = acs_2021_fp)
+# Person- Link for Person csv file for California as a zip file:  https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip
+# 2021 Person .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2017_2021_ACS_PUMS/csv_pca.zip" or use here(acs_2021_fp, "csv_pca.zip"):
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip", destfile = here(acs_2021_fp, "csv_pca.zip"))
+# Decompress/unzip "csv_hca.zip" and save in same folder "data/2017_2021_ACS_PUMS/" or acs_2021_fp
+unzip(zipfile = here(acs_2021_fp, "csv_pca.zip"), exdir = acs_2021_fp)
+
+# 2018-2022 ACS PUMS DATA Download: Housing and Person level files
+# Housing- Link for Housing csv file for California as a zip file: (clicking link/visiting it will download the zip file to where default downloads for your browser) https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip
+# 2022 Housing .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2018_2022_ACS_PUMS/csv_hca.zip" or use here(acs_2022_fp, "csv_hca.zip"):
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip", destfile = here(acs_2022_fp, "csv_hca.zip"))
+# Decompress/unzip "csv_hca.zip" and save in same folder "data/2018_2022_ACS_PUMS/" or acs_2022_fp
+unzip(zipfile = here(acs_2022_fp, "csv_hca.zip"), exdir = acs_2022_fp)
+# Person- Link for Person csv file for California as a zip file:  https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip
+# 2022 Person .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2018_2022_ACS_PUMS/csv_pca.zip" or use here(acs_2022_fp, "csv_pca.zip"):
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip", destfile = here(acs_2022_fp, "csv_pca.zip"))
+# Decompress/unzip "csv_hca.zip" and save in same folder "data/2018_2022_ACS_PUMS/" or acs_2022_fp
+unzip(zipfile = here(acs_2022_fp, "csv_pca.zip"), exdir = acs_2022_fp)
+
+# Delete all zip files after extracting 
+file.remove(here(acs_2021_fp, list.files(here(acs_2021_fp), pattern = "*.zip"))) %>% invisible()
+```
+
 
 ### Data Dictionary Table (New Variables Created for Analysis):
 

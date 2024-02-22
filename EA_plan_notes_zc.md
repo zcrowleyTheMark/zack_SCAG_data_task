@@ -23,9 +23,13 @@ output: html_document
 
 ### Main Data Files: 
 
-- **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2017-2021](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data)  
+- **2017-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2017-2021 5-year Access on FTP site](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/) which was saved in [data folder here](../data). 
+  - Housing 2017-2021 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip
+  - Person 2017-2021 PUMS .csv data link(clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip
 
-- **2018-2021 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2018-2022](https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/)
+- **2018-2022 ACS raw PUMS data**- download these two zip files: `csv_pca.zip` (person-level for CA) and `csv_hca.zip` (household-level for CA), extract both and then use the respective csv files in each folder: `psam_p06.csv` (person-level for CA) and `psam_h06.csv` (household-level for CA) from [US Census ACS PUMS 2018-2022 5-year Access on FTP site](https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/)
+  - Housing 2018-2022 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip
+  - Person 2018-2022 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip
   - **NOTES for using 2022 data**: - Has PUMA's for 2010 census for years 2018-2021, the observations from 2022 have PUMA's from the 2020 census- some of which may be new but are still within each SCAG county since the prefix of each PUMA remains the same.
   
 
