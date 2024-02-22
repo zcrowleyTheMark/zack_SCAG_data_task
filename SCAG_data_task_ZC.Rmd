@@ -11,12 +11,6 @@ output:
         toc_float:
             collapsed: false
             smooth_scroll: false
-params:
-  acs_data:
-    label: "ACS Dataset:"
-    value: "2017-2021"
-    input: select
-    choices: ["2017-2021", "2018-2022"]
 ---
 
 ```{r setup, include=FALSE}
@@ -39,7 +33,7 @@ options(scipen = 999,
 
 # Un-comment next two lines to install/update all necessary packages:
 # install.packages("remotes") # first install remotes to use update_packages()
-# remotes::update_packages(c("here", "rstudioapi", "magrittr", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
+# remotes::update_packages(c("here", "rstudioapi", "magrittr", "curl", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
 
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently (if you re-name this file, also change inside this if using an .Rproj/R project:
 here::i_am("SCAG_data_task_ZC.Rmd")
@@ -200,55 +194,6 @@ weight_perc_2groups <- function(df, var, weight, group1, group2, filter_value = 
     return(full_table)
 } # end of weight_perc_2groups()
 
-##### Variables/lists for functions
-# Set up county and race levels to use later on to convert each to factors and arrange tables:
-# county_levels:
-county_levels <- c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
-
-# race_levels:
-race_levels <-  c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White", "All Races")
-
-### Data Dictionaries ----
-### 2021 ACS: 
-## Get data dictionary as tibble from tidycensus for 2021:
-# pums_vars_acs5 <- pums_variables %>%
-#   filter(year == 2021, survey == "acs5")
-# # person level
-# pums_vars_acs5_person <- pums_variables %>%
-#   filter(year == 2021, survey == "acs5", level == "person")
-# # housing level:
-# pums_vars_acs5_housing <- pums_variables %>%
-#    filter(year == 2021, survey == "acs5", level == "housing")
-# 
-# # Write out data dicts for all vars, person and housing vars:
-# write_csv(pums_vars_acs5, "data_dicts_ACS_PUMS/pums_vars_acs5.csv")
-# write_csv(pums_vars_acs5_person, "data_dicts_ACS_PUMS/pums_vars_acs5_person.csv")
-# write_csv(pums_vars_acs5_housing, "data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv")
-# 
-# Read in data dicts from person and housing level data:
-pums_vars_acs5 <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5.csv", show_col_types = FALSE)
-pums_vars_acs5_person <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_person.csv", show_col_types = FALSE)
-pums_vars_acs5_housing <- read_csv("data_dicts_ACS_PUMS/pums_vars_acs5_housing.csv", show_col_types = FALSE)
-
-### 2022 ACS: Needed to scrape from website 
-# library(rvest) # package for webscraping
-# # Pull data dictionary from 2018-2022 ACS PUMS from website that has the data dict in a html table:
-# acs_data_dict_22 <- "https://api.census.gov/data/2022/acs/acs5/pums/variables.html" %>% 
-#   read_html() %>%
-#   html_element("table") %>% 
-#   html_table(convert = TRUE) %>% 
-#   janitor::clean_names() 
-# 
-# # Drop first row- was incorrectly pulled in from footer of table ("525 variables") :
-# acs_data_dict_22 <- acs_data_dict_22 %>% filter(name != "525 variables")
-# 
-# # write to csv called "acs_data_dict_22.csv:
-# acs_data_dict_22 %>% write_csv(file = "data_dicts_ACS_PUMS/acs_data_dict_22.csv")
-
-# Read in acs_data_dict_22
-pums_vars_acs5_22 <- read_csv("data_dicts_ACS_PUMS/acs_data_dict_22.csv", show_col_types = FALSE)
-
-
 ### Create directories and setup file paths ----
 # Creates a new folder called "data" if it doesn't already exist in working directory:
 if (!dir.exists("data")) {dir.create("data")}
@@ -264,25 +209,24 @@ if (!dir.exists(here(data_fp, '2017_2021_ACS_PUMS'))) {dir.create(here(data_fp, 
 acs_2021_fp <- here(data_fp, '2017_2021_ACS_PUMS')
 # list.files(acs_2021_fp) 
 
-# file path for 2021 person level data
-person_2021_fp <- here(acs_2021_fp, "csv_pca", "psam_p06.csv")
-
-# file path for 2021 household level data
-hh_2021_fp <- here(acs_2021_fp, "csv_hca", "psam_h06.csv")
-
 # Creates a new folder called "data" if it doesn't already exist in working directory:
 if (!dir.exists(here(data_fp, '2018_2022_ACS_PUMS'))) {dir.create(here(data_fp, '2018_2022_ACS_PUMS'))}
 # Set up file path for 2022 5-year ACS PUMS Data:
 acs_2022_fp <- here(data_fp, '2018_2022_ACS_PUMS')
 # list.files(acs_2022_fp)
 
-# file path for 2022 person level data
-person_2022_fp <- here(acs_2022_fp, "csv_pca", "psam_p06.csv")
+# Set up filepaths for all ACS raw data from FTP download:
+# file path for 2021 household level data
+hh_2021_fp <- here(acs_2021_fp,  "housing_CA_ACS_2021.csv")
+# file path for 2021 person level data
+person_2021_fp <- here(acs_2021_fp, "person_CA_ACS_2021.csv")
 
-# file path for 2022 household level data
-hh_2022_fp <- here(acs_2022_fp, "csv_hca", "psam_h06.csv")
+# file path for 2021 household level data
+hh_2022_fp <- here(acs_2022_fp,  "housing_CA_ACS_2022.csv")
+# file path for 2021 person level data
+person_2022_fp <- here(acs_2022_fp, "person_CA_ACS_2022.csv")
 
-### CLEAN DATA filepaths
+### CLEAN DATA directories and filepaths
 # File paths and directories for clean data- 
 # Creates a new folder called "clean_data" if it doesn't already exist in working directory:
 if (!dir.exists("clean_data")) {dir.create("clean_data")}
@@ -302,13 +246,7 @@ if (!dir.exists(here(clean_data_fp, 'acs_data_22'))) {dir.create(here(clean_data
 # file path for clean_data acs_data_22
 acs_data_22_fp <- here(clean_data_fp, "acs_data_22")
 
-# Clean ACS API data
-# Creates a new folder called "acs_api" (if it doesn't already exist in working directory)- this will be where the clean data for API datawill be stored:
-if (!dir.exists(here(clean_data_fp, 'acs_api'))) {dir.create(here(clean_data_fp, 'acs_api'))}
-# file path for clean_data acs_data_22
-acs_api_fp <- here(clean_data_fp, "acs_api")
-
-### OUTPUT filepaths
+### OUTPUT directories and filepaths
 # output folder
 # Creates a new folder called "output" (if it doesn't already exist in working directory)- this will be where the outputs from the R script will be stored:
 if (!dir.exists(here('output'))) {dir.create(here('output'))}
@@ -321,6 +259,11 @@ if (!dir.exists(here(output_fp, 'tables'))) {dir.create(here(output_fp, 'tables'
 # file path for clean_data acs_data_22
 tables_fp <- here(output_fp, 'tables')
 
+### data_dictionaries directories and filepaths
+# Creates a new folder called "data_dictionaries" (if it doesn't already exist in working directory)- this will be where the outputs from the R script will be stored:
+if (!dir.exists(here('data_dictionaries'))) {dir.create(here('data_dictionaries'))}
+# file path for clean_data acs_data_22
+data_dictionaries_fp <- here("data_dictionaries")
 ```
 
 
@@ -330,42 +273,74 @@ tables_fp <- here(output_fp, 'tables')
 
 - The first step is retrieving the .csv files that make up both 5 year estimates from 2017-2021 and 2018-2022.
 - These files are located on the US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) [File Transfer Protocol (FTP) site](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/)
-- This process takes about 4-5 minutes depending on your internet connectin and can be skipped if you have the full .zip drive with the data files already downloaded.
+- This process takes about 5-15 minutes to download all files depending on your internet connection and can be skipped if you have the full .zip drive with the data files already downloaded.
 
 ```{r acs_data_dwnld, include=FALSE}
 # 2017-2021 ACS PUMS DATA Download: Housing and Person level files
 # Housing- Link for Housing csv file for California as a zip file: (clicking link/visiting it will download the zip file to where default downloads for your browser) https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip
 # 2021 Housing .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2017_2021_ACS_PUMS/csv_hca.zip" or use here(acs_2021_fp, "csv_hca.zip"):
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip", destfile = here(acs_2021_fp, "csv_hca.zip"))
+curl::curl_download("http://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip", destfile = here(acs_2021_fp, "csv_hca.zip"))
 # Decompress/unzip "csv_hca.zip" and save in same folder "data/2017_2021_ACS_PUMS/" or acs_2021_fp
-unzip(zipfile = here(acs_2021_fp, "csv_hca.zip"), exdir = acs_2021_fp)
+unzip(zipfile = here(acs_2021_fp, "csv_hca.zip"), exdir = acs_2021_fp, overwrite = TRUE)
 # Person- Link for Person csv file for California as a zip file:  https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip
 # 2021 Person .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2017_2021_ACS_PUMS/csv_pca.zip" or use here(acs_2021_fp, "csv_pca.zip"):
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip", destfile = here(acs_2021_fp, "csv_pca.zip"))
+curl::curl_download("http://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip", destfile = here(acs_2021_fp, "csv_pca.zip"))
 # Decompress/unzip "csv_hca.zip" and save in same folder "data/2017_2021_ACS_PUMS/" or acs_2021_fp
-unzip(zipfile = here(acs_2021_fp, "csv_pca.zip"), exdir = acs_2021_fp)
+unzip(zipfile = here(acs_2021_fp, "csv_pca.zip"), exdir = acs_2021_fp, overwrite = TRUE)
 
 # 2018-2022 ACS PUMS DATA Download: Housing and Person level files
 # Housing- Link for Housing csv file for California as a zip file: (clicking link/visiting it will download the zip file to where default downloads for your browser) https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip
 # 2022 Housing .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2018_2022_ACS_PUMS/csv_hca.zip" or use here(acs_2022_fp, "csv_hca.zip"):
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip", destfile = here(acs_2022_fp, "csv_hca.zip"))
+curl::curl_download("http://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip", destfile = here(acs_2022_fp, "csv_hca.zip"))
 # Decompress/unzip "csv_hca.zip" and save in same folder "data/2018_2022_ACS_PUMS/" or acs_2022_fp
-unzip(zipfile = here(acs_2022_fp, "csv_hca.zip"), exdir = acs_2022_fp)
+unzip(zipfile = here(acs_2022_fp, "csv_hca.zip"), exdir = acs_2022_fp, overwrite = TRUE)
 # Person- Link for Person csv file for California as a zip file:  https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip
 # 2022 Person .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2018_2022_ACS_PUMS/csv_pca.zip" or use here(acs_2022_fp, "csv_pca.zip"):
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip", destfile = here(acs_2022_fp, "csv_pca.zip"))
+curl::curl_download("http://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip", destfile = here(acs_2022_fp, "csv_pca.zip"))
 # Decompress/unzip "csv_hca.zip" and save in same folder "data/2018_2022_ACS_PUMS/" or acs_2022_fp
-unzip(zipfile = here(acs_2022_fp, "csv_pca.zip"), exdir = acs_2022_fp)
+unzip(zipfile = here(acs_2022_fp, "csv_pca.zip"), exdir = acs_2022_fp, overwrite = TRUE)
 
-# Delete all zip files after extracting 
+# Delete all zip files after extracting from 2021 and 2022 folders:
 file.remove(here(acs_2021_fp, list.files(here(acs_2021_fp), pattern = "*.zip"))) %>% invisible()
+file.remove(here(acs_2022_fp, list.files(here(acs_2022_fp), pattern = "*.zip"))) %>% invisible()
+
+# Use file.rename() function to rename both 2021 files and 2022 files, using filepaths set up in the setup code chunk(lines 273-282):
+# 2021 rename .csv's: 
+file.rename(here(acs_2021_fp, "psam_h06.csv"), hh_2021_fp) %>% invisible()
+file.rename(here(acs_2021_fp, "psam_p06.csv"), person_2021_fp) %>% invisible()
+# 2022 rename .csv's:
+file.rename(here(acs_2022_fp, "psam_h06.csv"), hh_2022_fp) %>% invisible()
+file.rename(here(acs_2022_fp, "psam_p06.csv"), person_2022_fp) %>% invisible()
 ```
 
 
 ### Data Dictionary Table (New Variables Created for Analysis):
 
 ```{r ACS_data_new_vars_tbl}
+### Data Dictionaries from tidycensus ---- 
+### 2021 ACS: Get data dictionary as tibble from tidycensus for 2021:
+# pums_vars_acs5_2021 <- tidycensus::pums_variables %>% filter(year == 2021, survey == "acs5")
+# # Write out data dicts for all vars, person and housing vars:
+# write_csv(pums_vars_acs5_2021, here(data_dictionaries_fp, "pums_vars_acs5_2021.csv"))
+# Read in 2021 data dictionary:
+pums_vars_acs5_2021 <- read_csv(here(data_dictionaries_fp, "pums_vars_acs5_2021.csv"), show_col_types = FALSE)
 
+# If you want separate housing and person level references:
+# # person level
+# pums_vars_acs5_person_2021 <- pums_vars_acs5_2021 %>%
+#   filter(year == 2021, survey == "acs5", level == "person")
+# # housing level:
+# pums_vars_acs5_housing_2021 <- pums_vars_acs5_2021 %>%
+#    filter(year == 2021, survey == "acs5", level == "housing")
+
+### 2022 ACS: Get data dictionary as tibble from tidycensus for 2022:
+# pums_vars_acs5_2022 <- tidycensus::pums_variables %>% filter(year == 2022, survey == "acs5")
+# # Write out data dicts for all vars, person and housing vars:
+# write_csv(pums_vars_acs5_2022, here(data_dictionaries_fp, "pums_vars_acs5_2022.csv"))
+# Read in 2022 data dictionary:
+pums_vars_acs5_2022 <- read_csv(here(data_dictionaries_fp, "pums_vars_acs5_2022.csv"), show_col_types = FALSE)
+
+### Data Dictionary for New Variables ---- 
 # Set up up a tibble named "ACS_data_new_vars_tbl" to use reference/data dictionary for new variables that will be created for the creation of the tables below:
 # 4 columns: "variable_name", "description", "type", "levels":
 ACS_data_new_vars_tbl <- tribble(~ variable_name,           ~ description,       ~ type,   ~ levels,
@@ -404,7 +379,7 @@ map(.x = unique(ACS_data_new_vars_factors$variable_name), function(x) ACS_data_n
 # Yes No levels
 yes_no_levels <- c("Yes","No")
 # Write out to CSV for later reference:
-write_csv(ACS_data_new_vars_tbl, "data_dicts_ACS_PUMS/ACS_data_new_vars_tbl.csv")
+write_csv(ACS_data_new_vars_tbl, here(data_dictionaries_fp, "ACS_data_new_vars_tbl.csv"))
 
 # Print out nice table:
 ACS_data_new_vars_tbl %>% knitr::kable()
@@ -451,7 +426,7 @@ merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Im
                                                               PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
                                                               )) %>%
                                           filter(county %in% scag_county_list) %>%
-                                          select(SERIALNO, ST,PUMA,county, everything())
+                                          select(SERIALNO, ST, PUMA, county, everything())
 
 # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21": 879241 obs. (same as API call) with 34 variables
 write_csv(merged_data_scag, here(acs_data_21_fp, "merged_acs_data_scag.csv"))
@@ -568,7 +543,7 @@ merged_data_22_scag <- merged_data_22 %>% mutate(county = case_when(PUMA == 2500
                                           filter(county %in% scag_county_list) %>%
                                           select(SERIALNO, ST, PUMA,county, everything())
 
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
+# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":   881,207 obs.  with 43 variables
 write_csv(merged_data_22_scag, here(acs_data_22_fp, "merged_acs_22_scag.csv"))
 
 # check variables from the merged_data_22_scag using str() and summary():
@@ -630,7 +605,7 @@ clean_acs_scag_22 <- merged_data_22_scag %>% mutate(year = as.numeric(str_extrac
                                                     
                                                     ) # end of mutate for clean_acs_scag_22
 
-# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881207 obs.  with 34 variables
+# Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_22":  881,207 obs.  with 61 variables
 write_csv(clean_acs_scag_22, here(acs_data_22_fp, "clean_acs_scag_22.csv"))
 
 # Remove all large tibbles/dfs:
@@ -643,11 +618,10 @@ rm(merged_data_22_scag, clean_acs_scag_22)
 
 # Read in clean SCAG Data:
 
+- This is the point where you can choose which years of the ACS you want to use, if you want to use the 2018-2022 ACS PUMS un-comment the code as directed in this code chunk.
 - Read in clean SCAG Data and recode factor variables for use in ACS PUMS Analysis.
 
 ```{r read recode SCAG data}
-### Read in dataset -----
-
 # First, create a list of the column types to convert all specified variables to factors with levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl",
 # list is structured variable_name = col_factor({variable_name}_levels):
 acs_col_type_list <- list(county = col_factor(county_levels),
@@ -667,15 +641,17 @@ acs_col_type_list <- list(county = col_factor(county_levels),
                           lep = col_factor(lep_levels)
                           )
 
-# 2017-2021 ACS PUMS merged data
-# If you want to use 2017-2021 ACS PUMS merged data use the next line otherwise comment out/don't run the next line and go the next line:
-# Read in merged ACS data SCAG from 2017-2021, specifying col_types to list above "acs_col_type_list":
-ca_pums_scag <- read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), col_types = acs_col_type_list)
+### Read in clean dataset -----
 
-# 2018-2022 ACS PUMS merged data
-# Un-comment the next line (and comment out the above line)if you want to use the merged 2018-2022 ACS PUMS data file
-# Read in merged ACS data SCAG from 2018-2022:
-# ca_pums_scag <- read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), col_types = acs_col_type_list)
+# 2017-2021 ACS PUMS clean data
+# If you want to use 2017-2021 ACS PUMS clean data use the next line otherwise comment out/don't run the next line and go the next line:
+# Read in clean ACS data SCAG from 2017-2021, specifying col_types to list above "acs_col_type_list":
+# ca_pums_scag <- read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), col_types = acs_col_type_list)
+
+# 2018-2022 ACS PUMS clean data
+# Un-comment the next line (and comment out the above line)if you want to use the clean 2018-2022 ACS PUMS data file
+# Read in clean ACS data SCAG from 2018-2022:
+ca_pums_scag <- read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), col_types = acs_col_type_list)
 
 # Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
 # county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
@@ -1364,6 +1340,8 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 
 - The output file `scag_tabbed.xlsx`, has a table of contents for the first sheet that includes the name of each sheet and a description of each table.
 
+- Preview of all sheets in the exported Excel workbook `scag_tabbed.xlsx`:
+
 ```{r write_excel, include=FALSE}
 # Read in completed tables and set to tibbles in current global env:
 # Read in all the tables from the folder "output/tables" to a list and keep names from the files:
@@ -1448,6 +1426,9 @@ walk(names(sheets), ~ wb_add_cell_style(wb = scag_wb, sheet = .x, dims = wb_dims
 wb_save(scag_wb, file = "output/scag_tabbed.xlsx", overwrite = TRUE)
 
 # Remove all variables created in this chunk:
-rm(list = (names(table_file_list)), table_file_list, sheets, toc, scag_wb)
+rm(list = (names(table_file_list)), table_file_list, sheets, scag_wb)
+
+# Print out toc in nice table:
+toc %>% knitr::kable()
 ```
 
