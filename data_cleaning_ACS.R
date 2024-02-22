@@ -317,7 +317,7 @@ ca_pums_scag <- ca_pums_scag %>% mutate(single_hh = factor(case_when(HHT2 == 6  
 ca_pums_scag <- ca_pums_scag %>% mutate(lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
                                                                ENG %in% c(1:2) ~ "english_proficient",
                                                                TRUE ~ "<5yos_or_no_eng"),
-                                                     levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
+                                                     levels = c("limited_english_proficiency","english_proficient","<5yos_or_only_eng")
 )
 )
 

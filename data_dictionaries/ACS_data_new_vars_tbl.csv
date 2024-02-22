@@ -16,4 +16,4 @@ overcrowded,"2 categories of Overcrowding of households, If Yes, household has m
 hourly_wage,"Hourly Wage US dollars, adjusted for inflation",numeric,
 unemployed,"Unemployment: if Yes, unemployed, No otherwise.","factor: Yes, No",
 single_hh,"3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids",factor,
-lep,"3 categories of English Proficiency: Limited English Proficiency, English Proficient or Younger than 5 yos or no English spoken",factor,
+lep,"3 categories of English Proficiency: Limited English Proficiency, English Proficient, or Younger than 5 yos/speaks only English",factor,

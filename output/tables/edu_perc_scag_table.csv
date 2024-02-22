@@ -1,295 +1,295 @@
 county,race,education_level,percentage
-Imperial,Asian/Pacific Islander,Less than HS Diploma,12.7
-Imperial,Black,Less than HS Diploma,26.77
-Imperial,Hispanic/Latino,Less than HS Diploma,33.49
-Imperial,Multiracial/Other,Less than HS Diploma,13.05
-Imperial,Native American,Less than HS Diploma,22.1
-Imperial,White,Less than HS Diploma,7.61
-Imperial,All Races,Less than HS Diploma,29.43
-Imperial,Asian/Pacific Islander,HS Diploma,24.3
-Imperial,Black,HS Diploma,35.87
-Imperial,Hispanic/Latino,HS Diploma,24.61
-Imperial,Multiracial/Other,HS Diploma,39.46
-Imperial,Native American,HS Diploma,30.68
-Imperial,White,HS Diploma,28.89
-Imperial,All Races,HS Diploma,25.67
-Imperial,Asian/Pacific Islander,Some College,26.76
-Imperial,Black,Some College,26.32
-Imperial,Hispanic/Latino,Some College,21.79
-Imperial,Multiracial/Other,Some College,35.64
-Imperial,Native American,Some College,31.69
-Imperial,White,Some College,27.96
-Imperial,All Races,Some College,22.98
-Imperial,Asian/Pacific Islander,AA Degree,2.17
-Imperial,Black,AA Degree,7.21
-Imperial,Hispanic/Latino,AA Degree,6.47
-Imperial,Multiracial/Other,AA Degree,2.01
-Imperial,Native American,AA Degree,10.48
-Imperial,White,AA Degree,8.83
-Imperial,All Races,AA Degree,6.71
-Imperial,Asian/Pacific Islander,BA degree,18.15
-Imperial,Black,BA degree,2.25
-Imperial,Hispanic/Latino,BA degree,10.53
-Imperial,Multiracial/Other,BA degree,7.23
-Imperial,Native American,BA degree,1.52
-Imperial,White,BA degree,18.31
-Imperial,All Races,BA degree,11.28
-Imperial,Asian/Pacific Islander,MA degree or higher,15.93
-Imperial,Black,MA degree or higher,1.58
-Imperial,Hispanic/Latino,MA degree or higher,3.12
-Imperial,Multiracial/Other,MA degree or higher,2.61
-Imperial,Native American,MA degree or higher,3.54
-Imperial,White,MA degree or higher,8.4
-Imperial,All Races,MA degree or higher,3.94
-Los Angeles,Asian/Pacific Islander,Less than HS Diploma,11.42
-Los Angeles,Black,Less than HS Diploma,9.55
-Los Angeles,Hispanic/Latino,Less than HS Diploma,37.04
-Los Angeles,Multiracial/Other,Less than HS Diploma,5.66
-Los Angeles,Native American,Less than HS Diploma,18.12
-Los Angeles,White,Less than HS Diploma,4.72
-Los Angeles,All Races,Less than HS Diploma,20.29
-Los Angeles,Asian/Pacific Islander,HS Diploma,15.05
-Los Angeles,Black,HS Diploma,23.1
-Los Angeles,Hispanic/Latino,HS Diploma,25.72
-Los Angeles,Multiracial/Other,HS Diploma,14
-Los Angeles,Native American,HS Diploma,24.56
-Los Angeles,White,HS Diploma,15.92
-Los Angeles,All Races,HS Diploma,20.58
+Imperial,Asian/Pacific Islander,Less than HS Diploma,13.56
+Imperial,Black,Less than HS Diploma,20.81
+Imperial,Hispanic/Latino,Less than HS Diploma,32.24
+Imperial,Multiracial/Other,Less than HS Diploma,4
+Imperial,Native American,Less than HS Diploma,22.22
+Imperial,White,Less than HS Diploma,8.78
+Imperial,All Races,Less than HS Diploma,28.39
+Imperial,Asian/Pacific Islander,HS Diploma,21.51
+Imperial,Black,HS Diploma,29.62
+Imperial,Hispanic/Latino,HS Diploma,24.43
+Imperial,Multiracial/Other,HS Diploma,44.39
+Imperial,Native American,HS Diploma,24.62
+Imperial,White,HS Diploma,27.91
+Imperial,All Races,HS Diploma,25.15
+Imperial,Asian/Pacific Islander,Some College,24.66
+Imperial,Black,Some College,30.97
+Imperial,Hispanic/Latino,Some College,21.49
+Imperial,Multiracial/Other,Some College,39.41
+Imperial,Native American,Some College,37.5
+Imperial,White,Some College,26.7
+Imperial,All Races,Some College,22.74
+Imperial,Asian/Pacific Islander,AA Degree,3.21
+Imperial,Black,AA Degree,12.98
+Imperial,Hispanic/Latino,AA Degree,7.45
+Imperial,Multiracial/Other,AA Degree,3.9
+Imperial,Native American,AA Degree,7.32
+Imperial,White,AA Degree,9.18
+Imperial,All Races,AA Degree,7.72
+Imperial,Asian/Pacific Islander,BA degree,20.63
+Imperial,Black,BA degree,3.59
+Imperial,Hispanic/Latino,BA degree,11.13
+Imperial,Multiracial/Other,BA degree,5.56
+Imperial,Native American,BA degree,1.77
+Imperial,White,BA degree,19.26
+Imperial,All Races,BA degree,11.94
+Imperial,Asian/Pacific Islander,MA degree or higher,16.42
+Imperial,Black,MA degree or higher,2.02
+Imperial,Hispanic/Latino,MA degree or higher,3.26
+Imperial,Multiracial/Other,MA degree or higher,2.73
+Imperial,Native American,MA degree or higher,6.57
+Imperial,White,MA degree or higher,8.15
+Imperial,All Races,MA degree or higher,4.06
+Los Angeles,Asian/Pacific Islander,Less than HS Diploma,11.29
+Los Angeles,Black,Less than HS Diploma,9.21
+Los Angeles,Hispanic/Latino,Less than HS Diploma,36.57
+Los Angeles,Multiracial/Other,Less than HS Diploma,5.84
+Los Angeles,Native American,Less than HS Diploma,17.92
+Los Angeles,White,Less than HS Diploma,4.73
+Los Angeles,All Races,Less than HS Diploma,20.09
+Los Angeles,Asian/Pacific Islander,HS Diploma,14.86
+Los Angeles,Black,HS Diploma,23.05
+Los Angeles,Hispanic/Latino,HS Diploma,25.8
+Los Angeles,Multiracial/Other,HS Diploma,13.9
+Los Angeles,Native American,HS Diploma,24.82
+Los Angeles,White,HS Diploma,15.83
+Los Angeles,All Races,HS Diploma,20.55
 Los Angeles,Asian/Pacific Islander,Some College,12.99
-Los Angeles,Black,Some College,28.85
-Los Angeles,Hispanic/Latino,Some College,17.7
-Los Angeles,Multiracial/Other,Some College,21.36
-Los Angeles,Native American,Some College,26.83
-Los Angeles,White,Some College,19.44
-Los Angeles,All Races,Some College,18.45
-Los Angeles,Asian/Pacific Islander,AA Degree,7.3
-Los Angeles,Black,AA Degree,9.54
-Los Angeles,Hispanic/Latino,AA Degree,5.52
-Los Angeles,Multiracial/Other,AA Degree,8.6
-Los Angeles,Native American,AA Degree,10.21
-Los Angeles,White,AA Degree,7.93
-Los Angeles,All Races,AA Degree,6.93
-Los Angeles,Asian/Pacific Islander,BA degree,36.52
-Los Angeles,Black,BA degree,18.46
-Los Angeles,Hispanic/Latino,BA degree,9.94
-Los Angeles,Multiracial/Other,BA degree,32.3
-Los Angeles,Native American,BA degree,13.6
-Los Angeles,White,BA degree,31.25
-Los Angeles,All Races,BA degree,21.82
-Los Angeles,Asian/Pacific Islander,MA degree or higher,16.74
-Los Angeles,Black,MA degree or higher,10.49
-Los Angeles,Hispanic/Latino,MA degree or higher,4.07
-Los Angeles,Multiracial/Other,MA degree or higher,18.08
-Los Angeles,Native American,MA degree or higher,6.68
-Los Angeles,White,MA degree or higher,20.74
-Los Angeles,All Races,MA degree or higher,11.93
-Orange,Asian/Pacific Islander,Less than HS Diploma,11
-Orange,Black,Less than HS Diploma,7.04
-Orange,Hispanic/Latino,Less than HS Diploma,32.83
-Orange,Multiracial/Other,Less than HS Diploma,5.65
-Orange,Native American,Less than HS Diploma,6.72
-Orange,White,Less than HS Diploma,3.12
-Orange,All Races,Less than HS Diploma,13.62
-Orange,Asian/Pacific Islander,HS Diploma,12.77
-Orange,Black,HS Diploma,19.61
-Orange,Hispanic/Latino,HS Diploma,24.28
-Orange,Multiracial/Other,HS Diploma,12.59
-Orange,Native American,HS Diploma,16.93
-Orange,White,HS Diploma,15
-Orange,All Races,HS Diploma,17.19
-Orange,Asian/Pacific Islander,Some College,12.84
-Orange,Black,Some College,24.92
-Orange,Hispanic/Latino,Some College,19.46
-Orange,Multiracial/Other,Some College,20.95
-Orange,Native American,Some College,24.68
-Orange,White,Some College,22.18
-Orange,All Races,Some College,19.3
-Orange,Asian/Pacific Islander,AA Degree,7.35
-Orange,Black,AA Degree,11.34
-Orange,Hispanic/Latino,AA Degree,6.09
-Orange,Multiracial/Other,AA Degree,7.73
-Orange,Native American,AA Degree,18.83
-Orange,White,AA Degree,8.7
-Orange,All Races,AA Degree,7.68
-Orange,Asian/Pacific Islander,BA degree,35.51
-Orange,Black,BA degree,23.82
-Orange,Hispanic/Latino,BA degree,12.09
-Orange,Multiracial/Other,BA degree,32.71
-Orange,Native American,BA degree,25.06
-Orange,White,BA degree,31.14
-Orange,All Races,BA degree,26.54
-Orange,Asian/Pacific Islander,MA degree or higher,20.53
-Orange,Black,MA degree or higher,13.27
-Orange,Hispanic/Latino,MA degree or higher,5.25
-Orange,Multiracial/Other,MA degree or higher,20.37
-Orange,Native American,MA degree or higher,7.78
-Orange,White,MA degree or higher,19.86
-Orange,All Races,MA degree or higher,15.68
-Riverside,Asian/Pacific Islander,Less than HS Diploma,10.63
-Riverside,Black,Less than HS Diploma,6.52
-Riverside,Hispanic/Latino,Less than HS Diploma,30.81
-Riverside,Multiracial/Other,Less than HS Diploma,6.93
-Riverside,Native American,Less than HS Diploma,15.22
-Riverside,White,Less than HS Diploma,5.37
-Riverside,All Races,Less than HS Diploma,16.99
-Riverside,Asian/Pacific Islander,HS Diploma,15.46
-Riverside,Black,HS Diploma,26.1
-Riverside,Hispanic/Latino,HS Diploma,31.51
-Riverside,Multiracial/Other,HS Diploma,20.89
-Riverside,Native American,HS Diploma,36.42
-Riverside,White,HS Diploma,25.2
-Riverside,All Races,HS Diploma,27.23
-Riverside,Asian/Pacific Islander,Some College,18.87
-Riverside,Black,Some College,28.87
+Los Angeles,Black,Some College,28.16
+Los Angeles,Hispanic/Latino,Some College,17.51
+Los Angeles,Multiracial/Other,Some College,21.12
+Los Angeles,Native American,Some College,25.04
+Los Angeles,White,Some College,18.7
+Los Angeles,All Races,Some College,18.08
+Los Angeles,Asian/Pacific Islander,AA Degree,7.23
+Los Angeles,Black,AA Degree,9.48
+Los Angeles,Hispanic/Latino,AA Degree,5.61
+Los Angeles,Multiracial/Other,AA Degree,8.82
+Los Angeles,Native American,AA Degree,11.49
+Los Angeles,White,AA Degree,7.72
+Los Angeles,All Races,AA Degree,6.9
+Los Angeles,Asian/Pacific Islander,BA degree,36.35
+Los Angeles,Black,BA degree,18.87
+Los Angeles,Hispanic/Latino,BA degree,10.25
+Los Angeles,Multiracial/Other,BA degree,31.91
+Los Angeles,Native American,BA degree,13.59
+Los Angeles,White,BA degree,31.71
+Los Angeles,All Races,BA degree,22.07
+Los Angeles,Asian/Pacific Islander,MA degree or higher,17.28
+Los Angeles,Black,MA degree or higher,11.22
+Los Angeles,Hispanic/Latino,MA degree or higher,4.26
+Los Angeles,Multiracial/Other,MA degree or higher,18.42
+Los Angeles,Native American,MA degree or higher,7.15
+Los Angeles,White,MA degree or higher,21.32
+Los Angeles,All Races,MA degree or higher,12.31
+Orange,Asian/Pacific Islander,Less than HS Diploma,10.7
+Orange,Black,Less than HS Diploma,6.81
+Orange,Hispanic/Latino,Less than HS Diploma,31.86
+Orange,Multiracial/Other,Less than HS Diploma,4.83
+Orange,Native American,Less than HS Diploma,7.55
+Orange,White,Less than HS Diploma,3.23
+Orange,All Races,Less than HS Diploma,13.34
+Orange,Asian/Pacific Islander,HS Diploma,12.91
+Orange,Black,HS Diploma,18.82
+Orange,Hispanic/Latino,HS Diploma,24.37
+Orange,Multiracial/Other,HS Diploma,12.17
+Orange,Native American,HS Diploma,17.18
+Orange,White,HS Diploma,14.85
+Orange,All Races,HS Diploma,17.15
+Orange,Asian/Pacific Islander,Some College,12.74
+Orange,Black,Some College,26.25
+Orange,Hispanic/Latino,Some College,19.48
+Orange,Multiracial/Other,Some College,20.87
+Orange,Native American,Some College,26.98
+Orange,White,Some College,21.83
+Orange,All Races,Some College,19.11
+Orange,Asian/Pacific Islander,AA Degree,6.94
+Orange,Black,AA Degree,11.45
+Orange,Hispanic/Latino,AA Degree,6.21
+Orange,Multiracial/Other,AA Degree,8.01
+Orange,Native American,AA Degree,13.93
+Orange,White,AA Degree,8.57
+Orange,All Races,AA Degree,7.55
+Orange,Asian/Pacific Islander,BA degree,35.71
+Orange,Black,BA degree,23.52
+Orange,Hispanic/Latino,BA degree,12.58
+Orange,Multiracial/Other,BA degree,32.55
+Orange,Native American,BA degree,28.18
+Orange,White,BA degree,31.55
+Orange,All Races,BA degree,26.92
+Orange,Asian/Pacific Islander,MA degree or higher,21
+Orange,Black,MA degree or higher,13.15
+Orange,Hispanic/Latino,MA degree or higher,5.49
+Orange,Multiracial/Other,MA degree or higher,21.57
+Orange,Native American,MA degree or higher,6.18
+Orange,White,MA degree or higher,19.98
+Orange,All Races,MA degree or higher,15.94
+Riverside,Asian/Pacific Islander,Less than HS Diploma,10.37
+Riverside,Black,Less than HS Diploma,6.5
+Riverside,Hispanic/Latino,Less than HS Diploma,30.16
+Riverside,Multiracial/Other,Less than HS Diploma,7.09
+Riverside,Native American,Less than HS Diploma,11.7
+Riverside,White,Less than HS Diploma,5.49
+Riverside,All Races,Less than HS Diploma,16.9
+Riverside,Asian/Pacific Islander,HS Diploma,15.2
+Riverside,Black,HS Diploma,25.82
+Riverside,Hispanic/Latino,HS Diploma,31.5
+Riverside,Multiracial/Other,HS Diploma,20.84
+Riverside,Native American,HS Diploma,37.92
+Riverside,White,HS Diploma,24.49
+Riverside,All Races,HS Diploma,26.92
+Riverside,Asian/Pacific Islander,Some College,18.74
+Riverside,Black,Some College,29.66
 Riverside,Hispanic/Latino,Some College,19.41
-Riverside,Multiracial/Other,Some College,29.72
-Riverside,Native American,Some College,23.73
-Riverside,White,Some College,28.3
-Riverside,All Races,Some College,23.79
-Riverside,Asian/Pacific Islander,AA Degree,9.17
-Riverside,Black,AA Degree,11.36
-Riverside,Hispanic/Latino,AA Degree,6.38
-Riverside,Multiracial/Other,AA Degree,11.71
-Riverside,Native American,AA Degree,8.42
-Riverside,White,AA Degree,10.12
-Riverside,All Races,AA Degree,8.54
-Riverside,Asian/Pacific Islander,BA degree,31.83
-Riverside,Black,BA degree,17.44
-Riverside,Hispanic/Latino,BA degree,8.2
-Riverside,Multiracial/Other,BA degree,19.66
-Riverside,Native American,BA degree,11.8
-Riverside,White,BA degree,18.61
-Riverside,All Races,BA degree,14.98
-Riverside,Asian/Pacific Islander,MA degree or higher,14.04
-Riverside,Black,MA degree or higher,9.72
-Riverside,Hispanic/Latino,MA degree or higher,3.68
-Riverside,Multiracial/Other,MA degree or higher,11.08
-Riverside,Native American,MA degree or higher,4.41
-Riverside,White,MA degree or higher,12.4
-Riverside,All Races,MA degree or higher,8.49
-San Bernardino,Asian/Pacific Islander,Less than HS Diploma,8.81
-San Bernardino,Black,Less than HS Diploma,11.37
-San Bernardino,Hispanic/Latino,Less than HS Diploma,30.62
-San Bernardino,Multiracial/Other,Less than HS Diploma,7.25
-San Bernardino,Native American,Less than HS Diploma,13.84
-San Bernardino,White,Less than HS Diploma,7.71
-San Bernardino,All Races,Less than HS Diploma,19.26
-San Bernardino,Asian/Pacific Islander,HS Diploma,14.19
-San Bernardino,Black,HS Diploma,25.36
-San Bernardino,Hispanic/Latino,HS Diploma,29.66
-San Bernardino,Multiracial/Other,HS Diploma,19.9
-San Bernardino,Native American,HS Diploma,35.3
-San Bernardino,White,HS Diploma,26.53
-San Bernardino,All Races,HS Diploma,26.76
-San Bernardino,Asian/Pacific Islander,Some College,15.23
-San Bernardino,Black,Some College,30.55
-San Bernardino,Hispanic/Latino,Some College,20.94
-San Bernardino,Multiracial/Other,Some College,31.57
-San Bernardino,Native American,Some College,32.17
-San Bernardino,White,Some College,27.8
-San Bernardino,All Races,Some College,23.71
-San Bernardino,Asian/Pacific Islander,AA Degree,10.31
-San Bernardino,Black,AA Degree,9.7
-San Bernardino,Hispanic/Latino,AA Degree,6.81
-San Bernardino,Multiracial/Other,AA Degree,11.64
-San Bernardino,Native American,AA Degree,3.69
-San Bernardino,White,AA Degree,10.18
-San Bernardino,All Races,AA Degree,8.53
-San Bernardino,Asian/Pacific Islander,BA degree,33.87
-San Bernardino,Black,BA degree,14.83
-San Bernardino,Hispanic/Latino,BA degree,8.65
-San Bernardino,Multiracial/Other,BA degree,17.75
-San Bernardino,Native American,BA degree,10.84
-San Bernardino,White,BA degree,16.95
-San Bernardino,All Races,BA degree,14.2
-San Bernardino,Asian/Pacific Islander,MA degree or higher,17.59
-San Bernardino,Black,MA degree or higher,8.19
-San Bernardino,Hispanic/Latino,MA degree or higher,3.31
-San Bernardino,Multiracial/Other,MA degree or higher,11.9
-San Bernardino,Native American,MA degree or higher,4.17
-San Bernardino,White,MA degree or higher,10.84
-San Bernardino,All Races,MA degree or higher,7.55
-Ventura,Asian/Pacific Islander,Less than HS Diploma,5.92
-Ventura,Black,Less than HS Diploma,5.04
-Ventura,Hispanic/Latino,Less than HS Diploma,33.19
-Ventura,Multiracial/Other,Less than HS Diploma,3.25
-Ventura,Native American,Less than HS Diploma,16.93
-Ventura,White,Less than HS Diploma,3.31
-Ventura,All Races,Less than HS Diploma,14.65
-Ventura,Asian/Pacific Islander,HS Diploma,11.75
-Ventura,Black,HS Diploma,17.24
-Ventura,Hispanic/Latino,HS Diploma,26.18
-Ventura,Multiracial/Other,HS Diploma,16.88
-Ventura,Native American,HS Diploma,22.52
-Ventura,White,HS Diploma,16.48
-Ventura,All Races,HS Diploma,19.72
-Ventura,Asian/Pacific Islander,Some College,13.41
-Ventura,Black,Some College,24.62
-Ventura,Hispanic/Latino,Some College,19.05
-Ventura,Multiracial/Other,Some College,24.09
-Ventura,Native American,Some College,37.94
-Ventura,White,Some College,23.87
-Ventura,All Races,Some College,21.28
-Ventura,Asian/Pacific Islander,AA Degree,9.24
-Ventura,Black,AA Degree,13.93
-Ventura,Hispanic/Latino,AA Degree,7.72
-Ventura,Multiracial/Other,AA Degree,14.11
-Ventura,Native American,AA Degree,9.52
-Ventura,White,AA Degree,12.37
-Ventura,All Races,AA Degree,10.45
-Ventura,Asian/Pacific Islander,BA degree,35.92
-Ventura,Black,BA degree,23.08
-Ventura,Hispanic/Latino,BA degree,9.68
-Ventura,Multiracial/Other,BA degree,24.74
-Ventura,Native American,BA degree,2.57
-Ventura,White,BA degree,27.8
-Ventura,All Races,BA degree,21.54
-Ventura,Asian/Pacific Islander,MA degree or higher,23.75
-Ventura,Black,MA degree or higher,16.08
-Ventura,Hispanic/Latino,MA degree or higher,4.19
-Ventura,Multiracial/Other,MA degree or higher,16.93
-Ventura,Native American,MA degree or higher,10.51
-Ventura,White,MA degree or higher,16.18
-Ventura,All Races,MA degree or higher,12.36
-SCAG,All Races,Less than HS Diploma,18.45
-SCAG,Asian/Pacific Islander,Less than HS Diploma,10.97
-SCAG,Black,Less than HS Diploma,9.33
-SCAG,Hispanic/Latino,Less than HS Diploma,34.7
-SCAG,Multiracial/Other,Less than HS Diploma,5.9
-SCAG,Native American,Less than HS Diploma,15.62
-SCAG,White,Less than HS Diploma,4.67
+Riverside,Multiracial/Other,Some College,28.98
+Riverside,Native American,Some College,23.17
+Riverside,White,Some College,27.92
+Riverside,All Races,Some College,23.58
+Riverside,Asian/Pacific Islander,AA Degree,8.56
+Riverside,Black,AA Degree,10.9
+Riverside,Hispanic/Latino,AA Degree,6.7
+Riverside,Multiracial/Other,AA Degree,11.34
+Riverside,Native American,AA Degree,7.72
+Riverside,White,AA Degree,10.21
+Riverside,All Races,AA Degree,8.6
+Riverside,Asian/Pacific Islander,BA degree,32.3
+Riverside,Black,BA degree,17.2
+Riverside,Hispanic/Latino,BA degree,8.43
+Riverside,Multiracial/Other,BA degree,19.38
+Riverside,Native American,BA degree,12.17
+Riverside,White,BA degree,19.1
+Riverside,All Races,BA degree,15.24
+Riverside,Asian/Pacific Islander,MA degree or higher,14.82
+Riverside,Black,MA degree or higher,9.92
+Riverside,Hispanic/Latino,MA degree or higher,3.8
+Riverside,Multiracial/Other,MA degree or higher,12.38
+Riverside,Native American,MA degree or higher,7.31
+Riverside,White,MA degree or higher,12.79
+Riverside,All Races,MA degree or higher,8.75
+San Bernardino,Asian/Pacific Islander,Less than HS Diploma,9.01
+San Bernardino,Black,Less than HS Diploma,11.15
+San Bernardino,Hispanic/Latino,Less than HS Diploma,29.55
+San Bernardino,Multiracial/Other,Less than HS Diploma,7.33
+San Bernardino,Native American,Less than HS Diploma,13.06
+San Bernardino,White,Less than HS Diploma,7.49
+San Bernardino,All Races,Less than HS Diploma,18.82
+San Bernardino,Asian/Pacific Islander,HS Diploma,14.29
+San Bernardino,Black,HS Diploma,25.72
+San Bernardino,Hispanic/Latino,HS Diploma,30.79
+San Bernardino,Multiracial/Other,HS Diploma,20.18
+San Bernardino,Native American,HS Diploma,36.74
+San Bernardino,White,HS Diploma,26.54
+San Bernardino,All Races,HS Diploma,27.34
+San Bernardino,Asian/Pacific Islander,Some College,15.43
+San Bernardino,Black,Some College,29.65
+San Bernardino,Hispanic/Latino,Some College,20.14
+San Bernardino,Multiracial/Other,Some College,30.02
+San Bernardino,Native American,Some College,32.75
+San Bernardino,White,Some College,27.82
+San Bernardino,All Races,Some College,23.16
+San Bernardino,Asian/Pacific Islander,AA Degree,9.85
+San Bernardino,Black,AA Degree,9.98
+San Bernardino,Hispanic/Latino,AA Degree,7.15
+San Bernardino,Multiracial/Other,AA Degree,11.6
+San Bernardino,Native American,AA Degree,4.16
+San Bernardino,White,AA Degree,9.68
+San Bernardino,All Races,AA Degree,8.51
+San Bernardino,Asian/Pacific Islander,BA degree,33.45
+San Bernardino,Black,BA degree,15.22
+San Bernardino,Hispanic/Latino,BA degree,8.86
+San Bernardino,Multiracial/Other,BA degree,18.34
+San Bernardino,Native American,BA degree,10.49
+San Bernardino,White,BA degree,17.05
+San Bernardino,All Races,BA degree,14.33
+San Bernardino,Asian/Pacific Islander,MA degree or higher,17.97
+San Bernardino,Black,MA degree or higher,8.28
+San Bernardino,Hispanic/Latino,MA degree or higher,3.52
+San Bernardino,Multiracial/Other,MA degree or higher,12.54
+San Bernardino,Native American,MA degree or higher,2.8
+San Bernardino,White,MA degree or higher,11.41
+San Bernardino,All Races,MA degree or higher,7.85
+Ventura,Asian/Pacific Islander,Less than HS Diploma,6.15
+Ventura,Black,Less than HS Diploma,6.31
+Ventura,Hispanic/Latino,Less than HS Diploma,33.13
+Ventura,Multiracial/Other,Less than HS Diploma,3.67
+Ventura,Native American,Less than HS Diploma,20.32
+Ventura,White,Less than HS Diploma,3.34
+Ventura,All Races,Less than HS Diploma,14.79
+Ventura,Asian/Pacific Islander,HS Diploma,11.45
+Ventura,Black,HS Diploma,19.91
+Ventura,Hispanic/Latino,HS Diploma,25.62
+Ventura,Multiracial/Other,HS Diploma,16.12
+Ventura,Native American,HS Diploma,20.59
+Ventura,White,HS Diploma,16.62
+Ventura,All Races,HS Diploma,19.61
+Ventura,Asian/Pacific Islander,Some College,12.26
+Ventura,Black,Some College,18.34
+Ventura,Hispanic/Latino,Some College,18.25
+Ventura,Multiracial/Other,Some College,23.22
+Ventura,Native American,Some College,30.89
+Ventura,White,Some College,23.11
+Ventura,All Races,Some College,20.34
+Ventura,Asian/Pacific Islander,AA Degree,9.47
+Ventura,Black,AA Degree,15.89
+Ventura,Hispanic/Latino,AA Degree,7.69
+Ventura,Multiracial/Other,AA Degree,13.57
+Ventura,Native American,AA Degree,8.35
+Ventura,White,AA Degree,12.26
+Ventura,All Races,AA Degree,10.42
+Ventura,Asian/Pacific Islander,BA degree,36.57
+Ventura,Black,BA degree,22.79
+Ventura,Hispanic/Latino,BA degree,10.44
+Ventura,Multiracial/Other,BA degree,26.08
+Ventura,Native American,BA degree,9.65
+Ventura,White,BA degree,27.69
+Ventura,All Races,BA degree,21.81
+Ventura,Asian/Pacific Islander,MA degree or higher,24.1
+Ventura,Black,MA degree or higher,16.76
+Ventura,Hispanic/Latino,MA degree or higher,4.87
+Ventura,Multiracial/Other,MA degree or higher,17.33
+Ventura,Native American,MA degree or higher,10.2
+Ventura,White,MA degree or higher,16.98
+Ventura,All Races,MA degree or higher,13.03
+SCAG,All Races,Less than HS Diploma,18.22
+SCAG,Asian/Pacific Islander,Less than HS Diploma,10.81
+SCAG,Black,Less than HS Diploma,9.04
+SCAG,Hispanic/Latino,Less than HS Diploma,34.05
+SCAG,Multiracial/Other,Less than HS Diploma,5.86
+SCAG,Native American,Less than HS Diploma,15.07
+SCAG,White,Less than HS Diploma,4.7
 SCAG,All Races,HS Diploma,21.49
-SCAG,Asian/Pacific Islander,HS Diploma,14.35
-SCAG,Black,HS Diploma,23.6
-SCAG,Hispanic/Latino,HS Diploma,26.8
-SCAG,Multiracial/Other,HS Diploma,15.4
-SCAG,Native American,HS Diploma,27.57
-SCAG,White,HS Diploma,18.18
-SCAG,All Races,Some College,19.99
-SCAG,Asian/Pacific Islander,Some College,13.47
-SCAG,Black,Some College,28.85
-SCAG,Hispanic/Latino,Some College,18.67
-SCAG,Multiracial/Other,Some College,23.55
-SCAG,Native American,Some College,27.39
-SCAG,White,Some College,22.47
-SCAG,All Races,AA Degree,7.59
-SCAG,Asian/Pacific Islander,AA Degree,7.65
+SCAG,Asian/Pacific Islander,HS Diploma,14.26
+SCAG,Black,HS Diploma,23.56
+SCAG,Hispanic/Latino,HS Diploma,26.99
+SCAG,Multiracial/Other,HS Diploma,15.3
+SCAG,Native American,HS Diploma,28.23
+SCAG,White,HS Diploma,18.01
+SCAG,All Races,Some College,19.64
+SCAG,Asian/Pacific Islander,Some College,13.43
+SCAG,Black,Some College,28.35
+SCAG,Hispanic/Latino,Some College,18.43
+SCAG,Multiracial/Other,Some College,23.14
+SCAG,Native American,Some College,26.68
+SCAG,White,Some College,21.94
+SCAG,All Races,AA Degree,7.56
+SCAG,Asian/Pacific Islander,AA Degree,7.45
 SCAG,Black,AA Degree,9.91
-SCAG,Hispanic/Latino,AA Degree,5.97
-SCAG,Multiracial/Other,AA Degree,9.35
-SCAG,Native American,AA Degree,9.9
-SCAG,White,AA Degree,8.94
-SCAG,All Races,BA degree,20.86
-SCAG,Asian/Pacific Islander,BA degree,35.78
-SCAG,Black,BA degree,18.07
-SCAG,Hispanic/Latino,BA degree,9.81
-SCAG,Multiracial/Other,BA degree,28.89
-SCAG,Native American,BA degree,13.43
-SCAG,White,BA degree,27.71
-SCAG,All Races,MA degree or higher,11.63
-SCAG,Asian/Pacific Islander,MA degree or higher,17.78
-SCAG,Black,MA degree or higher,10.24
-SCAG,Hispanic/Latino,MA degree or higher,4.06
-SCAG,Multiracial/Other,MA degree or higher,16.91
-SCAG,Native American,MA degree or higher,6.09
-SCAG,White,MA degree or higher,18.02
+SCAG,Hispanic/Latino,AA Degree,6.14
+SCAG,Multiracial/Other,AA Degree,9.48
+SCAG,Native American,AA Degree,9.63
+SCAG,White,AA Degree,8.77
+SCAG,All Races,BA degree,21.11
+SCAG,Asian/Pacific Islander,BA degree,35.74
+SCAG,Black,BA degree,18.36
+SCAG,Hispanic/Latino,BA degree,10.13
+SCAG,Multiracial/Other,BA degree,28.69
+SCAG,Native American,BA degree,13.89
+SCAG,White,BA degree,28.1
+SCAG,All Races,MA degree or higher,11.97
+SCAG,Asian/Pacific Islander,MA degree or higher,18.31
+SCAG,Black,MA degree or higher,10.78
+SCAG,Hispanic/Latino,MA degree or higher,4.26
+SCAG,Multiracial/Other,MA degree or higher,17.53
+SCAG,Native American,MA degree or higher,6.5
+SCAG,White,MA degree or higher,18.48

@@ -32,8 +32,8 @@ options(scipen = 999,
         )
 
 # Un-comment next two lines to install/update all necessary packages:
-# install.packages("remotes") # first install remotes to use update_packages()
-# remotes::update_packages(c("here", "rstudioapi", "magrittr", "curl", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages
+# install.packages("remotes") # first install remotes to use remotes::update_packages()
+remotes::update_packages(c("here", "rstudioapi", "magrittr", "curl", "janitor", "fs", "tools", "knitr", "spatstat", "readxl", "openxlsx2", "data.table", "tidycensus", "tidyverse")) # un-comment to install/update packages, this line can be ran each time, it only installs/updates packages if not installed or if updates exist.
 
 # Set here() location- working directory will be based on the project folder that this Rmd file is inside of currently (if you re-name this file, also change inside this if using an .Rproj/R project:
 here::i_am("SCAG_data_task_ZC.Rmd")
@@ -267,15 +267,26 @@ data_dictionaries_fp <- here("data_dictionaries")
 ```
 
 
-# Download, Read in and Clean data from US Census ACS PUMS:
+# Download, Read in, and Clean data from US Census ACS PUMS
 
-### Download data from US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) File Transfer Protocol (FTP) site
+### Download data from US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) File Transfer Protocol (FTP) site:
 
 - The first step is retrieving the .csv files that make up both 5 year estimates from 2017-2021 and 2018-2022.
+- The next code chunk will download each of the zip files for the housing and person level data, both for the 5 year estimates from 2017-2021 and 2018-2022. 
+- This code can be changed to retrieve the 2023 data once it is released in 2025.
 - These files are located on the US Census American Community Survey (ACS) Public Use Microdata Sample (PUMS) [File Transfer Protocol (FTP) site](https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/)
-- This process takes about 5-15 minutes to download all files depending on your internet connection and can be skipped if you have the full .zip drive with the data files already downloaded.
+- Links for 2017-2021 files:
+    - Housing 2017-2021 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip
+    - Person 2017-2021 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_pca.zip
+- Links for 2018-2022 files: 
+    - Housing 2018-2022 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_hca.zip
+    - Person 2018-2022 PUMS .csv data link (clicking link will download the full large file): https://www2.census.gov/programs-surveys/acs/data/pums/2022/5-Year/csv_pca.zip
+- To get the URL's for the desired .zip files, go to the FTP site, click on the desired year for the 5-year estimates.
+    - The file name convention is `{file type}_{h=housing/p=person}{state abbreviation}.zip`, e.g. `csv_hca.zip` is a .csv file, for housing level data for the state of California (CA).
+    - Right click on the .zip file and click "Copy Link Address".  
+- This process takes about 5 minutes to download all files depending on your internet connection and can be skipped if you have the full .zip drive with the data files already downloaded.
 
-```{r acs_data_dwnld, include=FALSE}
+```{r acs_data_dwnld, eval=FALSE, include=FALSE}
 # 2017-2021 ACS PUMS DATA Download: Housing and Person level files
 # Housing- Link for Housing csv file for California as a zip file: (clicking link/visiting it will download the zip file to where default downloads for your browser) https://www2.census.gov/programs-surveys/acs/data/pums/2021/5-Year/csv_hca.zip
 # 2021 Housing .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2017_2021_ACS_PUMS/csv_hca.zip" or use here(acs_2021_fp, "csv_hca.zip"):
@@ -316,9 +327,11 @@ file.rename(here(acs_2022_fp, "psam_p06.csv"), person_2022_fp) %>% invisible()
 
 ### Data Dictionary Table (New Variables Created for Analysis):
 
+- Below is a table of all the new variables created. It contains the variable name, a brief description, type of variable, and levels if it is a factor variable (levels will be used to sort these variables and control their order in the output).
+
 ```{r ACS_data_new_vars_tbl}
 ### Data Dictionaries from tidycensus ---- 
-### 2021 ACS: Get data dictionary as tibble from tidycensus for 2021:
+### 2021 ACS: Get data dictionary as tibble from tidycensus for 2021 ACS 5-year (which covers the data from 2017-2021):
 # pums_vars_acs5_2021 <- tidycensus::pums_variables %>% filter(year == 2021, survey == "acs5")
 # # Write out data dicts for all vars, person and housing vars:
 # write_csv(pums_vars_acs5_2021, here(data_dictionaries_fp, "pums_vars_acs5_2021.csv"))
@@ -333,7 +346,7 @@ pums_vars_acs5_2021 <- read_csv(here(data_dictionaries_fp, "pums_vars_acs5_2021.
 # pums_vars_acs5_housing_2021 <- pums_vars_acs5_2021 %>%
 #    filter(year == 2021, survey == "acs5", level == "housing")
 
-### 2022 ACS: Get data dictionary as tibble from tidycensus for 2022:
+### 2022 ACS: Get data dictionary as tibble from tidycensus for 2022 ACS 5-year (which covers the data from 2018-2022):
 # pums_vars_acs5_2022 <- tidycensus::pums_variables %>% filter(year == 2022, survey == "acs5")
 # # Write out data dicts for all vars, person and housing vars:
 # write_csv(pums_vars_acs5_2022, here(data_dictionaries_fp, "pums_vars_acs5_2022.csv"))
@@ -343,8 +356,8 @@ pums_vars_acs5_2022 <- read_csv(here(data_dictionaries_fp, "pums_vars_acs5_2022.
 ### Data Dictionary for New Variables ---- 
 # Set up up a tibble named "ACS_data_new_vars_tbl" to use reference/data dictionary for new variables that will be created for the creation of the tables below:
 # 4 columns: "variable_name", "description", "type", "levels":
-ACS_data_new_vars_tbl <- tribble(~ variable_name,           ~ description,       ~ type,   ~ levels,
-                                 "year", "Year of ACS", "numeric", NA,
+ACS_data_new_vars_tbl <- tribble(~ variable_name,       ~ description,       ~ type,   ~ levels,
+                                 "year",               "Year of ACS",        "numeric",       NA,
                                   "county", "6 counties that make up SCAG Region", "factor", c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura"),
                                   "race", "6 categories of race and ethnicity", "factor", c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White"),
                                   "age_3_cat", "3 categories of age", "factor",c("<18 years", "18 - 64 years","65+ years"),
@@ -364,8 +377,8 @@ ACS_data_new_vars_tbl <- tribble(~ variable_name,           ~ description,      
                                 "unemployed", "Unemployment: if Yes, unemployed, No otherwise.", "factor: Yes, No", c("Yes","No"),
                                 "single_hh", "3 categories of Single Parent Households by gender: female head of HH, male head of HH, or cohabitates or no kids", 
                                 "factor", c("female_hh", "male_hh","cohabit_or_nokids"),
-                                 "lep", "3 categories of English Proficiency: Limited English Proficiency, English Proficient or Younger than 5 yos or no English spoken", 
-                                "factor", c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")
+                                 "lep", "3 categories of English Proficiency: Limited English Proficiency, English Proficient, or Younger than 5 yos/speaks only English", 
+                                "factor", c("limited_english_proficiency","english_proficient","<5yos_or_only_eng")
                                  )
 
 # For each factor variable in above table- Pull out each levels, name them and set to current environment as vectors to use later to set levels for corresponding variables:
@@ -387,7 +400,17 @@ ACS_data_new_vars_tbl %>% knitr::kable()
 
 
 
-### 2017-2021 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
+### Load and Clean raw ACS PUMS FTP data
+
+- This section will read in the raw data for the housing level data and person level data, selecting only the necessary variables for each with the given lists.
+- Then, the files are merged- keeping all observations from the person level data and adding the columns from the housing data where SERIALNO matches, the merged data is then written out to a .csv file.
+- The merged data is then filtered to the SCAG region, adding a county variable, and new variables created for later analysis as described in the previous section and in more detail in the file `data_cleaning_ACS.R`. 
+- Finally, the merged and cleaned data is written to a .csv file.
+- This process is repeated for both the 2017-2021 and the 2018-2022 ACS PUMS in the next two code chunks, the only difference is that the 2022 data in the 2018-2022 ACS PUMS has PUMA's drawn from the 2020 census (PUMA20), so this variable needed to be combined with the 2010 PUMA's (PUMA10) to create an overall PUMA variable (PUMA).
+
+#### 2017-2021 ACS PUMS data
+
+- Preview of 2017-2021 clean ACS data for SCAG Region:
 
 ```{r ACS 2021 FTP data, eval=FALSE, include=FALSE}
 # Total list of vars to get from ACS PUMS HHT
@@ -486,19 +509,30 @@ clean_acs_scag_21 <- merged_acs_data_scag %>% mutate(year = as.numeric(str_extra
                                                                                  HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"), levels = c("female_hh", "male_hh","cohabit_or_nokids")),
                                                     lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
                                                                            ENG %in% c(1:2) ~ "english_proficient",
-                                                                           TRUE ~ "<5yos_or_no_eng"), levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")),
+                                                                           TRUE ~ "<5yos_or_no_eng"), levels = c("limited_english_proficiency","english_proficient","<5yos_or_only_eng")),
                                                     
                                                     ) # end of mutate for clean_acs_scag_21
 
 # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_21":  881207 obs.  with 34 variables
 write_csv(clean_acs_scag_21, here(acs_data_21_fp, "clean_acs_scag_21.csv"))
 
+# Print out preview of 2021 clean ACS data:
+head(clean_acs_scag_21, 10)
+
 # Remove all large tibbles/dfs:
 rm(merged_acs_data_scag, clean_acs_scag_21)
 ```
 
 
-### 2018-2022 ACS data from US Census ACS PUMS FTP- Load and Clean raw data:
+```{r preview_clean_21}
+# Print out preview of 2021 clean ACS data:
+read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), show_col_types = FALSE) %>% head(10)
+```
+
+
+#### 2018-2022 ACS PUMS data
+
+- Preview of 2018-2022 clean ACS data for SCAG Region:
 
 ```{r ACS 2022 FTP data, eval=FALSE, include=FALSE}
 # Total list of vars to get from ACS PUMS 22- change from 21 is PUMA is in 2010 and 2020 census columns: "PUMA10" and "PUMA20"
@@ -613,15 +647,20 @@ rm(merged_data_22_scag, clean_acs_scag_22)
 ```
 
 
+```{r preview_clean_22}
+# Print out preview of 2022 clean ACS data:
+read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), show_col_types = FALSE) %>% head(10)
+```
+
 --- 
 
 
-# Read in clean SCAG Data:
+# Read in clean SCAG Data
 
-- This is the point where you can choose which years of the ACS you want to use, if you want to use the 2018-2022 ACS PUMS un-comment the code as directed in this code chunk.
+- This is the point where you can choose which years of the ACS you want to use, if you want to use the 2018-2022 ACS PUMS un-comment the code as directed in this code chunk (vice versa if you want to use the 2017-2021 data).
 - Read in clean SCAG Data and recode factor variables for use in ACS PUMS Analysis.
 
-```{r read recode SCAG data}
+```{r read recode SCAG data, results='asis'}
 # First, create a list of the column types to convert all specified variables to factors with levels that were set to the current working environment in code chuck "ACS_data_new_vars_tbl",
 # list is structured variable_name = col_factor({variable_name}_levels):
 acs_col_type_list <- list(county = col_factor(county_levels),
@@ -643,14 +682,12 @@ acs_col_type_list <- list(county = col_factor(county_levels),
 
 ### Read in clean dataset -----
 
-# 2017-2021 ACS PUMS clean data
-# If you want to use 2017-2021 ACS PUMS clean data use the next line otherwise comment out/don't run the next line and go the next line:
-# Read in clean ACS data SCAG from 2017-2021, specifying col_types to list above "acs_col_type_list":
+# 2017-2021 ACS PUMS clean data: Read in clean ACS data SCAG from 2017-2021, specifying col_types to list above "acs_col_type_list",
+# If you want to use 2017-2021 ACS PUMS clean data use the next line otherwise comment out/don't run the next line and go the 4 lines below to assign "ca_pums_scag":
 # ca_pums_scag <- read_csv(here(acs_data_21_fp, "clean_acs_scag_21.csv"), col_types = acs_col_type_list)
 
-# 2018-2022 ACS PUMS clean data
-# Un-comment the next line (and comment out the above line)if you want to use the clean 2018-2022 ACS PUMS data file
-# Read in clean ACS data SCAG from 2018-2022:
+# 2018-2022 ACS PUMS clean data: Read in clean ACS data SCAG from 2018-2022,
+# Un-comment the next line (and comment out 4 lines above) if you want to use the clean 2018-2022 ACS PUMS data file:
 ca_pums_scag <- read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), col_types = acs_col_type_list)
 
 # Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
@@ -664,17 +701,28 @@ if (is.na(race_levels[7] == "All Races")) {race_levels <- append(race_levels,  "
 # spec(ca_pums_scag)
 # str(ca_pums_scag)
 
+# Print out the years of ACS PUMS currently loaded:
+cat(str_glue("\n\n"))
+cat(str_glue("\n\n"))
+cat(str_glue("### **<u>{min(ca_pums_scag$year)}-{max(ca_pums_scag$year)} ACS PUMS Data for SCAG Region</u>**"))
+cat(str_glue("\n\n"))
+cat(str_glue("\n\n"))
+
 # Print out first 10 rows to preview in document:
 head(ca_pums_scag, 10)
 ```
 
 # Analysis and Replication of Tables and Figures for SCAG
 
-- Each of the following code chunks will create a table and write it out to a .csv file to the folder `output/tables`.
+- Each of the following code chunks will create a table to match the figures from the Equity Analysis report or RECBR and write it out to a .csv file to the folder `output/tables`.
+- Below is a brief description of each table and the data it includes.
 
 ## Tables and Figures from Equity Analysis Technical Report- (EA report)
 
 ### Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity
+
+- Percentage of Workers who Commute by Walk, Bike, or Public Transit.
+- Uses person level weights, excludes person who work from home. 
 
 ```{r fig_5}
 # Figure 5. Workers who Commute by Walk, Bike, or Public Transit by Race and Ethnicity:
@@ -695,6 +743,9 @@ if (file.exists(here(tables_fp, 'walk_bike_public_scag_table.csv'))) {rm(list = 
 
 ### Figure 6. Householders without a Vehicle by Race and Ethnicity
 
+- Percentage of Households without a Vehicle.
+- Uses household level weights, includes only housing level data.
+
 ```{r fig_6}
 # Figure 6. Householders without a Vehicle by Race and Ethnicity:
 # Filter to only housing data(RELSHIPP == 20) and Use household weights- WGTP; sum over VEH == 0; Use weight_perc_2groups():
@@ -713,6 +764,12 @@ if (file.exists(here(tables_fp, 'no_veh_scag_table.csv'))) {rm(list = ls(pattern
 
 ### Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity
 
+- Workers’ Commute Times in Minutes by Mode of transportation, three categories:
+    - Workers who Commute by bus, rail, taxi, or ferry: coded "Public"
+    - Workers who Commute by Car or Motorcycle: coded level "Private"
+    - Workers who Commute by Walk, Bike, or Other: coded level "Other"   
+- Uses person level weights, excludes person who work from home. 
+
 ```{r fig_7}
 # Figure 7. Figure 7. Workers’ Commute Times (Minutes) by Mode and Race and Ethnicity: Use person level weights- PWGTP:
 # Grouped by all_transport and race
@@ -723,7 +780,6 @@ scag_race_transport_mean <- ca_pums_scag %>% filter(JWTRNS != 11) %>% select(PWG
                                          summarize(
                                            mean_transit_times_in_minutes = weighted.mean(JWMNP, PWGTP, na.rm = TRUE) # weighted mean 
                                          ) %>% mutate(county = "SCAG") %>% relocate(county) 
-
 
 # Get all_transport means for all SCAG non-home workers- Any Transport:
 scag_race_any_transport_mean <- ca_pums_scag %>% filter(JWTRNS != 11) %>%  select(PWGTP, race, all_transport, JWMNP) %>% 
@@ -813,10 +869,13 @@ if (file.exists(here(tables_fp, 'transport_mean_scag_table.csv'))) {rm(list = ls
 
 ### Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
 
+- Percentage of Renters and Homeowners Experiencing Housing Cost Burden, divided by household_type: Renters or Homeowners.
+- Uses household level weights, includes only housing level data. 
+
 ```{r fig_19}
 # Figure 19. Renters and Homeowners Experiencing Housing Cost Burden by Race and Ethnicity 
 # Filter to only housing data and renters (filter(RELSHIPP == 20, own_home == "Non-Homeowner")) and Use household weights- WGTP, sum if renter_burden == "Yes":
-#### Use  weight_perc_2groups() twice, once for own_home == "Non-Homeowner" on variable "renter_burden" for Renters and again with own_home == "Homeowner" on variable "housing_burden" for Homeowners:
+#### Use weight_perc_2groups() twice, once for own_home == "Non-Homeowner" on variable "renter_burden" for Renters and again with own_home == "Homeowner" on variable "housing_burden" for Homeowners:
 # Get renter_burden by using weight_perc_2groups() and add a column called household_type = "Renters":
 scag_renter_burden_table <- ca_pums_scag %>% filter(RELSHIPP == 20, own_home == "Non-Homeowner") %>% 
     weight_perc_2groups(var = "renter_burden", weight = "WGTP", group1 = "county", group2 = "race", filter_value = "Yes",
@@ -845,6 +904,9 @@ if (file.exists(here(tables_fp, 'housing_burden_scag_table.csv'))) {
 
 ### Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 
+- Percentage of People Living in Households Without Kitchen and Plumbing Facilities.
+- Uses household level weights, includes only housing level data. 
+
 ```{r fig_20}
 # Figure 20. People Living in Households Without Kitchen and Plumbing Facilities by Race and Ethnicity
 # Filter to only housing data filter(RELSHIPP == 20) and Use household weights- WGTP: sum if no_kitchen_plumbing == "Yes"
@@ -862,6 +924,9 @@ if (file.exists(here(tables_fp, 'no_kitchen_plumbing_scag_table.csv'))) {rm(list
 ```
 
 ### Figure 21. Households with Severe Overcrowding by Race and Ethnicity
+
+- Percentage of Households with Severe Overcrowding- defined as have more than 1.5 persons per room.
+- Uses household level weights, includes only housing level data. 
 
 ```{r fig_21}
 # Figure 21. Households with Severe Overcrowding by Race and Ethnicity:
@@ -881,6 +946,9 @@ if (file.exists(here(tables_fp, 'overcrowded_scag_table.csv'))) {rm(list = ls(pa
 
 ### Figure 22. Homeownership by Race and Ethnicity
 
+- Percentage of Homeownership.
+- Uses household level weights, includes only housing level data. 
+
 ```{r fig_22}
 # Figure 22. Homeownership by Race and Ethnicity:
 # Filter to only housing data (filter(RELSHIPP == 20)) and Use household weights- WGTP, filter "own_home" to "Homeowner":
@@ -898,6 +966,9 @@ if (file.exists(here(tables_fp, 'homeownership_scag_table.csv'))) {rm(list = ls(
 
 ### Figure 28. People without Health Insurance by Race and Ethnicity
 
+- Percentage of People without Health Insurance.
+- Uses person level weights. 
+
 ```{r fig_28}
 # Figure 28. People without Health Insurance by Race and Ethnicity:
 # Use person level weights- PWGTP; sum over those without health insurance coverage HICOV ==  2
@@ -914,6 +985,9 @@ if (file.exists(here(tables_fp, 'no_hicov_scag_table.csv'))) {rm(list = ls(patte
 ```
 
 ### Figure 39. Median Hourly Wage by Race and Ethnicity
+
+- Median Hourly Wage: US dollars, adjusted for inflation and calculated for those respondents that worked more than 0 hours/week.
+- Uses person level weights, includes only civilian workers, ages 25-64 years. 
 
 ```{r fig_39}
 # Figure 39. Median Hourly Wage by Race and Ethnicity
@@ -966,6 +1040,8 @@ if (file.exists(here(tables_fp, 'med_hr_wage_scag_table.csv'))) {rm(list = ls(pa
 ```
 
 ### Figure 40. Unemployment by Race and Ethnicity
+
+- Unemployment, Uses person level weights, excludes those respondents not in the labor force. 
 
 ```{r fig_40}
 # Figure 40. Unemployment by Race and Ethnicity
@@ -1027,6 +1103,9 @@ if (file.exists(here(tables_fp, 'unemployed_scag_table.csv'))) {rm(list = ls(pat
 
 ### Figure 41. Working Poor by Race and Ethnicity
 
+- Percentage of Working Poor: if respondent is working and is less than 200 percent below the federal poverty line.
+- Uses person level weights, includes only civilian workers, ages 25-64 years. 
+
 ```{r fig_41}
 # Figure 41. Working Poor by Race and Ethnicity
 # Use person level weights- PWGTP; Filter to age 25-64 and a civilian worker; if AGEP greater than or equal to 25 and AGEP less than or equal to 64 AND if ESR in (1 2); *Civilian worker;
@@ -1046,6 +1125,8 @@ if (file.exists(here(tables_fp, 'working_poor_scag_table.csv'))) {rm(list = ls(p
 ## Tables and Figures from Racial Equity Baseline Conditions Report (REBCR)
 
 ### Total Population by County and SCAG
+
+- Total population calculated using person level weights.
 
 ```{r total_pop}
 # Total Population by County and SCAG:
@@ -1068,6 +1149,8 @@ if (file.exists(here(tables_fp, 'total_pop_scag_table.csv'))) {rm(list = ls(patt
 
 ### Race/Ethnicity Distribution (%) by County and SCAG Region
 
+- Percentages of Race/Ethnicity calculated using person level weights.
+
 ```{r race_ethnicity}
 # Race/Ethnicity Distribution (%) by County and SCAG Region:
 # Use person level weights- PWGTP; Percentages of race by county and SCAG
@@ -1088,6 +1171,11 @@ if (file.exists(here(tables_fp, 'race_perc_scag_table.csv'))) {rm(list = ls(patt
 
 
 ### Age Distribution (%) by County and SCAG Region
+
+- Percentages of Age categories calculated using person level weights,  three categories:
+    - <18 years
+    - 18 - 64 years
+    - 65+ years
 
 ```{r age_dist}
 # Age Distribution (%) by County and SCAG Region:
@@ -1113,6 +1201,10 @@ if (file.exists(here(tables_fp, 'age_perc_scag_table.csv'))) {rm(list = ls(patte
 
 ### Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region
 
+- Percentages of Single Parent Households (%) by Gender using household level weights, two categories of gender_head_of_household:
+    - female_hh = female head of household
+    - male_hh = male head of household
+
 ```{r singe_parent}
 ### 
 # Single Parent Households (%) by Gender of Head of Household and then by County and SCAG Region:
@@ -1131,7 +1223,9 @@ write_csv(single_hh_scag_table, here(tables_fp, "single_hh_scag_table.csv"))
 if (file.exists(here(tables_fp, 'single_hh_scag_table.csv'))) {rm(list = ls(pattern = "single_hh"))}
 ```
 
-### National Origin (% Foreign born) by County and SCAG Region
+### National Origin (% Foreign Born) by County and SCAG Region
+
+- Percentage of Foreign Born Respondents, using person level weights.
 
 ```{r natl_origin}
 # National Origin (% Foreign born) by County and SCAG Region
@@ -1153,6 +1247,9 @@ if (file.exists(here(tables_fp, 'natl_origin_scag_table.csv'))) {rm(list = ls(pa
 
 ### Limited English Proficiency (%) by County and SCAG Region
 
+- Percentage of Respondents with Limited English Proficiency (LEP), using person level weights.
+    - LEP defined as ability to speak English rated as "not well" or "not at all". 
+
 ```{r LEP}
 # Limited English Proficiency (LEP %) by County and SCAG Region
 # Use person level weights- PWGTP:Percentages of LEP by county and SCAG
@@ -1172,6 +1269,8 @@ if (file.exists(here(tables_fp, 'lep_scag_table.csv'))) {rm(list = ls(pattern = 
 
 ### People with Disabilities (%) by County and SCAG Region
 
+- Percentage of People with Disabilities, using person level weights.
+
 ```{r disablities}
 # People with Disabilities (%) by County and SCAG Region
 # Use person level weights- PWGTP; Percentages of LEP by county and SCAG; Filter to DIS == 1 
@@ -1190,7 +1289,14 @@ if (file.exists(here(tables_fp, 'dis_scag_table.csv'))) {rm(list = ls(pattern = 
 
 ### Disabilites by category (%) by County and SCAG Region
 
-- 6 categories of disabilities: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive
+- Percentage of Disabilities by category, using person level weights.
+- 6 categories of disabilities: 
+    - Self-care
+    - Hearing 
+    - Vision
+    - Independent
+    - Ambulatory
+    - Cognitive
 
 ```{r disablities_cat}
 # Disabilites by category (%) by County and SCAG Region: Use person level weights- PWGTP:
@@ -1242,12 +1348,19 @@ write_csv(categories_dis_scag_table, here(tables_fp, "categories_dis_scag_table.
 if (file.exists(here(tables_fp, 'categories_dis_scag_table.csv'))) {rm(list = ls(pattern = "categories_dis"))}
 ```
 
-### Educational Attainment (%) by Race/ethincity and whole SCAG Region
+### Educational Attainment (%) by Race/ethnicity and whole SCAG Region
 
-- 6 categories of disabilities: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive
+- Percentages of Educational Attainment, using person level weights, includes only respondents over 25 years old.
+- 6 categories of Education: 
+    - Less than HS Diploma 
+    - HS Diploma 
+    - Some College 
+    - AA Degree 
+    - BA degree 
+    - MA degree or higher
 
 ```{r education}
-# Educational Attainment (%) by Race/ethincity and whole SCAG Region
+# Educational Attainment (%) by Race/ethnicity and whole SCAG Region
 # Variable "edu", Use person level weights- PWGTP; Filter to people over 25, filter(AGEP > 25)
 
 # Use weight_perc_table():
@@ -1264,11 +1377,14 @@ write_csv(edu_perc_scag_table, here(tables_fp, "edu_perc_scag_table.csv"))
 if (file.exists(here(tables_fp, 'edu_perc_scag_table.csv'))) {rm(list = ls(pattern = "edu_perc"))}
 ```
 
-### Median Household Income by Race/ethincity and whole SCAG Region
+### Median Household Income by Race/ethnicity and whole SCAG Region
+
+- Median Household Income: US dollars, adjusted for inflation.
+- Uses household level weights. 
 
 ```{r med_hh_income}
-# Median Household Income by Race/ethincity and whole SCAG Region
-# Use person level weights- WGTP; filter(RELSHIPP == 20) Only household level
+# Median Household Income by Race/ethnicity and whole SCAG Region
+# Use household level weights- WGTP; filter(RELSHIPP == 20) Only household level
 # use weighted median for only households
 # Get median hh income for all races for all SCAG:
 scag_med_hh_income_all_races <- ca_pums_scag %>% filter(RELSHIPP == 20) %>% drop_na(housing_income) %>% select(WGTP, housing_income)  %>% 
@@ -1316,6 +1432,9 @@ if (file.exists(here(tables_fp, 'med_hh_income_scag_table.csv'))) {rm(list = ls(
 
 ### Household Poverty (%) by Race/ethnicity and whole SCAG Region
 
+- Percentage of Households in Poverty, defined as less than 200 percent below the federal poverty line.
+- Uses household level weights. 
+
 ```{r poverty_hh}
 # if poverty == "Yes"- this is if the respondent is less than 200 percent below the poverty line; Use household level weights- WGTP; Filter only households: filter(RELSHIPP == 20)
 # Use weight_perc_table(): Pass in data filtered to only hh (filter(RELSHIPP == 20)), calculate weighted percentages using hh level weights- "WGTP", for variable "poverty" and filter to "poverty" == "Yes" 
@@ -1334,7 +1453,7 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 --- 
 
 
-# Write out Excel workbook file with all sheets:
+# Output: Write out Excel workbook file with all sheets
 
 - Finally, the last step is taking all of the tables created above and writing each table to a sheet into an Excel workbook.
 
@@ -1342,9 +1461,9 @@ if (file.exists(here(tables_fp, 'poverty_hh_scag_table.csv'))) {rm(list = ls(pat
 
 - Preview of all sheets in the exported Excel workbook `scag_tabbed.xlsx`:
 
-```{r write_excel, include=FALSE}
+```{r write_excel}
 # Read in completed tables and set to tibbles in current global env:
-# Read in all the tables from the folder "output/tables" to a list and keep names from the files:
+# Read in all the tables from the folder "output/tables" (here(tables_fp)) to a list and keep names from the files (full.names = TRUE):
 table_file_list <- lapply(list.files(here(tables_fp), full.names = TRUE), function(x) { read_csv(x, show_col_types = FALSE) } )
 
 # Set names of each list element to the actual file name without path and file extension:
@@ -1378,9 +1497,9 @@ toc <- tribble(~ sheet_name,           ~ description,
                  "LEP",                  "Limited English Proficiency (%) by County and SCAG Region",
                  "Disablity",            "People with Disabilities (%) by County and SCAG Region",
                  "Categories_Disablity", "Disabilites by 6 categories (%) and then by County and SCAG Region: Self-care, Hearing, Vision, Independent, Ambulatory, Cognitive",
-                 "Education",            "Educational Attainment (%) by Race/ethincity and whole SCAG Region",
-                 "Median_HH_Income",     "Median Household Income by Race/ethincity and whole SCAG Region",
-                 "Poverty_HH",           "Household Poverty (%) by Race/ethincity and whole SCAG Region") 
+                 "Education",            "Educational Attainment (%) by Race/ethnicity and whole SCAG Region",
+                 "Median_HH_Income",     "Median Household Income by Race/ethnicity and whole SCAG Region",
+                 "Poverty_HH",           "Household Poverty (%) by Race/ethnicity and whole SCAG Region") 
 
 # Write out table to new sheet in excel file for tabbed SCAG output, list is this format: ("name of new sheet" = df/tibble)
 # Make a list that has the name of each sheet (sheet_name from TOC above) and the df/tibble that will populate it- 
