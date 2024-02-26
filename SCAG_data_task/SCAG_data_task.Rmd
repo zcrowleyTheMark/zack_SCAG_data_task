@@ -29,7 +29,7 @@ output:
     
 Directory Tree Diagram for folder "SCAG_data_task": 
 ```{r, echo=FALSE}
-fs::dir_tree(path = "SCAG_data_task")
+fs::dir_tree(path = ".")
 ```
 
 3. Once you have opened and inspected the the folder "/SCAG_data_task", Open the R project file named `SCAG_data_task.Rproj` by double-clicking on it, this will launch your Rstudio as an R project, then open the `SCAG_data_task.Rmd` by going to File, Open, click on R markdown file `SCAG_data_task.Rmd` inside folder 'SCAG_data_task'. R markdown files are like R scripts that allow for adding text in between R code which is contained inside code chunks like this: 
@@ -223,17 +223,15 @@ data_fp <- here('data')
 # list.files(data_fp)
 
 ### IMPORTS directories and filepaths 
-# Creates a new folder called "data" if it doesn't already exist in working directory:
+# Creates a new folder called "data/2017_2021_ACS_PUMS" if it doesn't already exist in working directory:
 if (!dir.exists(here(data_fp, '2017_2021_ACS_PUMS'))) {dir.create(here(data_fp, '2017_2021_ACS_PUMS'))}
 # file path for 2021 5-year ACS PUMS Data:
 acs_2021_fp <- here(data_fp, '2017_2021_ACS_PUMS')
-# list.files(acs_2021_fp) 
 
-# Creates a new folder called "data" if it doesn't already exist in working directory:
+# Creates a new folder called "data/2018_2022_ACS_PUMS" if it doesn't already exist in working directory:
 if (!dir.exists(here(data_fp, '2018_2022_ACS_PUMS'))) {dir.create(here(data_fp, '2018_2022_ACS_PUMS'))}
 # Set up file path for 2022 5-year ACS PUMS Data:
 acs_2022_fp <- here(data_fp, '2018_2022_ACS_PUMS')
-# list.files(acs_2022_fp)
 
 # Set up filepaths for all ACS raw data from FTP download:
 # file path for 2021 household level data
@@ -286,6 +284,24 @@ if (!dir.exists(here('data_dictionaries'))) {dir.create(here('data_dictionaries'
 data_dictionaries_fp <- here("data_dictionaries")
 
 # Return a file tree of current path: fs::dir_tree(path = ".")
+
+### Un-comment for new 2023 data (all filepaths that will be for 2023 data): ----
+# # Creates a new folder called "data/2019_2023_ACS_PUMS" if it doesn't already exist in working directory:
+# if (!dir.exists(here(data_fp, '2019_2023_ACS_PUMS'))) {dir.create(here(data_fp, '2019_2023_ACS_PUMS'))}
+# # Set up file path for 2022 5-year ACS PUMS Data:
+# acs_2023_fp <- here(data_fp, '2019_2023_ACS_PUMS')
+# 
+# # Set up filepaths for all ACS raw data from FTP download:
+# # file path for 2023 household level data
+# hh_2023_fp <- here(acs_2023_fp,  "housing_CA_ACS_2021.csv")
+# # file path for 2023 person level data
+# person_2023_fp <- here(acs_2023_fp, "person_CA_ACS_2021.csv")
+# 
+# # Clean 23 data
+# # Creates a new folder called "acs_data_23" (if it doesn't already exist in working directory)- this will be where the clean data for the 2023 ACS will be stored:
+# if (!dir.exists(here(clean_data_fp, 'acs_data_23'))) {dir.create(here(clean_data_fp, 'acs_data_23'))}
+# # file path for clean_data acs_data_23
+# acs_data_23_fp <- here(clean_data_fp, "acs_data_23")
 ```
 
 
@@ -357,6 +373,27 @@ file.rename(here(acs_2021_fp, "psam_p06.csv"), person_2021_fp) %>% invisible()
 # 2022 rename .csv's:
 file.rename(here(acs_2022_fp, "psam_h06.csv"), hh_2022_fp) %>% invisible()
 file.rename(here(acs_2022_fp, "psam_p06.csv"), person_2022_fp) %>% invisible()
+
+### Un-comment for new 2023 data (data download for new 2023 5-year ACS-PUMS data): ----
+### 2019-2023 ACS PUMS DATA Download Housing and Person level files:
+# # 2023 Housing .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2018_2023_ACS_PUMS/csv_hca.zip" or use here(acs_2023_fp, "csv_hca.zip"):
+# if (!file.exists(here(acs_2023_fp, "csv_hca.zip"))) {
+# curl::curl_download("http://www2.census.gov/programs-surveys/acs/data/pums/2023/5-Year/csv_hca.zip", destfile = here(acs_2023_fp, "csv_hca.zip"))
+#     }
+# # Decompress/unzip "csv_hca.zip" and save in same folder "data/2018_2023_ACS_PUMS/" or acs_2023_fp
+# unzip(zipfile = here(acs_2023_fp, "csv_hca.zip"), exdir = acs_2023_fp, overwrite = TRUE)
+# 
+# # Person- Link for Person csv file for California as a zip file:  https://www2.census.gov/programs-surveys/acs/data/pums/2023/5-Year/csv_pca.zip
+# # 2023 Person .csv file, destfile is where the file will be downloaded and its name/extension, download to "data/2018_2023_ACS_PUMS/csv_pca.zip" or use here(acs_2023_fp, "csv_pca.zip"):
+# if (!file.exists(here(acs_2023_fp, "csv_pca.zip"))) {
+# curl::curl_download("http://www2.census.gov/programs-surveys/acs/data/pums/2023/5-Year/csv_pca.zip", destfile = here(acs_2023_fp, "csv_pca.zip"))
+#     }
+# # Decompress/unzip "csv_hca.zip" and save in same folder "data/2018_2023_ACS_PUMS/" or acs_2023_fp
+# unzip(zipfile = here(acs_2023_fp, "csv_pca.zip"), exdir = acs_2023_fp, overwrite = TRUE)
+# 
+# # 2023 rename .csv's:
+# file.rename(here(acs_2023_fp, "psam_h06.csv"), hh_2023_fp) %>% invisible()
+# file.rename(here(acs_2023_fp, "psam_p06.csv"), person_2023_fp) %>% invisible()
 ```
 
 
@@ -477,7 +514,7 @@ merged_data <- person_data %>% left_join(., housing_data, by = c("SERIALNO", "ST
 scag_county_list <- c("Imperial", "Los Angeles", "Orange", "Riverside","San Bernardino", "Ventura")
 
 # Mutate/case_when to replicate SAS code above for creating "county" var-
-# Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
+# Create county variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
 merged_data_scag <- merged_data %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
                                                               PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
                                                               PUMA %in% (5901:5999) ~ "Orange", # 59 prefix
@@ -588,7 +625,6 @@ housing_data_22 <- fread(here(hh_2022_fp), select = housing_vars_list_22) %>% as
 # Variables to pull out of raw housing data:
 person_vars_list_22 <- c("SERIALNO", "ST", "PUMA10", "PUMA20", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG",
                       "NATIVITY", "DIS", "DDRS", "DEAR", "DEYE", "DOUT", "DPHY", "DREM", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP", "HICOV")
-# Set up type list for read_csv:
 
 # Read in the person level data:
 person_data_22 <- fread(here(person_2022_fp), select = person_vars_list_22) %>% as_tibble()
@@ -690,6 +726,120 @@ read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), show_col_types = FALSE) 
 ```
 
 
+<!-- 2019-2023 ACS PUMS data: Un-comment next code chunk named `ACS 2023 FTP data` to update for new 2023 data -->
+
+```{r ACS 2023 FTP data, eval=FALSE, include=FALSE}
+# # Total list of vars to get from ACS PUMS 23- change from 21 is PUMA is in 2010 and 2020 census columns: "PUMA10" and "PUMA20"
+# vars_list_pums_23 <- c("SERIALNO", "PUMA10", "PUMA20", "ST", "SPORDER", "RELSHIPP", "PWGTP", "WGTP", "SEX", "AGEP", "HHT", "HHT2", "HISP",
+#                     "RAC1P", "POVPIP", "NATIVITY", "DIS", "DDRS", "DEAR", "DEYE", "DOUT", "DPHY", "DREM", "SCHL", "ESR", "JWMNP", "JWTRNS",
+#                     "TEN","KIT", "PLM", "WAGP", "WKHP", "ADJINC","HINCP", "VEH","RMSP", "NP", "GRPIP", "OCPIP", "POVPIP", "HICOV")
+# 
+# ### Housing level data raw:
+# # Variables to pull out of raw housing data:
+# housing_vars_list_23 <- c("SERIALNO", "PUMA10", "PUMA20", "ST","WGTP", "HHT", "HHT2", "TEN", "KIT", "PLM", "ADJINC", "HINCP", "VEH", "RMSP", "NP", "GRPIP", "OCPIP")
+# 
+# # Read in the housing level data, select only vars from housing_vars_list, convert to tibble:
+# housing_data_23 <- fread(here(hh_2023_fp), select = housing_vars_list_23) %>% as_tibble()
+# 
+# ### Person level data raw:
+# # Variables to pull out of raw housing data:
+# person_vars_list_23 <- c("SERIALNO", "ST", "PUMA10", "PUMA20", "SPORDER", "RELSHIPP", "PWGTP", "SEX", "AGEP", "HISP", "RAC1P", "ENG",
+#                       "NATIVITY", "DIS", "DDRS", "DEAR", "DEYE", "DOUT", "DPHY", "DREM", "SCHL", "ESR", "JWMNP", "JWTRNS", "WAGP", "WKHP", "ADJINC", "POVPIP", "HICOV")
+# 
+# # Read in the person level data:
+# person_data_23 <- fread(here(person_2023_fp), select = person_vars_list_23) %>% as_tibble()
+# 
+# # # Merge the person level data and the housing level data- using the variable `SERIALNO`; left_join on person_data- to only keep data in person-level data:
+# merged_data_23 <- person_data_23 %>% left_join(., housing_data_23, by = c("SERIALNO", "ST", "PUMA10", "PUMA20", "ADJINC"))
+# 
+# # Create single PUMA code that merges the columns "PUMA10" and "PUMA20", use PUMA10 and if -9 then take in PUMA20 to replace:
+# merged_data_23 <- merged_data_23 %>% mutate(PUMA = case_when(PUMA10 == -9 ~ PUMA20, TRUE ~ PUMA10))
+# 
+# # SCAG County list- need to convert PUMA codes to county and then filter whole raw ACS PUMS data set to only these counties:
+# scag_county_list <- c("Imperial","Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")
+# 
+# # Mutate/case_when to replicate SAS code above for creating "county" var-
+# # Create couny variable with SCAG counties and filter to only those rows in SCAG Counties using scag_county_list from above:
+# merged_data_23_scag <- merged_data_23 %>% mutate(county = case_when(PUMA == 2500 ~ "Imperial", # 25 prefix
+#                                                                     PUMA %in% (3701:3799) ~ "Los Angeles", # 37 prefix
+#                                                                     PUMA %in% (5901:5999) ~ "Orange", # 59 prefix
+#                                                                     PUMA %in% (6501:6599) ~ "Riverside", # 65 prefix
+#                                                                     PUMA %in% (7101:7199) ~ "San Bernardino", # 71 prefix
+#                                                                     PUMA %in% (11101:11199) ~ "Ventura" # 111 prefix
+#                                                                     )) %>%
+#                                           filter(county %in% scag_county_list) %>%
+#                                           select(SERIALNO, ST, PUMA,county, everything())
+# 
+# # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_23":  881,207 obs. with 43 variables
+# write_csv(merged_data_23_scag, here(acs_data_23_fp, "merged_acs_23_scag.csv"))
+# 
+# # check variables from the merged_data_23_scag using str() and summary():
+# # str(merged_data_23_scag)
+# # Remove all large files if no longer needed:
+# rm(housing_data_23, person_data_23, merged_data_23, merged_data_23_scag)
+# 
+# ### Data Recode/Create New Variables for analysis -----
+# 
+# # Read in merged_data_23_scag from  here(acs_data_23_fp, "merged_acs_23_scag.csv")
+# merged_data_23_scag <- read_csv(here(acs_data_23_fp, "merged_acs_23_scag.csv"), show_col_types = FALSE)
+# 
+# # Create all new variables, see Data Dictionary Table above and separate R script named "data_cleaning_ACS.R" for detailed breakdown of each new variable:
+# clean_acs_scag_23 <- merged_data_23_scag %>% mutate(year = as.numeric(str_extract(SERIALNO, "\\d{4}")),
+#                                                     county = factor(county, levels = c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura")),
+#                                                     race = factor(case_when(HISP != 1  ~ "Hispanic/Latino",
+#                                                                             HISP == 1 & RAC1P == 1 ~ "White", 
+#                                                                             HISP == 1 & RAC1P == 2 ~ "Black", 
+#                                                                             HISP == 1 & RAC1P %in% c(6,7) ~ "Asian/Pacific Islander", 
+#                                                                             HISP == 1 & RAC1P %in% c(3:5) ~ "Native American", 
+#                                                                             HISP == 1 & RAC1P %in% c(8,9) ~ "Multiracial/Other"
+#                                                          ), levels = c("Asian/Pacific Islander", "Black", "Hispanic/Latino", "Multiracial/Other", "Native American", "White")),
+#                                                     age_3_cat = factor(case_when(AGEP < 18  ~ "<18 years",
+#                                                                                  AGEP %in% c(18:64) ~ "18 - 64 years",
+#                                                                                  AGEP > 64 ~ "65+ years"
+#                                                                      ), levels = c("<18 years", "18 - 64 years","65+ years")),
+#                                                     housing_income = HINCP * (ADJINC/1000000),
+#                                                     edu = factor(case_when(SCHL %in% c(1:15)  ~ "Less than HS Diploma",
+#                                                                            SCHL %in% c(16:17) ~ "HS Diploma",
+#                                                                            SCHL %in% c(18:19) ~ "Some College",
+#                                                                            SCHL == 20 ~ "AA Degree",
+#                                                                            SCHL == 21 ~ "BA degree",
+#                                                                            SCHL %in% c(22:24) ~ "MA degree or higher"
+#                                                                ), levels = c("Less than HS Diploma", "HS Diploma", "Some College", "AA Degree", "BA degree", "MA degree or higher")),
+#                                                     own_home = factor(case_when(TEN %in% c(1:2) ~ "Homeowner",
+#                                                                                 TEN %in% c(3:4) ~ "Non-Homeowner"), levels = c("Homeowner", "Non-Homeowner")),
+#                                                     walk_bike_public_transport = factor(case_when(JWTRNS %in% c(2:5,9,10)  ~ "Walk/Bike/Public",
+#                                                                                                   TRUE ~ "Other Transport"), levels = c("Walk/Bike/Public", "Other Transport")),
+#                                                     all_transport = factor(case_when(JWTRNS %in% c(1,8) ~ "Private",
+#                                                                                      JWTRNS %in% c(2:7) ~  "Public",
+#                                                                                      JWTRNS %in% c(9,10,12) ~ "Other"
+#                                                                                     ), levels = c("Other", "Public","Private")),
+#                                                     poverty = factor(case_when(POVPIP %in% c(0:199) ~ "Yes", POVPIP >= 200 ~ "No",), levels = c("Yes","No")),
+#                                                     housing_burden = factor(case_when(own_home == "Homeowner" & OCPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
+#                                                                                       TRUE ~ "No",), levels = c("Yes","No")),
+#                                                     renter_burden = factor(case_when(own_home == "Non-Homeowner" & GRPIP >= 30 & POVPIP %in% c(0:199) ~ "Yes",
+#                                                                                      TRUE ~ "No",), levels = c("Yes","No")),
+#                                                     no_kitchen_plumbing = factor(case_when(KIT == 2 & PLM == 2 ~ "Yes", KIT == 1 | PLM == 1 ~ "No"), levels = c("Yes","No")),
+#                                                     crowd = case_when(RMSP > 0  ~ NP/RMSP, TRUE ~ NA),
+#                                                     overcrowded = factor(case_when(crowd >= 1.5  ~ "Yes", crowd < 1.5 ~ "No"), levels = c("Yes","No")),
+#                                                     hourly_wage = if_else(WKHP > 0, ((WAGP * (ADJINC/1000000))/52)/WKHP, NA_real_),
+#                                                     unemployed = factor(case_when(ESR == 3  ~ "Yes", ESR != 3 ~ "No"), levels = c("Yes","No")),
+#                                                     single_hh = factor(case_when(HHT2 == 6  ~ "female_hh",
+#                                                                                  HHT2 == 10  ~ "male_hh",
+#                                                                                  HHT2 %in% c(1:5,7:9,11:12) ~ "cohabit_or_nokids"), levels = c("female_hh", "male_hh","cohabit_or_nokids")),
+#                                                     lep = factor(case_when(ENG %in% c(3:4) ~ "limited_english_proficiency",
+#                                                                            ENG %in% c(1:2) ~ "english_proficient",
+#                                                                            TRUE ~ "<5yos_or_no_eng"), levels = c("limited_english_proficiency","english_proficient","<5yos_or_no_eng")),
+#                                                     
+#                                                     ) # end of mutate for clean_acs_scag_23
+# 
+# # Write out to .csv for the raw data from ACS Data call to folder named "clean_data/acs_data_23":  881,207 obs. with 61 variables
+# write_csv(clean_acs_scag_23, here(acs_data_23_fp, "clean_acs_scag_23.csv"))
+# 
+# # Remove all large tibbles/dfs:
+# rm(merged_data_23_scag, clean_acs_scag_23)
+```
+
+
 --- 
 
 
@@ -727,6 +877,10 @@ acs_col_type_list <- list(county = col_factor(county_levels),
 # 2018-2022 ACS PUMS clean data: Read in clean ACS data SCAG from 2018-2022,
 # Un-comment the next line (and comment out 4 lines above) if you want to use the clean 2018-2022 ACS PUMS data file:
 ca_pums_scag <- read_csv(here(acs_data_22_fp, "clean_acs_scag_22.csv"), col_types = acs_col_type_list)
+
+# 2019-2023 ACS PUMS clean data: Read in clean ACS data SCAG from 2019-2023,
+# Un-comment the next line (and comment out 4 lines above and 8 lines above) if you want to use the clean 2019-2023 ACS PUMS data file:
+# ca_pums_scag <- read_csv(here(acs_data_23_fp, "clean_acs_scag_23.csv")), col_types = acs_col_type_list)
 
 # Set up county and race levels to use to convert each to factors and arrange tables, append 7th category to each for totals for SCAG:
 # county_levels: c("Imperial", "Los Angeles", "Orange", "Riverside", "San Bernardino", "Ventura", "SCAG")
@@ -1586,8 +1740,7 @@ sheets <- list("TOC" = toc,
 # Create an output folder if it does NOT exist already:
 if (!dir.exists("output")) {dir.create("output")}
 
-# Save full workbook as an openxlsx2 wb by passing the sheet list ("sheets") to openxlsx2::write_xlsx() and destination "path/filename.xlsx", write to "output/scag_tabbed.xlsx",
-# the col_widths = "auto" option will change the column widths to auto (widen them so they are legible):
+# Save full workbook as an openxlsx2 wb by passing the sheet list ("sheets") to openxlsx2::write_xlsx() and destination "path/filename.xlsx", write to "output/scag_tabbed.xlsx",the col_widths = "auto" option will change the column widths to auto (widen them so they are legible):
 scag_wb <- openxlsx2::write_xlsx(sheets, "output/scag_tabbed.xlsx", col_widths = "auto")
 
 # use walk()- this applies functions over a vector and is only for the side-affects of the functions, in this case it will use functiosn from the openxlsx2 package to format the workbook "scag_wb":
