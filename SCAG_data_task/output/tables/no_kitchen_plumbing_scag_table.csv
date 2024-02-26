@@ -1,0 +1,50 @@
+county,race,no_kitchen_plumbing_percentage
+Imperial,Asian/Pacific Islander,0
+Imperial,Black,0
+Imperial,Hispanic/Latino,0.1
+Imperial,Multiracial/Other,0
+Imperial,Native American,1.86
+Imperial,White,0.13
+Imperial,All Races,0.12
+Los Angeles,Asian/Pacific Islander,0.21
+Los Angeles,Black,0.47
+Los Angeles,Hispanic/Latino,0.28
+Los Angeles,Multiracial/Other,0.45
+Los Angeles,Native American,0.16
+Los Angeles,White,0.22
+Los Angeles,All Races,0.27
+Orange,Asian/Pacific Islander,0.14
+Orange,Black,0.19
+Orange,Hispanic/Latino,0.19
+Orange,Multiracial/Other,0.16
+Orange,Native American,0
+Orange,White,0.09
+Orange,All Races,0.13
+Riverside,Asian/Pacific Islander,0.16
+Riverside,Black,0.08
+Riverside,Hispanic/Latino,0.19
+Riverside,Multiracial/Other,0.34
+Riverside,Native American,0.04
+Riverside,White,0.2
+Riverside,All Races,0.19
+San Bernardino,Asian/Pacific Islander,0.46
+San Bernardino,Black,0.27
+San Bernardino,Hispanic/Latino,0.23
+San Bernardino,Multiracial/Other,0.23
+San Bernardino,Native American,0.79
+San Bernardino,White,0.31
+San Bernardino,All Races,0.28
+Ventura,Asian/Pacific Islander,0.16
+Ventura,Black,0
+Ventura,Hispanic/Latino,0.15
+Ventura,Multiracial/Other,0.26
+Ventura,Native American,0
+Ventura,White,0.23
+Ventura,All Races,0.2
+SCAG,Asian/Pacific Islander,0.2
+SCAG,Black,0.38
+SCAG,Hispanic/Latino,0.24
+SCAG,Multiracial/Other,0.35
+SCAG,Native American,0.25
+SCAG,White,0.2
+SCAG,All Races,0.23

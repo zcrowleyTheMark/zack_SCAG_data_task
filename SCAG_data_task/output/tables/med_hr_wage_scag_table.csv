@@ -1,0 +1,50 @@
+county,race,med_hr_wage
+Imperial,Asian/Pacific Islander,24.53
+Imperial,Black,11.41
+Imperial,Hispanic/Latino,17.26
+Imperial,Multiracial/Other,16.91
+Imperial,Native American,20.34
+Imperial,White,24.11
+Imperial,All Races,17.73
+Los Angeles,Asian/Pacific Islander,27.4
+Los Angeles,Black,23.54
+Los Angeles,Hispanic/Latino,17.84
+Los Angeles,Multiracial/Other,27.55
+Los Angeles,Native American,22.51
+Los Angeles,White,32.11
+Los Angeles,All Races,22.3
+Orange,Asian/Pacific Islander,31.48
+Orange,Black,25.69
+Orange,Hispanic/Latino,19.52
+Orange,Multiracial/Other,32.11
+Orange,Native American,28.59
+Orange,White,35.61
+Orange,All Races,27.33
+Riverside,Asian/Pacific Islander,26.69
+Riverside,Black,24.65
+Riverside,Hispanic/Latino,19.51
+Riverside,Multiracial/Other,25.05
+Riverside,Native American,19.99
+Riverside,White,28.62
+Riverside,All Races,22.31
+San Bernardino,Asian/Pacific Islander,26.72
+San Bernardino,Black,21.99
+San Bernardino,Hispanic/Latino,19.46
+San Bernardino,Multiracial/Other,22.99
+San Bernardino,Native American,22.43
+San Bernardino,White,27.4
+San Bernardino,All Races,21.92
+Ventura,Asian/Pacific Islander,35.65
+Ventura,Black,28.56
+Ventura,Hispanic/Latino,18.64
+Ventura,Multiracial/Other,30.02
+Ventura,Native American,29.04
+Ventura,White,32.11
+Ventura,All Races,24.93
+SCAG,Asian/Pacific Islander,28.47
+SCAG,Black,23.67
+SCAG,Hispanic/Latino,18.56
+SCAG,Multiracial/Other,27.55
+SCAG,Native American,22.51
+SCAG,White,32.11
+SCAG,All Races,22.78

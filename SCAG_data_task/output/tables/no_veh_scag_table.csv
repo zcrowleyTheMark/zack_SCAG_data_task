@@ -1,0 +1,50 @@
+county,race,no_vehicle_percentage
+Imperial,Asian/Pacific Islander,4.14
+Imperial,Black,14.65
+Imperial,Hispanic/Latino,6.25
+Imperial,Multiracial/Other,2.73
+Imperial,Native American,13.56
+Imperial,White,4.46
+Imperial,All Races,6.19
+Los Angeles,Asian/Pacific Islander,8.53
+Los Angeles,Black,16.13
+Los Angeles,Hispanic/Latino,8.31
+Los Angeles,Multiracial/Other,9.37
+Los Angeles,Native American,18.28
+Los Angeles,White,7.22
+Los Angeles,All Races,8.74
+Orange,Asian/Pacific Islander,5.74
+Orange,Black,9.34
+Orange,Hispanic/Latino,4.11
+Orange,Multiracial/Other,4.2
+Orange,Native American,0.47
+Orange,White,4.19
+Orange,All Races,4.58
+Riverside,Asian/Pacific Islander,4.33
+Riverside,Black,5.86
+Riverside,Hispanic/Latino,3.4
+Riverside,Multiracial/Other,6.07
+Riverside,Native American,9.68
+Riverside,White,3.98
+Riverside,All Races,3.97
+San Bernardino,Asian/Pacific Islander,4.31
+San Bernardino,Black,9.35
+San Bernardino,Hispanic/Latino,3.43
+San Bernardino,Multiracial/Other,4.99
+San Bernardino,Native American,8.39
+San Bernardino,White,4.64
+San Bernardino,All Races,4.49
+Ventura,Asian/Pacific Islander,3.07
+Ventura,Black,5.46
+Ventura,Hispanic/Latino,4.24
+Ventura,Multiracial/Other,3.75
+Ventura,Native American,0
+Ventura,White,3.96
+Ventura,All Races,3.99
+SCAG,Asian/Pacific Islander,7.18
+SCAG,Black,13.68
+SCAG,Hispanic/Latino,6.34
+SCAG,Multiracial/Other,7.36
+SCAG,Native American,12.41
+SCAG,White,5.64
+SCAG,All Races,6.75

@@ -1,0 +1,197 @@
+county,race,transportation_type,mean_transit_times_in_minutes
+Imperial,Asian/Pacific Islander,Any Transportation,24.71
+Imperial,Asian/Pacific Islander,Private,25.12
+Imperial,Asian/Pacific Islander,Public,0
+Imperial,Asian/Pacific Islander,Other,15.95
+Imperial,Black,Any Transportation,20.25
+Imperial,Black,Private,19.51
+Imperial,Black,Public,0
+Imperial,Black,Other,25.88
+Imperial,Hispanic/Latino,Any Transportation,23.25
+Imperial,Hispanic/Latino,Private,23.67
+Imperial,Hispanic/Latino,Public,27.97
+Imperial,Hispanic/Latino,Other,11.54
+Imperial,Multiracial/Other,Any Transportation,14
+Imperial,Multiracial/Other,Private,14.49
+Imperial,Multiracial/Other,Public,0
+Imperial,Multiracial/Other,Other,5
+Imperial,Native American,Any Transportation,27.76
+Imperial,Native American,Private,30.9
+Imperial,Native American,Public,20.77
+Imperial,Native American,Other,12.77
+Imperial,White,Any Transportation,20.81
+Imperial,White,Private,20.71
+Imperial,White,Public,0
+Imperial,White,Other,22.24
+Imperial,All Races,Any Transportation,22.86
+Imperial,All Races,Private,23.21
+Imperial,All Races,Public,27.72
+Imperial,All Races,Other,14.17
+Los Angeles,Asian/Pacific Islander,Any Transportation,30.83
+Los Angeles,Asian/Pacific Islander,Private,30.54
+Los Angeles,Asian/Pacific Islander,Public,51.25
+Los Angeles,Asian/Pacific Islander,Other,17.86
+Los Angeles,Black,Any Transportation,33.48
+Los Angeles,Black,Private,31.92
+Los Angeles,Black,Public,56
+Los Angeles,Black,Other,21.55
+Los Angeles,Hispanic/Latino,Any Transportation,31.32
+Los Angeles,Hispanic/Latino,Private,30.52
+Los Angeles,Hispanic/Latino,Public,49.51
+Los Angeles,Hispanic/Latino,Other,19.3
+Los Angeles,Multiracial/Other,Any Transportation,30.03
+Los Angeles,Multiracial/Other,Private,30.35
+Los Angeles,Multiracial/Other,Public,44.53
+Los Angeles,Multiracial/Other,Other,17.5
+Los Angeles,Native American,Any Transportation,31.61
+Los Angeles,Native American,Private,30.67
+Los Angeles,Native American,Public,71.2
+Los Angeles,Native American,Other,12.42
+Los Angeles,White,Any Transportation,29.82
+Los Angeles,White,Private,29.98
+Los Angeles,White,Public,49.07
+Los Angeles,White,Other,18.33
+Los Angeles,All Races,Any Transportation,31
+Los Angeles,All Races,Private,30.48
+Los Angeles,All Races,Public,50.26
+Los Angeles,All Races,Other,18.87
+Orange,Asian/Pacific Islander,Any Transportation,29.01
+Orange,Asian/Pacific Islander,Private,28.89
+Orange,Asian/Pacific Islander,Public,50.47
+Orange,Asian/Pacific Islander,Other,25.2
+Orange,Black,Any Transportation,28.03
+Orange,Black,Private,27.75
+Orange,Black,Public,42.64
+Orange,Black,Other,19.05
+Orange,Hispanic/Latino,Any Transportation,26.34
+Orange,Hispanic/Latino,Private,26.11
+Orange,Hispanic/Latino,Public,44.61
+Orange,Hispanic/Latino,Other,18.94
+Orange,Multiracial/Other,Any Transportation,27
+Orange,Multiracial/Other,Private,27.24
+Orange,Multiracial/Other,Public,43.6
+Orange,Multiracial/Other,Other,15.76
+Orange,Native American,Any Transportation,37.25
+Orange,Native American,Private,35.85
+Orange,Native American,Public,70
+Orange,Native American,Other,52.27
+Orange,White,Any Transportation,27.03
+Orange,White,Private,27.01
+Orange,White,Public,54.46
+Orange,White,Other,20.37
+Orange,All Races,Any Transportation,27.22
+Orange,All Races,Private,27.12
+Orange,All Races,Public,47.4
+Orange,All Races,Other,20.69
+Riverside,Asian/Pacific Islander,Any Transportation,35.33
+Riverside,Asian/Pacific Islander,Private,35.35
+Riverside,Asian/Pacific Islander,Public,74.48
+Riverside,Asian/Pacific Islander,Other,21.45
+Riverside,Black,Any Transportation,38.75
+Riverside,Black,Private,38.65
+Riverside,Black,Public,62.47
+Riverside,Black,Other,29.7
+Riverside,Hispanic/Latino,Any Transportation,32.76
+Riverside,Hispanic/Latino,Private,32.88
+Riverside,Hispanic/Latino,Public,49.05
+Riverside,Hispanic/Latino,Other,22.26
+Riverside,Multiracial/Other,Any Transportation,34.84
+Riverside,Multiracial/Other,Private,35.1
+Riverside,Multiracial/Other,Public,49.59
+Riverside,Multiracial/Other,Other,20.73
+Riverside,Native American,Any Transportation,40.05
+Riverside,Native American,Private,37.71
+Riverside,Native American,Public,79.37
+Riverside,Native American,Other,4.68
+Riverside,White,Any Transportation,34.31
+Riverside,White,Private,34.41
+Riverside,White,Public,57.93
+Riverside,White,Other,23.89
+Riverside,All Races,Any Transportation,33.84
+Riverside,All Races,Private,33.92
+Riverside,All Races,Public,55.34
+Riverside,All Races,Other,23.06
+San Bernardino,Asian/Pacific Islander,Any Transportation,33.3
+San Bernardino,Asian/Pacific Islander,Private,33.07
+San Bernardino,Asian/Pacific Islander,Public,67.93
+San Bernardino,Asian/Pacific Islander,Other,19.12
+San Bernardino,Black,Any Transportation,33.55
+San Bernardino,Black,Private,33.55
+San Bernardino,Black,Public,56.83
+San Bernardino,Black,Other,15.05
+San Bernardino,Hispanic/Latino,Any Transportation,32.2
+San Bernardino,Hispanic/Latino,Private,32.17
+San Bernardino,Hispanic/Latino,Public,65.68
+San Bernardino,Hispanic/Latino,Other,19.36
+San Bernardino,Multiracial/Other,Any Transportation,33.13
+San Bernardino,Multiracial/Other,Private,33.1
+San Bernardino,Multiracial/Other,Public,86.25
+San Bernardino,Multiracial/Other,Other,23.88
+San Bernardino,Native American,Any Transportation,26.25
+San Bernardino,Native American,Private,21.93
+San Bernardino,Native American,Public,97.56
+San Bernardino,Native American,Other,33.37
+San Bernardino,White,Any Transportation,31.35
+San Bernardino,White,Private,31.68
+San Bernardino,White,Public,60.42
+San Bernardino,White,Other,17.39
+San Bernardino,All Races,Any Transportation,32.18
+San Bernardino,All Races,Private,32.21
+San Bernardino,All Races,Public,64.29
+San Bernardino,All Races,Other,18.64
+Ventura,Asian/Pacific Islander,Any Transportation,28.09
+Ventura,Asian/Pacific Islander,Private,27.74
+Ventura,Asian/Pacific Islander,Public,52.02
+Ventura,Asian/Pacific Islander,Other,28.92
+Ventura,Black,Any Transportation,28.01
+Ventura,Black,Private,28.64
+Ventura,Black,Public,27.33
+Ventura,Black,Other,12.64
+Ventura,Hispanic/Latino,Any Transportation,25.21
+Ventura,Hispanic/Latino,Private,25.14
+Ventura,Hispanic/Latino,Public,51.15
+Ventura,Hispanic/Latino,Other,16.69
+Ventura,Multiracial/Other,Any Transportation,25.7
+Ventura,Multiracial/Other,Private,26.29
+Ventura,Multiracial/Other,Public,49.9
+Ventura,Multiracial/Other,Other,10.97
+Ventura,Native American,Any Transportation,24.88
+Ventura,Native American,Private,24.85
+Ventura,Native American,Public,60
+Ventura,Native American,Other,10
+Ventura,White,Any Transportation,26.29
+Ventura,White,Private,26.3
+Ventura,White,Public,60.92
+Ventura,White,Other,16.03
+Ventura,All Races,Any Transportation,25.95
+Ventura,All Races,Private,25.92
+Ventura,All Races,Public,53.71
+Ventura,All Races,Other,17
+SCAG,Asian/Pacific Islander,Any Transportation,30.73
+SCAG,Asian/Pacific Islander,Private,30.51
+SCAG,Asian/Pacific Islander,Public,52.29
+SCAG,Asian/Pacific Islander,Other,20.12
+SCAG,Black,Any Transportation,33.76
+SCAG,Black,Private,32.77
+SCAG,Black,Public,55.67
+SCAG,Black,Other,21.26
+SCAG,Hispanic/Latino,Any Transportation,30.63
+SCAG,Hispanic/Latino,Private,30.18
+SCAG,Hispanic/Latino,Public,49.52
+SCAG,Hispanic/Latino,Other,19.35
+SCAG,Multiracial/Other,Any Transportation,30.13
+SCAG,Multiracial/Other,Private,30.4
+SCAG,Multiracial/Other,Public,46.43
+SCAG,Multiracial/Other,Other,17.83
+SCAG,Native American,Any Transportation,32.23
+SCAG,Native American,Private,30.57
+SCAG,Native American,Public,75.29
+SCAG,Native American,Other,19.41
+SCAG,White,Any Transportation,29.64
+SCAG,White,Private,29.76
+SCAG,White,Public,51
+SCAG,White,Other,18.97
+SCAG,All Races,Any Transportation,30.54
+SCAG,All Races,Private,30.26
+SCAG,All Races,Public,50.66
+SCAG,All Races,Other,19.39
